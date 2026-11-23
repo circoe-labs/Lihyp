@@ -136,8 +136,14 @@ class RouteInput(StrictInput):
     destination: str = Field(min_length=1, max_length=150)
     distance_m: int = Field(gt=0, le=10_000_000)
     duration_s: int = Field(gt=0, le=1_000_000)
-    provider: Literal["manual"] = "manual"
+    provider: Literal["manual", "openrouteservice", "osrm_demo", "osrm"] = "manual"
     source: str = Field(min_length=5, max_length=500)
+    origin_coordinates: tuple[float, float] | None = None
+    destination_coordinates: tuple[float, float] | None = None
+    geometry: dict | None = None
+    valid_at: str | None = None
+    profile: str | None = None
+    restrictions: list[str] = Field(default_factory=list)
 
 
 class ScenarioInput(StrictInput):
@@ -146,7 +152,8 @@ class ScenarioInput(StrictInput):
     start_date: date
     end_date: date
     timezone: str = "Europe/Paris"
-    route: RouteInput
+    route: RouteInput | None = None
+    route_quote_id: str | None = Field(default=None, max_length=60)
     passengers: int = Field(ge=0, le=1_000_000)
     window_start: str = Field(pattern=r"^([01]\d|2[0-3]):[0-5]\d$")
     window_end: str = Field(pattern=r"^([01]\d|2[0-3]):[0-5]\d$")
@@ -175,6 +182,10 @@ class ScenarioInput(StrictInput):
     def rules(self):
         if self.start_date > self.end_date:
             raise ValueError("Date de fin antérieure à la date de début")
+        if (self.route is None) == (self.route_quote_id is None):
+            raise ValueError("Fournir soit une route manuelle, soit un calcul routier, pas les deux")
+        if self.route is not None and self.route.provider != "manual":
+            raise ValueError("Les distances calculées exigent un devis serveur")
         if not self.vehicle_version_id or not self.energy_version_id:
             raise ValueError("Versions de référence requises")
         try:
@@ -197,3 +208,9 @@ class RoutePreviewInput(StrictInput):
     origin: tuple[float, float]
     destination: tuple[float, float]
     profile: Literal["driving-car", "driving-hgv"] = "driving-hgv"
+
+
+class RouteResolveInput(StrictInput):
+    origin: str = Field(min_length=2, max_length=150)
+    destination: str = Field(min_length=2, max_length=150)
+    profile: Literal["driving-car", "driving-hgv"] = "driving-car"

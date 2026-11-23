@@ -59,3 +59,81 @@ class ORSRoutingProvider:
         except (httpx.HTTPError, KeyError, IndexError, ValueError, TypeError) as err:
             # Ne pas logguer response ou URL contenant secret ; diagnostics typés.
             raise RoutingFailure("provider_error", "Route ORS indisponible ou réponse invalide") from None
+
+
+class GeoplatformGeocoder:
+    """Géocodage des lieux français via la Géoplateforme (IGN / BAN)."""
+    API_URL = "https://data.geopf.fr/geocodage/search"
+
+    def __init__(self, client: httpx.Client | None = None):
+        self.client = client or httpx.Client(timeout=12, follow_redirects=False)
+
+    def locate(self, place: str) -> tuple[tuple[float, float], str]:
+        if not isinstance(place, str) or not 2 <= len(place.strip()) <= 150:
+            raise RoutingFailure("invalid_place", "Saisir un lieu de 2 à 150 caractères")
+        try:
+            response = self.client.get(self.API_URL, params={"q": place.strip(), "limit": 5})
+            response.raise_for_status()
+            features = response.json().get("features", [])
+            if not features:
+                raise RoutingFailure("place_not_found", "Lieu introuvable dans le géocodeur IGN")
+            # Pour la saisie « Caen », préférer la commune à une rue homonyme.
+            query = place.strip().casefold()
+            preferred = next((f for f in features if
+                             str(f.get("properties", {}).get("city", "")).casefold() == query
+                             or str(f.get("properties", {}).get("name", "")).casefold() == query),
+                             features[0])
+            lon, lat = preferred["geometry"]["coordinates"][:2]
+            lon, lat = float(lon), float(lat)
+            if not (-5.5 <= lon <= 10 and 41 <= lat <= 52):
+                raise ValueError("Place outside France")
+            label = str(preferred.get("properties", {}).get("label") or place)
+            return (lon, lat), label[:180]
+        except RoutingFailure:
+            raise
+        except (httpx.HTTPError, KeyError, ValueError, IndexError, TypeError):
+            raise RoutingFailure("geocoding_unavailable", "Géocodage IGN indisponible ou réponse invalide") from None
+
+
+class OSRMRoutingProvider:
+    """Calcul routier OSRM ; endpoint de démonstration jamais garanti en production."""
+    DEFAULT_URL = "https://router.project-osrm.org/route/v1/driving"
+
+    def __init__(self, base_url: str | None = None, *, client: httpx.Client | None = None):
+        self.base_url = (base_url or self.DEFAULT_URL).rstrip("/")
+        self.is_demo = self.base_url == self.DEFAULT_URL
+        self.client = client or httpx.Client(timeout=15, follow_redirects=False)
+
+    def route(self, origin, destination, profile="driving-car", departure_time=None):
+        if profile not in ("driving-car", "driving-hgv"):
+            raise RoutingFailure("unsupported_profile", "Profil routage non supporté")
+        if profile == "driving-hgv" and self.is_demo:
+            # Le profil du serveur de démonstration OSRM est générique (voiture).
+            # On ne doit pas promettre que les contraintes de gabarit sont appliquées.
+            pass
+        for lon, lat in (origin, destination):
+            if not (-180 <= lon <= 180 and -90 <= lat <= 90):
+                raise RoutingFailure("invalid_coordinates", "Coordonnées hors bornes")
+        coords = ";".join(f"{lon:.7f},{lat:.7f}" for lon, lat in (origin, destination))
+        try:
+            response = self.client.get(
+                f"{self.base_url}/{coords}",
+                params={"overview": "full", "geometries": "geojson", "steps": "false"},
+            )
+            response.raise_for_status()
+            route = response.json()["routes"][0]
+            distance, duration = Decimal(str(route["distance"])), Decimal(str(route["duration"]))
+            geometry = route["geometry"]
+            if distance <= 0 or duration <= 0 or geometry.get("type") != "LineString":
+                raise ValueError("invalid route")
+            provider = "osrm_demo" if self.is_demo else "osrm"
+            restrictions = (
+                "Tracé de démonstration OSRM : profil voiture, sans garantie de gabarit autocar ni disponibilité.",
+            ) if self.is_demo else (
+                "Routage OSRM : vérifier les restrictions et la compatibilité autocar.",
+            )
+            return RouteResult(distance, duration, profile, provider, "osrm-v1",
+                               datetime.now(timezone.utc).isoformat(),
+                               geometry=geometry, restrictions=restrictions)
+        except (httpx.HTTPError, KeyError, IndexError, ValueError, TypeError, AttributeError):
+            raise RoutingFailure("provider_error", "Itinéraire indisponible : vérifier le service de routage") from None

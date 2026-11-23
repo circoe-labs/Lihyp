@@ -3,154 +3,145 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>SimCO₂ — Études de transport voyageurs</title>
+  <meta name="description" content="Simulateur de coûts et d'émissions pour le transport de voyageurs" />
+  <title>SimCO₂ — Simulations</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzxQD5e9q8b+vSlmXD+YlP8Mlw=" crossorigin="" />
   <link rel="stylesheet" href="/assets/style.css" />
+  <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script defer src="/assets/app.js"></script>
 </head>
 <body>
+  <button id="language-toggle" type="button" class="language-toggle" aria-label="Switch to English">EN</button>
+
   <div id="login" class="login-screen">
     <div class="login-card">
       <div class="brand-icon">S<span>²</span></div>
-      <div class="eyebrow">OUTIL D'AIDE À LA DÉCISION · PROTOTYPE</div>
+      <div class="eyebrow" data-i18n="loginKicker">SIMULATEUR DE TRANSPORT · PROTOTYPE</div>
       <h1>SimCO₂</h1>
-      <p>Simulez une ligne de transport voyageurs et tracez vos hypothèses de coûts et d'émissions.</p>
+      <p data-i18n="loginIntro">Estimez le coût et les émissions d'une ligne de transport avec un itinéraire calculé.</p>
       <form id="login-form">
-        <label>Identifiant <input name="username" autocomplete="username" required /></label>
-        <label>Mot de passe <input name="password" type="password" autocomplete="current-password" required /></label>
-        <button type="submit" class="button primary full">Ouvrir la session</button>
+        <label><span data-i18n="username">Identifiant</span> <input name="username" autocomplete="username" required /></label>
+        <label><span data-i18n="password">Mot de passe</span> <input name="password" type="password" autocomplete="current-password" required /></label>
+        <button type="submit" class="button primary full" data-i18n="signIn">Se connecter</button>
       </form>
-      <div class="form-message" id="login-message" role="status"></div>
-      <p class="muted tiny">Aucun compte prédéfini. Créer le premier compte avec <code>simco2 create-user</code> depuis le terminal.</p>
+      <div class="form-message" id="login-message" role="status" aria-live="polite"></div>
+      <p class="muted tiny" data-i18n="loginHelp">Compte créé par l'administrateur du service. En local : python -m simco2.cli create-user.</p>
     </div>
   </div>
 
   <div id="shell" class="shell hidden">
     <aside class="sidebar">
-      <div class="brand"><span class="brand-icon small">S<span>²</span></span><span>SimCO₂<small>Transport & climat</small></span></div>
-      <div class="sidebar-label">ESPACE DE TRAVAIL</div>
-      <nav aria-label="Navigation principale">
-        <button class="nav-item active" data-view="overview"><span>◈</span> Vue d'ensemble</button>
-        <button class="nav-item" data-view="scenarios"><span>▤</span> Simulations</button>
-        <button class="nav-item" data-view="vehicles"><span>▣</span> Véhicules</button>
-        <button class="nav-item" data-view="energy"><span>◉</span> Énergies par pays</button>
-        <button class="nav-item" data-view="stations"><span>⌖</span> Stations</button>
-        <button class="nav-item" data-view="results"><span>▥</span> Résultats & PDF</button>
-        <button class="nav-item" data-view="routing"><span>⊕</span> Routage / API</button>
+      <div class="brand"><span class="brand-icon small">S<span>²</span></span><span>SimCO₂<small data-i18n="brandSubtitle">Transport & climat</small></span></div>
+      <div class="sidebar-label" data-i18n="navTitle">SIMULER ET EXPLORER</div>
+      <nav aria-label="Navigation" id="main-nav">
+        <button class="nav-item active" data-view="scenarios"><span>▤</span> <span data-i18n="navSimulations">Simulations</span></button>
+        <button class="nav-item" data-view="stations"><span>⌖</span> <span data-i18n="navStations">Stations en Normandie</span></button>
+        <div class="sidebar-label compact" data-i18n="settings">PARAMÈTRES</div>
+        <button class="nav-item" data-view="vehicles"><span>▣</span> <span data-i18n="navVehicles">Véhicules</span></button>
+        <button class="nav-item" data-view="energy"><span>◉</span> <span data-i18n="navEnergy">Énergies par pays</span></button>
       </nav>
       <div class="sidebar-bottom">
-        <div class="prototype-note"><strong>Périmètre actuel</strong><br/>Monoligne · 1 jour · pas de recharges ni repositionnement.<br/>Les calculs ne constituent pas une optimisation globale.</div>
-        <div class="user-row"><span id="user-label">Compte</span><button id="logout-button" class="text-button">Déconnexion</button></div>
+        <div class="prototype-note" data-i18n="prototypeNotice">Prototype : 1 ligne, 1 jour, sans trajets retour ni ravitaillement. Les résultats ne sont pas un optimum prouvé.</div>
+        <div class="user-row"><span id="user-label"></span><button id="logout-button" class="text-button" data-i18n="logout">Déconnexion</button></div>
       </div>
     </aside>
 
     <main class="main">
       <header class="topbar">
-        <div><span class="topbar-kicker">ÉTUDE DE MOBILITÉ</span><h1 id="page-title">Vue d'ensemble</h1></div>
-        <div class="topbar-actions"><span class="status-dot"></span> Prototype local <a href="/docs" target="_blank" rel="noopener" class="text-button">API ↗</a></div>
+        <div><span class="topbar-kicker" data-i18n="topKicker">SIMULATION DE TRANSPORT</span><h1 id="page-title" data-i18n="navSimulations">Simulations</h1></div>
+        <div class="topbar-actions"><span class="status-dot"></span><span data-i18n="localPrototype">Prototype</span> <a href="/docs" target="_blank" rel="noopener" class="text-button">API ↗</a></div>
       </header>
       <div class="workspace">
-        <div id="feedback" class="feedback hidden" role="status"></div>
-        <div class="notice-banner"><b>Données non certifiées.</b> Les tarifs et facteurs sont saisis comme hypothèses ; aucune valeur nationale n'a été inventée. <a href="#" id="limitations-link">Voir les limites</a>.</div>
+        <div id="feedback" class="feedback hidden" role="status" aria-live="polite"></div>
+        <div class="notice-banner"><strong data-i18n="uncertified">Données de calcul non certifiées.</strong> <span data-i18n="globalNotice">Les prix et facteurs CO₂ sont des hypothèses à renseigner. Les stations répertoriées sont indicatives.</span></div>
 
-        <section id="view-overview" class="view">
-          <div class="section-heading"><div><div class="eyebrow">TABLEAU DE BORD</div><h2>Un simulateur traçable, de la demande au résultat.</h2><p>Référentiels versionnés, calculs déterministes et édition de rapports reproductibles.</p></div></div>
-          <div class="stat-grid">
-            <div class="stat-card"><span>Énergies paramétrées</span><strong id="stat-energies">—</strong><small>hypothèses nationales</small></div>
-            <div class="stat-card"><span>Versions véhicules courantes</span><strong id="stat-vehicles">—</strong><small>catalogue partagé</small></div>
-            <div class="stat-card"><span>Scénarios personnels</span><strong id="stat-scenarios">—</strong><small>visibilité Q24 provisoire</small></div>
-            <div class="stat-card"><span>Exécutions gelées</span><strong id="stat-runs">—</strong><small>avec empreinte SHA-256</small></div>
-          </div>
-          <div class="split-content"><article class="panel"><div class="eyebrow">PARCOURS</div><h3>Configurer votre première simulation</h3><p>Saisissez d'abord un tarif et un facteur sourcés, puis le modèle de véhicule, avant de définir la ligne et la demande.</p><ol class="steps"><li>Énergie et facteur par pays</li><li>Véhicule, places, consommation et capacité</li><li>Ligne, amplitude horaire, nombre de voyageurs</li><li>Calcul et rapport PDF</li></ol><button class="button primary" data-goto="energy">Commencer par les énergies</button></article>
-          <article class="panel quiet-panel"><div class="eyebrow">QUALITÉ DU MODÈLE</div><h3>Ce qui est réellement pris en charge</h3><p>Calcul de consommation distance + temps, TCO variable / véhicule / exploitation, émissions directes ou puits-roue, affectation sans réemploi de véhicules.</p><p class="warning-text">Le moteur ne réalise pas encore l'optimisation réseau, la recharge, les dépôts multi-jours, la réglementation ou l'ACV complète.</p><a class="subtle-link" href="/feature-status" target="_blank" rel="noopener">Détails du périmètre ↗</a></article></div>
-        </section>
-
-        <section id="view-energy" class="view hidden">
-          <div class="section-heading"><div><div class="eyebrow">RÉFÉRENTIELS</div><h2>Énergies par pays</h2><p>Prix unique pour une énergie et un pays à une révision donnée, jamais par station.</p></div><button class="button outline" id="reload-energy">Actualiser</button></div>
-          <div class="two-column">
-            <article class="panel"><h3>Créer une révision de données</h3><p class="small muted">Les valeurs sont des hypothèses déclarées, pas des facteurs nationaux vérifiés. Modifier un tarif crée toujours une nouvelle version.</p>
-              <form id="energy-form" class="form-grid">
-                <label>Pays <select name="country_iso"><option value="FR">France (FR)</option></select></label>
-                <label>Énergie <select name="energy_code" id="energy-code"><option value="DIESEL">Gazole — L</option><option value="ELECTRIC">Électricité — kWh</option><option value="H2">Hydrogène — kg</option></select></label>
-                <label>Prix national (EUR/unité) <input type="text" inputmode="decimal" name="price_per_unit" placeholder="ex. 2.00" required /></label>
-                <label>Facteur direct (kgCO₂e/unité) <input type="text" inputmode="decimal" name="direct" placeholder="si connu" /></label>
-                <label>Facteur puits-roue (kgCO₂e/unité) <input type="text" inputmode="decimal" name="well_to_wheel" placeholder="si connu" /></label>
-                <label>Millésime / date de source <input type="date" name="source_date" required /></label>
-                <label class="wide">Source / hypothèse <input name="source" required minlength="5" placeholder="Origine, méthode ou hypothèse de travail" /></label>
-                <label class="wide">Licence / droit de réutilisation <input name="license" value="À vérifier" required /></label>
-                <div class="wide actions"><button class="button primary" type="submit">Enregistrer une version</button></div>
+        <section id="view-scenarios" class="view">
+          <div class="section-heading"><div><div class="eyebrow" data-i18n="scenarioKicker">NOUVELLE ÉTUDE</div><h2 data-i18n="scenarioTitle">Simuler une ligne</h2><p data-i18n="scenarioIntro">Renseignez les lieux et les voyageurs. Le logiciel calcule la distance, le temps et affiche le trajet sur une carte.</p></div></div>
+          <div class="simulator-layout">
+            <article class="panel">
+              <form id="scenario-form" class="form-grid">
+                <div class="wide form-section-title"><span class="step-number">1</span> <h3 data-i18n="stepRoute">Itinéraire et voyageurs</h3></div>
+                <label class="wide"><span data-i18n="scenarioName">Nom de la simulation</span><input name="name" value="Simulation Caen - Rouen" required /></label>
+                <label><span data-i18n="date">Date</span><input name="start_date" type="date" required /></label>
+                <label><span data-i18n="passengerCount">Nombre de voyageurs</span><input name="passengers" type="number" min="0" value="80" required /></label>
+                <label><span data-i18n="origin">Départ</span><input id="route-origin" name="origin" required value="Caen" data-i18n-placeholder="originExample" placeholder="Ville ou adresse en France" /></label>
+                <label><span data-i18n="destination">Arrivée</span><input id="route-destination" name="destination" required value="Rouen" data-i18n-placeholder="destinationExample" placeholder="Ville ou adresse en France" /></label>
+                <div class="wide route-compute-row"><button class="button outline" type="button" id="calculate-route" data-i18n="calculateRoute">Calculer l'itinéraire</button><span id="route-status" class="small muted" role="status" aria-live="polite" data-i18n="routeNotReady">Distance et durée calculées automatiquement</span></div>
+                <div class="wide route-summary hidden" id="route-summary" aria-live="polite"></div>
+                <div class="wide route-map-container hidden" id="route-map-container"><div id="route-map" class="map-canvas" aria-label="Carte de l'itinéraire"></div><p class="map-fallback hidden" id="route-map-fallback" data-i18n="mapUnavailable">Carte indisponible hors ligne. Les lieux et distances restent affichés.</p><p class="map-attribution"><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a> · <span data-i18n="routingMapNotice">Trajet estimatif, accès autocar non garanti</span></p></div>
+                <div class="wide form-section-title"><span class="step-number">2</span> <h3 data-i18n="stepVehicle">Véhicule et énergie</h3></div>
+                <div class="wide form-note hidden" id="catalogue-notice"></div>
+                <label><span data-i18n="vehicle">Véhicule</span><select name="vehicle_version_id" id="scenario-vehicle" required></select></label>
+                <label><span data-i18n="energy">Énergie et tarif</span><select name="energy_version_id" id="scenario-energy" required></select></label>
+                <details class="wide advanced-settings"><summary data-i18n="advancedSettings">Options avancées (facultatif)</summary><div class="form-grid">
+                  <label><span data-i18n="windowStart">Départs de</span><input name="window_start" type="time" value="09:00" required /></label>
+                  <label><span data-i18n="windowEnd">à</span><input name="window_end" type="time" value="11:00" required /></label>
+                  <label><span data-i18n="maxVehicles">Véhicules disponibles</span><input name="max_vehicles" type="number" min="0" value="2" required /></label>
+                  <label><span data-i18n="tcoScope">Périmètre coût</span><select name="tco_scope"><option value="variable" data-i18n="tcoVariable">Exploitation variable</option><option value="vehicle" data-i18n="tcoVehicle">TCO véhicule</option><option value="complete" data-i18n="tcoComplete">TCO exploitation partiel</option></select></label>
+                  <label><span data-i18n="co2Scope">Périmètre émissions</span><select name="emission_scope"><option value="direct" data-i18n="co2Direct">Direct</option><option value="well_to_wheel" data-i18n="co2Wtw">Puits à la roue</option></select></label>
+                  <label><span data-i18n="infrastructureCost">Infrastructure EUR/jour</span><input name="infrastructure_daily_eur" value="0" inputmode="decimal" required /></label>
+                </div></details>
+                <div class="wide actions"><button class="button primary large" type="submit" id="scenario-submit" data-i18n="runSimulation">Lancer la simulation</button></div>
+                <p class="wide small muted" data-i18n="oneWayWarning">Calcul sur un trajet simple sans retour ni réemploi de véhicules. Le routage ne certifie pas les restrictions autocars.</p>
               </form>
             </article>
-            <article class="panel"><div class="panel-head"><h3>Révisions actives</h3><span class="subtle-tag">FR · non vérifié</span></div><div id="energy-table" class="table-wrap"></div><div id="energy-history" class="history"></div></article>
+            <div class="simulator-side"><article class="panel"><h3 data-i18n="mySimulations">Mes simulations</h3><div id="scenario-table" class="table-wrap"></div></article><article class="panel"><h3 data-i18n="myResults">Résultats précédents</h3><div id="runs-table" class="table-wrap"></div></article></div>
           </div>
-        </section>
-
-        <section id="view-vehicles" class="view hidden">
-          <div class="section-heading"><div><div class="eyebrow">CATALOGUES</div><h2>Véhicules</h2><p>Les variantes et leurs coefficients sont enregistrés en versions immuables.</p></div><button class="button outline" id="reload-vehicles">Actualiser</button></div>
-          <div class="two-column">
-            <article class="panel"><h3>Saisir une fiche hypothétique</h3><p class="small muted" id="vehicle-edit-label">Nouveau véhicule — aucune donnée constructeur préchargée.</p>
-              <form id="vehicle-form" class="form-grid">
-                <label class="wide">Nom de variante <input name="label" required placeholder="Autocar diesel - hypothèse A" /></label>
-                <label>Constructeur <input name="manufacturer" required placeholder="Exemple" /></label>
-                <label>Modèle <input name="model" required /></label>
-                <label>Places assises utiles <input type="number" name="seats" min="1" max="150" value="50" required /></label>
-                <label>Énergie <select name="energy_code"><option value="DIESEL">Gazole (L)</option><option value="ELECTRIC">Électricité (kWh)</option><option value="H2">Hydrogène (kg)</option></select></label>
-                <label>Consommation par km <input name="consumption_per_km" value="0.2" inputmode="decimal" required /></label>
-                <label>Consommation par heure <input name="consumption_per_hour" value="0" inputmode="decimal" required /></label>
-                <label>Capacité utile réservoir/batterie <input name="usable_capacity" value="100" inputmode="decimal" required /></label>
-                <label>Réserve <input name="reserve" value="5" inputmode="decimal" required /></label>
-                <label>Maintenance EUR/km <input name="maintenance_eur_per_km" value="0" inputmode="decimal" required /></label>
-                <label>Personnel EUR/h <input name="labor_eur_per_h" value="0" inputmode="decimal" required /></label>
-                <label>Prix d'acquisition EUR <input name="purchase_eur" value="0" inputmode="decimal" required /></label>
-                <label>Valeur résiduelle EUR <input name="residual_eur" value="0" inputmode="decimal" required /></label>
-                <label>Durée de vie (ans) <input name="life_years" type="number" value="10" min="1" required /></label>
-                <label>Assurance EUR/an <input name="insurance_eur_year" value="0" inputmode="decimal" required /></label>
-                <label class="wide">Source / méthode <input name="source" required value="Hypothèse utilisateur (non vérifiée)" /></label>
-                <div class="wide actions"><button class="button primary" type="submit" id="vehicle-submit">Créer la fiche</button><button class="button outline hidden" type="button" id="vehicle-cancel">Annuler édition</button></div>
-              </form>
-            </article>
-            <article class="panel"><h3>Catalogue partagé</h3><div id="vehicle-table" class="table-wrap"></div><div id="vehicle-history" class="history"></div></article>
-          </div>
-        </section>
-
-        <section id="view-stations" class="view hidden">
-          <div class="section-heading"><div><div class="eyebrow">INFRASTRUCTURES</div><h2>Stations</h2><p>Référentiel manuel non raccordé au moteur d'affectation à ce jalon.</p></div></div>
-          <div class="two-column"><article class="panel"><h3>Enregistrer une station non vérifiée</h3><form id="station-form" class="form-grid">
-            <label class="wide">Nom <input name="name" required /></label><label>Longitude <input type="number" name="longitude" step="any" required /></label><label>Latitude <input type="number" name="latitude" step="any" required /></label><label>Accès <select name="access"><option value="public">Public (déclaré)</option><option value="private">Privé</option><option value="restricted">Restreint</option></select></label><label>Énergie <select name="energy_code"><option>DIESEL</option><option>ELECTRIC</option><option>H2</option></select></label><label>Connecteur / pompe <input name="connector" required value="à confirmer" /></label><label>Nombre de points <input type="number" name="ports" min="1" value="1" required /></label><label class="wide">Origine de l'information <input name="source" required placeholder="Document à vérifier ou relevé" /></label><label>Date observée <input type="date" name="observed_at" required /></label><div class="wide actions"><button type="submit" class="button primary">Enregistrer (non vérifiée)</button></div>
-          </form></article><article class="panel"><h3>Stations saisies</h3><div id="station-table" class="table-wrap"></div><p class="small warning-text">Aucun tarif de station. Compatibilité car et disponibilité ne sont pas vérifiées.</p></article></div>
-        </section>
-
-        <section id="view-scenarios" class="view hidden">
-          <div class="section-heading"><div><div class="eyebrow">SIMULATEUR</div><h2>Configurer une étude</h2><p>Baseline opérationnelle : 1 ligne orientée, 1 jour, consommation fixe, véhicule dédié à chaque course.</p></div></div>
-          <div class="two-column">
-            <article class="panel"><h3>Hypothèses de scénario</h3><form id="scenario-form" class="form-grid">
-              <label class="wide">Nom de simulation <input name="name" value="Simulation mono-ligne" required /></label>
-              <label>Date <input name="start_date" type="date" required /></label><label>Demande de voyageurs <input name="passengers" type="number" min="0" value="80" required /></label>
-              <label>Origine de la ligne <input name="origin" required placeholder="Caen" /></label><label>Destination <input name="destination" required placeholder="Rouen" /></label>
-              <label>Distance en mètres <input name="distance_m" type="number" min="1" required placeholder="distance déclarée" /></label><label>Durée en secondes <input name="duration_s" type="number" min="1" required placeholder="durée déclarée" /></label>
-              <label class="wide">Source de la distance et durée <input name="route_source" required value="Hypothèse utilisateur - à valider par routage" /></label>
-              <label>Début des départs <input name="window_start" type="time" value="09:00" required /></label><label>Fin des départs <input name="window_end" type="time" value="11:00" required /></label>
-              <label>Véhicules disponibles au départ <input name="max_vehicles" type="number" min="0" value="2" required /></label><label>Version du véhicule <select name="vehicle_version_id" id="scenario-vehicle" required></select></label>
-              <label class="wide">Tarifs & facteurs versionnés <select name="energy_version_id" id="scenario-energy" required></select></label>
-              <label>Périmètre TCO <select name="tco_scope"><option value="variable">Exploitation variable</option><option value="vehicle">TCO véhicule</option><option value="complete">TCO exploitation (hors modules non implémentés)</option></select></label>
-              <label>Périmètre CO₂e <select name="emission_scope"><option value="direct">Direct</option><option value="well_to_wheel">Puits à la roue</option></select></label>
-              <label>Infrastructure EUR/jour (TCO complet) <input name="infrastructure_daily_eur" value="0" inputmode="decimal" required /></label>
-              <div class="wide form-note">La route est saisie manuellement et reste non vérifiée. Tous les véhicules démarrent à l'origine et ne reviennent pas : aucun trajet à vide n'est supposé. Demande servie intégralement ou diagnostic d'échec.</div>
-              <div class="wide actions"><button class="button primary" type="submit">Enregistrer et calculer</button></div>
-            </form></article>
-            <article class="panel"><h3>Scénarios existants</h3><div id="scenario-table" class="table-wrap"></div></article>
-          </div>
-        </section>
-
-        <section id="view-results" class="view hidden">
-          <div class="section-heading"><div><div class="eyebrow">RESTITUTION</div><h2>Résultats d'exécution</h2><p>Les chiffres ci-dessous proviennent des snapshots enregistrés, non des catalogues actuels.</p></div><button class="button outline" id="reload-results">Actualiser</button></div>
-          <article class="panel"><h3>Historique personnel</h3><div id="runs-table" class="table-wrap"></div></article>
           <div id="result-detail" class="panel result-panel hidden"></div>
         </section>
 
-        <section id="view-routing" class="view hidden">
-          <div class="section-heading"><div><div class="eyebrow">CARTOGRAPHIE & API</div><h2>Accès au routage</h2><p>Une requête ORS est possible uniquement si la clé est configurée côté serveur.</p></div></div>
-          <article class="panel"><h3>OpenRouteService</h3><div id="routing-status"></div><p class="small muted">Les routes d'un bus ne sont pas automatiquement certifiées par le profil HGV. Les données de routage doivent être contrôlées avant exploitation.</p>
-          <form id="routing-form" class="form-grid"><label>Origine longitude <input name="lon1" type="number" step="any" required /></label><label>Origine latitude <input name="lat1" type="number" step="any" required /></label><label>Destination longitude <input name="lon2" type="number" step="any" required /></label><label>Destination latitude <input name="lat2" type="number" step="any" required /></label><label>Profil <select name="profile"><option value="driving-hgv">Véhicule lourd</option><option value="driving-car">Voiture (non validé pour bus)</option></select></label><div class="wide actions"><button type="submit" class="button primary">Prévisualiser l'itinéraire</button></div></form><pre id="routing-answer" class="code-result"></pre></article>
+        <section id="view-stations" class="view hidden">
+          <div class="section-heading"><div><div class="eyebrow" data-i18n="stationKicker">RÉFÉRENTIELS GÉOGRAPHIQUES</div><h2 data-i18n="stationTitle">Stations en Normandie</h2><p data-i18n="stationIntro">Stations hydrogène répertoriées et stations essence/gazole issues de la DGCCRF. Informations indicatives, sans garantie d'accès pour les autocars.</p></div><button class="button outline" id="reload-stations" data-i18n="refresh">Actualiser</button></div>
+          <article class="panel"><div class="station-toolbar"><label><span data-i18n="filterType">Afficher</span><select id="station-filter"><option value="all" data-i18n="filterAll">Toutes les stations</option><option value="h2" data-i18n="filterH2">Hydrogène H₂</option><option value="fuel" data-i18n="filterFuel">Essence / gazole</option><option value="manual" data-i18n="filterManual">Ajoutées manuellement</option></select></label><span class="small muted" id="station-counter"></span></div>
+            <div id="station-map" class="map-canvas station-map" aria-label="Carte des stations"></div><p class="map-fallback hidden" id="station-map-fallback" data-i18n="mapUnavailable">Carte indisponible hors ligne. Les lieux et distances restent affichés.</p><p class="map-attribution"><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a> · <span data-i18n="mapInfo">Localisations déclarées dans les sources</span></p><div id="station-data-status" class="small muted"></div><div id="station-list" class="station-list"></div><button class="button outline hidden" id="more-stations" data-i18n="moreStations">Charger davantage de stations essence</button>
+            <p class="small warning-text" data-i18n="stationCaution">Liste indicative : une station H₂ destinée aux véhicules légers n'est pas automatiquement compatible avec un autocar. Disponibilité et accès à confirmer auprès de l'exploitant.</p>
+          </article>
+          <details class="panel" id="add-station-details"><summary data-i18n="addStation">Ajouter une station manuellement (avancé)</summary><form id="station-form" class="form-grid">
+            <label class="wide"><span data-i18n="stationName">Nom de la station</span><input name="name" required /></label>
+            <label><span data-i18n="longitude">Longitude</span><input name="longitude" type="number" step="any" required /></label>
+            <label><span data-i18n="latitude">Latitude</span><input name="latitude" type="number" step="any" required /></label>
+            <label><span data-i18n="access">Accès</span><select name="access"><option value="public" data-i18n="publicDeclared">Public (déclaré)</option><option value="private" data-i18n="private">Privé</option><option value="restricted" data-i18n="restricted">Restreint</option></select></label>
+            <label><span data-i18n="energy">Énergie</span><select name="energy_code"><option>DIESEL</option><option>ELECTRIC</option><option>H2</option></select></label>
+            <label><span data-i18n="pump">Pompe / connecteur</span><input name="connector" value="à confirmer" required /></label>
+            <label><span data-i18n="ports">Nombre de points</span><input name="ports" type="number" min="1" value="1" required /></label>
+            <label class="wide"><span data-i18n="source">Source / méthode</span><input name="source" required data-i18n-placeholder="sourceHint" placeholder="Document ou relevé" /></label>
+            <label><span data-i18n="sourceDate">Date observée</span><input name="observed_at" type="date" required /></label>
+            <div class="wide actions"><button class="button primary" type="submit" data-i18n="saveStation">Enregistrer la station non vérifiée</button></div>
+          </form></details>
+        </section>
+
+        <section id="view-vehicles" class="view hidden">
+          <div class="section-heading"><div><div class="eyebrow" data-i18n="settings">PARAMÈTRES</div><h2 data-i18n="navVehicles">Véhicules</h2><p data-i18n="vehicleIntro">Créer un modèle de véhicule utilisé par les simulations. Les valeurs doivent être justifiées par une source.</p></div><button class="button outline" id="reload-vehicles" data-i18n="refresh">Actualiser</button></div>
+          <div class="two-column"><article class="panel"><h3 data-i18n="vehicleFormTitle">Fiche véhicule</h3><p class="small muted" id="vehicle-edit-label" data-i18n="vehicleUnverified">Données constructeur non préchargées : valeurs à vérifier.</p><form id="vehicle-form" class="form-grid">
+            <label class="wide"><span data-i18n="modelName">Nom de variante</span><input name="label" required data-i18n-placeholder="modelExample" placeholder="Autocar diesel A" /></label>
+            <label><span data-i18n="manufacturer">Constructeur</span><input name="manufacturer" required /></label><label><span data-i18n="model">Modèle</span><input name="model" required /></label>
+            <label><span data-i18n="seats">Places utiles</span><input type="number" name="seats" min="1" max="150" value="50" required /></label>
+            <label><span data-i18n="energy">Énergie</span><select name="energy_code"><option value="DIESEL" data-i18n="diesel">Gazole (L)</option><option value="ELECTRIC" data-i18n="electric">Électricité (kWh)</option><option value="H2" data-i18n="hydrogen">Hydrogène (kg)</option></select></label>
+            <label><span data-i18n="consumptionKm">Consommation / km</span><input name="consumption_per_km" value="0.2" inputmode="decimal" required /></label><label><span data-i18n="consumptionHour">Consommation / h</span><input name="consumption_per_hour" value="0" inputmode="decimal" required /></label>
+            <label><span data-i18n="capacity">Réservoir / batterie utile</span><input name="usable_capacity" value="100" inputmode="decimal" required /></label><label><span data-i18n="reserve">Réserve</span><input name="reserve" value="5" inputmode="decimal" required /></label>
+            <details class="wide advanced-settings"><summary data-i18n="advancedVehicle">Coûts avancés (facultatif)</summary><div class="form-grid">
+              <label><span data-i18n="maintenance">Maintenance EUR/km</span><input name="maintenance_eur_per_km" value="0" inputmode="decimal" required /></label><label><span data-i18n="labor">Personnel EUR/h</span><input name="labor_eur_per_h" value="0" inputmode="decimal" required /></label><label><span data-i18n="purchase">Acquisition EUR</span><input name="purchase_eur" value="0" inputmode="decimal" required /></label><label><span data-i18n="residual">Valeur résiduelle EUR</span><input name="residual_eur" value="0" inputmode="decimal" required /></label><label><span data-i18n="life">Durée de vie (ans)</span><input name="life_years" type="number" value="10" min="1" required /></label><label><span data-i18n="insurance">Assurance EUR/an</span><input name="insurance_eur_year" value="0" inputmode="decimal" required /></label>
+            </div></details>
+            <label class="wide"><span data-i18n="source">Source / méthode</span><input name="source" required value="Hypothèse utilisateur non vérifiée" /></label>
+            <div class="wide actions"><button class="button primary" type="submit" id="vehicle-submit" data-i18n="saveVehicle">Enregistrer le véhicule</button><button class="button outline hidden" type="button" id="vehicle-cancel" data-i18n="cancel">Annuler</button></div>
+          </form></article><article class="panel"><h3 data-i18n="vehicleCatalog">Catalogue de véhicules</h3><div id="vehicle-table" class="table-wrap"></div><div id="vehicle-history" class="history"></div></article></div>
+        </section>
+
+        <section id="view-energy" class="view hidden">
+          <div class="section-heading"><div><div class="eyebrow" data-i18n="settings">PARAMÈTRES</div><h2 data-i18n="navEnergy">Énergies par pays</h2><p data-i18n="energyIntro">Un prix national par énergie, des facteurs d'émissions sourcés et versionnés. Aucun tarif par station.</p></div><button class="button outline" id="reload-energy" data-i18n="refresh">Actualiser</button></div>
+          <div class="two-column"><article class="panel"><h3 data-i18n="energyFormTitle">Enregistrer un tarif et des facteurs</h3><p class="small muted" data-i18n="energyUnverified">Les valeurs ne sont pas préremplies : les sources nationales et les périmètres doivent être validés.</p><form id="energy-form" class="form-grid">
+            <label><span data-i18n="country">Pays</span><select name="country_iso"><option value="FR" data-i18n="france">France (FR)</option></select></label>
+            <label><span data-i18n="energy">Énergie</span><select name="energy_code" id="energy-code"><option value="DIESEL" data-i18n="diesel">Gazole (L)</option><option value="ELECTRIC" data-i18n="electric">Électricité (kWh)</option><option value="H2" data-i18n="hydrogen">Hydrogène (kg)</option></select></label>
+            <label><span data-i18n="nationalPrice">Prix national EUR/unité</span><input name="price_per_unit" required inputmode="decimal" placeholder="2.00" /></label>
+            <label><span data-i18n="directFactor">Facteur direct kgCO₂e/unité</span><input name="direct" inputmode="decimal" data-i18n-placeholder="optional" placeholder="facultatif" /></label>
+            <label><span data-i18n="wtwFactor">Facteur puits-roue kgCO₂e/unité</span><input name="well_to_wheel" inputmode="decimal" data-i18n-placeholder="optional" placeholder="facultatif" /></label>
+            <label><span data-i18n="sourceDate">Date de source</span><input type="date" name="source_date" required /></label>
+            <label class="wide"><span data-i18n="source">Source / méthode</span><input name="source" required minlength="5" data-i18n-placeholder="sourceHint" placeholder="Document ou relevé" /></label>
+            <label class="wide"><span data-i18n="license">Licence / droit de réutilisation</span><input name="license" value="À vérifier" required /></label>
+            <div class="wide actions"><button class="button primary" type="submit" data-i18n="saveEnergy">Enregistrer une version</button></div>
+          </form></article><article class="panel"><h3 data-i18n="savedEnergies">Énergies enregistrées</h3><div id="energy-table" class="table-wrap"></div><div id="energy-history" class="history"></div><p class="small muted"><a target="_blank" rel="noopener" href="https://data.economie.gouv.fr/explore/dataset/prix-des-carburants-en-france-flux-instantane-v2/" data-i18n="fuelSourceLink">Source officielle des prix à la pompe (DGCCRF)</a></p></article></div>
         </section>
       </div>
     </main>

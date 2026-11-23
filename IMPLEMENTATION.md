@@ -29,6 +29,30 @@ Changer son emplacement avec `SIMCO2_DB_PATH=/chemin/prive/simco2.sqlite`.
 Ne pas exposer ce service sur Internet sans reverse proxy TLS, configuration
 et audit de sécurité complémentaires.
 
+## Interface simplifiée (premier lot du 23 novembre 2026)
+
+Après connexion, l'onglet **Simulations** s'ouvre directement. L'utilisateur saisit
+le départ, l'arrivée et le nombre de voyageurs, puis clique sur
+**Calculer l'itinéraire** : la distance et la durée sont fournies par IGN + OSRM
+(démonstration par défaut), avec une carte et un avertissement sur les restrictions
+autocars. L'utilisateur ne peut plus saisir lui-même les mètres ou les secondes
+dans le formulaire ; l'API historique conserve les scénarios manuels pour archives.
+
+Les **résultats et le téléchargement PDF sont dans Simulations**, sans page dédiée.
+Le bouton **FR / EN** change l'interface et la langue du PDF. L'onglet
+**Stations en Normandie** présente sept lieux hydrogène H2-Mobile identifiés
+et les stations essence/gazole du flux DGCCRF, chargées par pages et sans prix
+station. Les données de stations restent indicatives et les valeurs de prix et
+d'émission nationales ne sont pas devinées.
+
+Voir `docs/ux-routing-i18n-stations.md` pour les fournisseurs, avertissements,
+conditions de réutilisation et prérequis de mise en ligne.
+
+Configuration facultative pour un routage autre que la démonstration OSRM :
+`SIMCO2_ROUTING_PROVIDER=ors` avec `ORS_API_KEY` côté serveur, ou
+`SIMCO2_ROUTING_PROVIDER=osrm` avec `SIMCO2_OSRM_URL` privé.
+**Ce prototype local n'est pas encore hébergé pour les utilisateurs externes.**
+
 ## Parcours minimal testable
 
 1. Se connecter avec son compte.

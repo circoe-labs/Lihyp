@@ -1,0 +1,7 @@
+.......................                                                  [100%]
+23 passed in 2.76s
+
+OpenAPI: 25 paths (schema generated)
+Python compileall: PASS
+Node syntax check: PASS
+Illustrative PDF: 2 pages; 80.0 EUR and 108.00 kgCO2e present in extracted text.

@@ -1,0 +1,111 @@
+/*
+ * Leaflet 1.9 layout safety net, served locally.
+ * The optional full stylesheet is loaded from a CDN, but map containment MUST NOT
+ * depend on that request succeeding. These selectors preserve the positioning
+ * contract used by Leaflet's renderer and keep tiles inside their own map.
+ * Leaflet (c) 2010-2023 Vladimir Agafonkin / contributors, BSD-2-Clause.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS
+ * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+.leaflet-container {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background: #e5eef1;
+  outline-offset: 1px;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: none;
+}
+.leaflet-pane,
+.leaflet-tile,
+.leaflet-marker-icon,
+.leaflet-marker-shadow,
+.leaflet-tile-container,
+.leaflet-pane > svg,
+.leaflet-pane > canvas,
+.leaflet-zoom-box,
+.leaflet-image-layer,
+.leaflet-layer {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+.leaflet-pane { z-index: 400; }
+.leaflet-tile-pane { z-index: 200; }
+.leaflet-overlay-pane { z-index: 400; }
+.leaflet-shadow-pane { z-index: 500; }
+.leaflet-marker-pane { z-index: 600; }
+.leaflet-tooltip-pane { z-index: 650; }
+.leaflet-popup-pane { z-index: 700; }
+.leaflet-map-pane canvas { z-index: 100; }
+.leaflet-map-pane svg { z-index: 200; }
+.leaflet-tile,
+.leaflet-marker-icon,
+.leaflet-marker-shadow { user-select: none; -webkit-user-drag: none; }
+.leaflet-tile { visibility: hidden; }
+.leaflet-tile-loaded { visibility: inherit; }
+.leaflet-zoom-animated { transform-origin: 0 0; }
+.leaflet-zoom-hide { visibility: hidden; }
+.leaflet-container .leaflet-overlay-pane svg,
+.leaflet-container .leaflet-marker-pane img,
+.leaflet-container .leaflet-shadow-pane img,
+.leaflet-container .leaflet-tile-pane img,
+.leaflet-container img.leaflet-image-layer {
+  max-width: none !important;
+  max-height: none !important;
+}
+.leaflet-container .leaflet-tile-pane img { width: auto; height: auto; padding: 0; }
+.leaflet-container .leaflet-pane > svg { width: auto; height: auto; }
+.leaflet-container .leaflet-control { position: relative; z-index: 800; pointer-events: auto; }
+.leaflet-top, .leaflet-bottom { position: absolute; z-index: 1000; pointer-events: none; }
+.leaflet-top { top: 0; }
+.leaflet-right { right: 0; }
+.leaflet-bottom { bottom: 0; }
+.leaflet-left { left: 0; }
+.leaflet-top .leaflet-control { margin-top: 10px; }
+.leaflet-bottom .leaflet-control { margin-bottom: 10px; }
+.leaflet-left .leaflet-control { margin-left: 10px; }
+.leaflet-right .leaflet-control { margin-right: 10px; }
+.leaflet-control-zoom { box-shadow: 0 1px 5px #0003; border-radius: 4px; }
+.leaflet-control-zoom a {
+  display: block; background: #fff; border-bottom: 1px solid #ddd;
+  width: 30px; height: 30px; line-height: 30px;
+  text-align: center; font-size: 21px; font-weight: bold;
+  color: #183244; text-decoration: none;
+}
+.leaflet-control-zoom a:first-child { border-radius: 4px 4px 0 0; }
+.leaflet-control-zoom a:last-child { border-bottom: 0; border-radius: 0 0 4px 4px; }
+.leaflet-control-attribution {
+  background: rgba(255,255,255,.82);
+  color: #3b5663; padding: 0 5px; font-size: 10px; line-height: 1.45;
+}
+.leaflet-control-attribution a { color: #146f81; }
+.leaflet-container .leaflet-popup-pane { pointer-events: none; }
+.leaflet-popup { position: absolute; text-align: center; margin-bottom: 20px; }
+.leaflet-popup-content-wrapper {
+  background: white; color: #183244; border-radius: 9px;
+  box-shadow: 0 3px 14px #0003; padding: 1px;
+}
+.leaflet-popup-content { margin: 12px 17px; line-height: 1.4; }
+.leaflet-popup-tip-container { position: absolute; left: 50%; width: 40px; height: 20px; margin-left: -20px; overflow: hidden; pointer-events: none; }
+.leaflet-popup-tip { width: 17px; height: 17px; background: #fff; transform: translate(11px,-9px) rotate(45deg); box-shadow: 0 3px 14px #0003; }
+.leaflet-container a.leaflet-popup-close-button { position: absolute; right: 7px; top: 5px; color: #667889; text-decoration: none; font-size: 19px; z-index: 2; }
+.leaflet-interactive { cursor: pointer; }
+.leaflet-grab { cursor: grab; }
+.leaflet-dragging .leaflet-grab { cursor: grabbing; }

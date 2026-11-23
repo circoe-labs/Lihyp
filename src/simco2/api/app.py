@@ -8,20 +8,22 @@ from fastapi import FastAPI, Depends, HTTPException, Header, Request
 from fastapi.responses import HTMLResponse, Response, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
-from simco2.adapters.db import Database
+from simco2.adapters.db import Database, rid
 from simco2.adapters.routing import (ORSRoutingProvider, OSRMRoutingProvider,
                                       GeoplatformGeocoder)
+from simco2.adapters.routing_settings import RoutingSettings
 from simco2.adapters.discovery import NORMANDY_H2, FuelStationDirectory, FUEL_SOURCE
 from simco2.api.schemas import (
     EnergyInput, VehicleInput, StationInput, ScenarioInput, LoginInput, RunInput,
-    RoutePreviewInput, RouteResolveInput, RouteInput)
+    RoutePreviewInput, RouteResolveInput, RouteInput, ComparisonInput,
+    RoutingConfigInput, RoutingKeyInput)
 from simco2.domain.engine import BaselineEngine
 from simco2.domain.errors import DomainError, MissingReference, RoutingFailure
 from simco2.reporting import render_pdf
 
 
 def create_app(db_path: str | Path | None = None, *, geocoder=None, routing_provider=None,
-               fuel_directory=None) -> FastAPI:
+               fuel_directory=None, routing_settings=None) -> FastAPI:
     app = FastAPI(title="SimCO2 — prototype de simulation transport voyageurs",
                   version="0.1.0", description="Prototype mono-ligne et données non vérifiées")
     db = Database(db_path or os.getenv("SIMCO2_DB_PATH", "./simco2.sqlite"))
@@ -30,15 +32,26 @@ def create_app(db_path: str | Path | None = None, *, geocoder=None, routing_prov
     engine = BaselineEngine()
     app.state.geocoder = geocoder if geocoder is not None else GeoplatformGeocoder()
     app.state.fuel_directory = fuel_directory if fuel_directory is not None else FuelStationDirectory()
-    mode = os.getenv("SIMCO2_ROUTING_MODE", "demo").strip().lower()
-    if routing_provider is not None:
-        app.state.routing_provider = routing_provider
-    elif mode == "disabled":
-        app.state.routing_provider = None
-    elif mode == "ors" or (mode == "demo" and os.getenv("ORS_API_KEY")):
-        app.state.routing_provider = None if not os.getenv("ORS_API_KEY") else ORSRoutingProvider(os.environ["ORS_API_KEY"])
-    else:
-        app.state.routing_provider = OSRMRoutingProvider(os.getenv("SIMCO2_OSRM_URL"))
+    app.state.routing_settings = routing_settings or RoutingSettings()
+    # Injected provider is reserved for deterministic tests; production resolves
+    # settings at request time so a locally saved key takes effect immediately.
+    app.state.routing_provider = routing_provider
+
+    def active_router():
+        return app.state.routing_provider or app.state.routing_settings.provider()
+
+    def is_local_operator(actor: dict, request: Request) -> bool:
+        # Infrastructure administration is not an external-user permission.
+        # Password-protected, loopback-only controls; no remote admin endpoint.
+        return (actor.get("username") == os.getenv("SIMCO2_OPERATOR_USERNAME", "admin")
+                and request.client is not None
+                and request.client.host in ("127.0.0.1", "::1", "testclient")
+                and request.url.hostname in ("127.0.0.1", "localhost", "::1", "testserver")
+                and not request.headers.get("x-forwarded-for"))
+
+    def assert_local_operator(actor: dict, request: Request):
+        if not is_local_operator(actor, request):
+            raise HTTPException(status_code=403, detail="Réservé à l'exploitant connecté en local")
 
     @app.exception_handler(DomainError)
     async def handle_domain_error(request, exc: DomainError):
@@ -229,6 +242,68 @@ def create_app(db_path: str | Path | None = None, *, geocoder=None, routing_prov
         return Response(content=pdf, media_type="application/pdf",
                         headers={"Content-Disposition": f'attachment; filename="simulation-{run_id}.pdf"'})
 
+    @app.post("/comparisons", status_code=201)
+    def compare_vehicles(data: ComparisonInput, actor: Actor, db: Db):
+        """Comparer des cas séparés sur un itinéraire, une demande et un périmètre identiques."""
+        from simco2.api.schemas import ScenarioInput
+        quote = db.get_route_quote(data.route_quote_id, actor["id"])
+        energies = {e["energy_code"]: e for e in db.list_energies(data.country_iso)}
+        entries = []
+        for version_id in data.vehicle_version_ids:
+            vehicle = db.get_vehicle(version_id)
+            payload = vehicle["payload"]
+            energy = energies.get(payload["energy_code"])
+            if energy is None:
+                raise DomainError("missing_energy", "Configurer l'énergie " + payload["energy_code"] + " avant comparaison")
+            scenario = ScenarioInput.model_validate({
+                "name": (data.name + " - " + payload["label"])[:200],
+                "country_iso": data.country_iso, "start_date": data.start_date,
+                "end_date": data.start_date, "timezone": "Europe/Paris",
+                "route_quote_id": data.route_quote_id, "passengers": data.passengers,
+                "window_start": data.window_start, "window_end": data.window_end,
+                "max_vehicles": data.max_vehicles, "tco_scope": data.tco_scope,
+                "emission_scope": data.emission_scope,
+                "infrastructure_daily_eur": data.infrastructure_daily_eur,
+                "vehicle_version_id": version_id, "energy_version_id": energy["id"],
+            })
+            check_references(scenario, db)
+            scenario_doc = scenario.model_dump(mode="json", exclude={"route_quote_id"})
+            scenario_doc["route"] = quote
+            revision_id = rid()
+            snapshot = {
+                "scenario_revision_id": revision_id, "scenario_revision_number": 1,
+                "scenario": scenario_doc, "vehicle_version": vehicle,
+                "energy_version": energy, "routing_snapshot": quote,
+                "solver_version": engine.ENGINE_VERSION, "country": data.country_iso,
+                "timezone": "Europe/Paris",
+                "units": {"distance": "m", "time": "s", "money": "EUR", "co2e": "kgCO2e"},
+                "random_seed": None, "time_limit_seconds": None,
+            }
+            result = engine.solve(snapshot).result
+            entries.append({"scenario_id": rid(), "revision_id": revision_id,
+                            "run_id": rid(), "scenario": scenario_doc,
+                            "snapshot": snapshot, "result": result})
+        shared = {
+            "route": quote, "country_iso": data.country_iso,
+            "start_date": data.start_date.isoformat(), "passengers": data.passengers,
+            "window_start": data.window_start, "window_end": data.window_end,
+            "max_vehicles": data.max_vehicles, "tco_scope": data.tco_scope,
+            "emission_scope": data.emission_scope,
+            "infrastructure_daily_eur": data.infrastructure_daily_eur,
+            "vehicle_version_ids": list(data.vehicle_version_ids),
+            "comparison_kind": "independent_homogeneous_cases",
+            "optimality_proven": False,
+        }
+        return db.record_comparison(data.name, shared, entries, actor["id"])
+
+    @app.get("/comparisons")
+    def comparisons(actor: Actor, db: Db):
+        return db.list_comparisons(actor["id"])
+
+    @app.get("/comparisons/{comparison_id}")
+    def get_comparison(comparison_id: str, actor: Actor, db: Db):
+        return db.get_comparison(comparison_id, actor["id"])
+
     @app.get("/stations/discovery")
     def station_discovery(actor: Actor, offset: int = 0, limit: int = 100):
         if offset < 0 or offset > 10000 or not 1 <= limit <= 100:
@@ -242,24 +317,69 @@ def create_app(db_path: str | Path | None = None, *, geocoder=None, routing_prov
                 "fuel_source": FUEL_SOURCE}
 
     @app.get("/routing/status")
-    def routing_status(actor: Actor):
-        provider = app.state.routing_provider
-        return {"provider": "openrouteservice" if isinstance(provider, ORSRoutingProvider)
-                else "osrm_demo" if isinstance(provider, OSRMRoutingProvider) and provider.is_demo
-                else "osrm" if provider else "disabled",
-                "configured": bool(os.getenv("ORS_API_KEY")),
-                "available": provider is not None,
-                "prototype_only": isinstance(provider, OSRMRoutingProvider) and provider.is_demo,
-                "note": "Les profils routiers ne certifient pas les limitations d'autocars."}
+    def routing_status(actor: Actor, request: Request):
+        status = app.state.routing_settings.status(operator=is_local_operator(actor, request))
+        if app.state.routing_provider is not None:
+            status.update({"provider": "fixture", "available": True, "endpoint": "test fixture"})
+        return {**status, "configured": bool(status["configured"].get("ors")),
+                "geoapify_configured": status["configured"].get("geoapify", False),
+                "prototype_only": status["provider"] == "osrm_demo"}
+
+    @app.get("/routing/config")
+    def routing_config(actor: Actor, request: Request):
+        return app.state.routing_settings.status(operator=is_local_operator(actor, request))
+
+    @app.post("/routing/config")
+    def save_routing_config(data: RoutingConfigInput, actor: Actor, request: Request):
+        assert_local_operator(actor, request)
+        if os.getenv("SIMCO2_ROUTING_MODE"):
+            raise HTTPException(status_code=409, detail="Fournisseur fixé par l'environnement serveur")
+        app.state.routing_settings.select(data.provider, data.profile)
+        return app.state.routing_settings.status(operator=True)
+
+    @app.post("/routing/keys")
+    def save_routing_key(data: RoutingKeyInput, actor: Actor, request: Request):
+        assert_local_operator(actor, request)
+        env_key = "SIMCO2_GEOAPIFY_API_KEY" if data.provider == "geoapify" else "ORS_API_KEY"
+        if os.getenv(env_key):
+            raise HTTPException(status_code=409, detail="Clé gérée par l'environnement serveur")
+        # Uniquement côté serveur, jamais dans les journaux, snapshots ou réponses.
+        app.state.routing_settings.put_key(data.provider, data.key)
+        return app.state.routing_settings.status(operator=True)
+
+    @app.delete("/routing/keys/{provider}")
+    def remove_routing_key(provider: str, actor: Actor, request: Request):
+        assert_local_operator(actor, request)
+        env_key = "SIMCO2_GEOAPIFY_API_KEY" if provider == "geoapify" else "ORS_API_KEY"
+        if os.getenv(env_key):
+            raise HTTPException(status_code=409, detail="Clé gérée par l'environnement serveur")
+        app.state.routing_settings.remove_key(provider)
+        return app.state.routing_settings.status(operator=True)
+
+    @app.post("/routing/test")
+    def test_routing(data: RoutePreviewInput, actor: Actor):
+        router = active_router()
+        if router is None:
+            raise RoutingFailure("provider_unconfigured", "Configurer un fournisseur de routage")
+        if app.state.routing_provider is None:
+            profile = app.state.routing_settings.selected()[1]
+        else:
+            profile = data.profile or "driving-car"
+        result = router.route(data.origin, data.destination, profile)
+        return {"distance_m": str(result.distance_m), "duration_s": str(result.duration_s),
+                "provider": result.provider, "profile": profile,
+                "restrictions": list(result.restrictions), "valid_at": result.valid_at}
 
     @app.post("/routing/resolve")
     def resolve_route(data: RouteResolveInput, actor: Actor, db: Db):
-        provider = app.state.routing_provider
+        provider = active_router()
         if provider is None:
             raise RoutingFailure("provider_unconfigured", "Routage non configuré sur le serveur")
         start, start_label = app.state.geocoder.locate(data.origin)
         stop, stop_label = app.state.geocoder.locate(data.destination)
-        route = provider.route(start, stop, data.profile)
+        profile = data.profile or ("driving-car" if app.state.routing_provider is not None
+                                   else app.state.routing_settings.selected()[1])
+        route = provider.route(start, stop, profile)
         if not route.geometry or route.geometry.get("type") != "LineString":
             raise RoutingFailure("invalid_geometry", "Le fournisseur n'a pas fourni de tracé")
         from decimal import ROUND_HALF_UP
@@ -273,17 +393,19 @@ def create_app(db_path: str | Path | None = None, *, geocoder=None, routing_prov
             "provider": route.provider, "source": "Routage automatique: " + route.provider,
             "origin_coordinates": start, "destination_coordinates": stop,
             "geometry": route.geometry, "valid_at": route.valid_at,
-            "profile": data.profile, "restrictions": list(route.restrictions),
+            "profile": profile, "restrictions": list(route.restrictions),
         }).model_dump(mode="json")
         quote_id = db.save_route_quote(actor["id"], payload)
-        return {"quote_id": quote_id, "route": payload,
-                "expires_in_seconds": 1800}
+        return {"quote_id": quote_id, "route": payload, "expires_in_seconds": 1800}
 
     @app.post("/routing/preview")
     def route_preview(data: RoutePreviewInput, actor: Actor):
-        # Compatibilité de l'ancienne API, utile aux tests et aux outils experts.
-        router = ORSRoutingProvider(os.getenv("ORS_API_KEY", ""))
-        out = router.route(data.origin, data.destination, data.profile)
+        # Ancienne API conservée pour les outils experts.
+        key = app.state.routing_settings.key_for("ors")
+        router = ORSRoutingProvider(key) if key else None
+        if router is None:
+            raise RoutingFailure("provider_unconfigured", "Clé ORS absente sur le serveur")
+        out = router.route(data.origin, data.destination, data.profile or "driving-hgv")
         return {"distance_m": str(out.distance_m), "duration_s": str(out.duration_s),
                 "provider": out.provider, "version": out.provider_version,
                 "valid_at": out.valid_at, "geometry": out.geometry,

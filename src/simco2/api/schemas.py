@@ -136,7 +136,7 @@ class RouteInput(StrictInput):
     destination: str = Field(min_length=1, max_length=150)
     distance_m: int = Field(gt=0, le=10_000_000)
     duration_s: int = Field(gt=0, le=1_000_000)
-    provider: Literal["manual", "openrouteservice", "osrm_demo", "osrm"] = "manual"
+    provider: Literal["manual", "openrouteservice", "osrm_demo", "osrm", "geoapify"] = "manual"
     source: str = Field(min_length=5, max_length=500)
     origin_coordinates: tuple[float, float] | None = None
     destination_coordinates: tuple[float, float] | None = None
@@ -213,4 +213,42 @@ class RoutePreviewInput(StrictInput):
 class RouteResolveInput(StrictInput):
     origin: str = Field(min_length=2, max_length=150)
     destination: str = Field(min_length=2, max_length=150)
-    profile: Literal["driving-car", "driving-hgv"] = "driving-car"
+    profile: Literal["driving-car", "driving-hgv", "bus", "truck", "heavy_truck"] | None = None
+
+
+class ComparisonInput(StrictInput):
+    """Même demande et même route pour plusieurs modèles séparés (pas flotte mixte)."""
+    name: str = Field(min_length=2, max_length=200)
+    route_quote_id: str = Field(min_length=1, max_length=60)
+    vehicle_version_ids: list[str] = Field(min_length=2, max_length=8)
+    country_iso: Literal["FR"] = "FR"
+    start_date: date
+    passengers: int = Field(ge=0, le=1_000_000)
+    window_start: str = Field(default="09:00", pattern=r"^([01]\d|2[0-3]):[0-5]\d$")
+    window_end: str = Field(default="11:00", pattern=r"^([01]\d|2[0-3]):[0-5]\d$")
+    max_vehicles: int = Field(default=10, ge=0, le=1000)
+    tco_scope: Literal["variable", "vehicle", "complete"] = "variable"
+    emission_scope: Literal["direct", "well_to_wheel"] = "direct"
+    infrastructure_daily_eur: str = "0"
+
+    @field_validator("vehicle_version_ids")
+    @classmethod
+    def unique_vehicles(cls, items):
+        if len(items) != len(set(items)) or any(not item for item in items):
+            raise ValueError("Sélectionner des véhicules distincts")
+        return items
+
+    @field_validator("infrastructure_daily_eur")
+    @classmethod
+    def cost(cls, value):
+        return require_decimal(value)
+
+
+class RoutingConfigInput(StrictInput):
+    provider: Literal["geoapify", "ors", "osrm_demo"]
+    profile: Literal["bus", "truck", "heavy_truck", "driving-hgv", "driving-car"]
+
+
+class RoutingKeyInput(StrictInput):
+    provider: Literal["geoapify", "ors"]
+    key: str = Field(min_length=8, max_length=300)

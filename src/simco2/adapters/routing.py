@@ -137,3 +137,50 @@ class OSRMRoutingProvider:
                                geometry=geometry, restrictions=restrictions)
         except (httpx.HTTPError, KeyError, IndexError, ValueError, TypeError, AttributeError):
             raise RoutingFailure("provider_error", "Itinéraire indisponible : vérifier le service de routage") from None
+
+
+class GeoapifyRoutingProvider:
+    """Routage Geoapify bus/camion. Réponse GeoJSON normalisée en LineString."""
+    API_URL = "https://api.geoapify.com/v1/routing"
+    SUPPORTED = ("bus", "truck", "heavy_truck")
+
+    def __init__(self, api_key: str, *, client: httpx.Client | None = None):
+        if not api_key:
+            raise RoutingFailure("provider_unconfigured", "Clé Geoapify absente côté serveur")
+        self.api_key = api_key
+        self.client = client or httpx.Client(timeout=15, follow_redirects=False)
+
+    def route(self, origin, destination, profile="bus", departure_time=None):
+        if profile not in self.SUPPORTED:
+            raise RoutingFailure("unsupported_profile", "Profil Geoapify non pris en charge")
+        for lon, lat in (origin, destination):
+            if not (-180 <= lon <= 180 and -90 <= lat <= 90):
+                raise RoutingFailure("invalid_coordinates", "Coordonnées hors bornes")
+        try:
+            response = self.client.get(self.API_URL, params={
+                "waypoints": "|".join(f"{lat:.7f},{lon:.7f}" for lon, lat in (origin, destination)),
+                "mode": profile, "format": "geojson", "apiKey": self.api_key,
+            })
+            response.raise_for_status()
+            feature = response.json()["features"][0]
+            props = feature["properties"]
+            distance, duration = Decimal(str(props["distance"])), Decimal(str(props["time"]))
+            geometry = feature["geometry"]
+            if geometry["type"] == "MultiLineString":
+                segments = geometry["coordinates"]
+                coords = []
+                for line in segments:
+                    coords.extend(line if not coords or coords[-1] != line[0] else line[1:])
+                geometry = {"type": "LineString", "coordinates": coords}
+            if (distance <= 0 or duration <= 0 or geometry["type"] != "LineString"
+                    or len(geometry["coordinates"]) < 2
+                    or len(geometry["coordinates"]) > 15000):
+                raise ValueError("invalid route")
+            return RouteResult(distance, duration, profile, "geoapify", "routing-v1",
+                               datetime.now(timezone.utc).isoformat(), geometry=geometry,
+                               restrictions=(
+                                   "Profil Geoapify indicatif : restrictions bus/camion non garanties partout.",
+                               ))
+        except (httpx.HTTPError, KeyError, IndexError, ValueError, TypeError, AttributeError):
+            # Ne jamais inclure l'URL avec apiKey dans les erreurs renvoyées.
+            raise RoutingFailure("provider_error", "Routage Geoapify indisponible ou réponse invalide") from None

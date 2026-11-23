@@ -44,3 +44,7 @@ Geoapify (profil `bus` par défaut), les options `truck`/`heavy_truck`, ORS et
 le routage OSRM de démonstration. Seul l'exploitant connecté localement peut
 saisir/supprimer des clés dans l'interface ; en production, utiliser un
 système de secrets côté serveur. Lire `docs/multivehicule-et-api-routage.md`.
+
+## Refonte Stations et Énergies (PR distincte)
+
+Stations en Normandie : filtres H₂/essence/gazole, carte + liste synchronisées et fiches détaillées au survol/clic. Énergies par pays : tableau de consultation, ajout et modification dans un panneau distinct, retrait réversible sans effacement des simulations historiques. Les données de stations ne sont pas certifiées et **aucun prix national fictif n'est ajouté**. Voir `docs/stations-et-energies-ux.md`.

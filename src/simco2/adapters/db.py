@@ -137,6 +137,8 @@ class Database:
     def list_energies(self, country: str = "FR") -> list[dict]:
         with self.session() as con:
             rows = con.execute("""SELECT * FROM energy_versions e WHERE country_iso=?
+                AND NOT EXISTS (SELECT 1 FROM energy_catalog_archived a
+                    WHERE a.country_iso=e.country_iso AND a.energy_code=e.energy_code)
                 AND revision=(SELECT MAX(revision) FROM energy_versions x
                     WHERE x.country_iso=e.country_iso AND x.energy_code=e.energy_code)
                 ORDER BY energy_code""", (country,)).fetchall()
@@ -182,9 +184,27 @@ class Database:
             for perimeter, factor in payload.get("factors", {}).items():
                 con.execute("""INSERT INTO emission_factors VALUES (?, ?, ?, ?, ?)""",
                             (eid, perimeter, str(factor), payload["source"], payload["source_date"]))
+            con.execute("DELETE FROM energy_catalog_archived WHERE country_iso=? AND energy_code=?",
+                        (country,code))
             self._event(con, actor, "energy", eid, "create_version",
                         self._version_row(prev) if prev else None, payload)
         return self.get_energy(eid)
+
+    def archive_energy(self, country: str, code: str, actor: str) -> None:
+        """Hide an active energy from new choices, never erase immutable historical inputs."""
+        with self.session() as con:
+            con.execute("BEGIN IMMEDIATE")
+            latest = con.execute("""SELECT id FROM energy_versions WHERE country_iso=?
+                AND energy_code=? ORDER BY revision DESC LIMIT 1""", (country, code)).fetchone()
+            if latest is None:
+                raise MissingReference("Énergie inexistante")
+            con.execute("""INSERT INTO energy_catalog_archived VALUES (?, ?, ?, ?)
+                ON CONFLICT(country_iso, energy_code) DO UPDATE SET
+                  archived_by=excluded.archived_by, archived_at=excluded.archived_at""",
+                  (country, code, actor, utc_now()))
+            self._event(con, actor, "energy", latest["id"], "archive_from_catalogue",
+                        {"country_iso":country,"energy_code":code},
+                        {"archived":True})
 
     def list_vehicles(self) -> list[dict]:
         with self.session() as con:

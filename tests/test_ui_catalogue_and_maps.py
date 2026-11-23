@@ -47,3 +47,20 @@ def test_bus_demo_is_not_silently_created_on_login(tmp_path):
     assert 'solutionCard(demoCoach())' in js
     assert 'add-demo-vehicle' in js
     assert 'synthetic' in js.lower()
+
+
+def test_stations_and_energy_catalogue_layout_matches_reviewed_mockups():
+    html = (UI / 'index.html').read_text(encoding='utf-8')
+    js = (UI / 'app.js').read_text(encoding='utf-8')
+    css = (UI / 'style.css').read_text(encoding='utf-8')
+    for control in ('station-filter-h2', 'station-filter-petrol',
+                    'station-filter-diesel', 'station-list', 'station-details'):
+        assert f'id="{control}"' in html
+    assert 'station-explorer-grid' in css
+    assert "bindPopup(stationPopupHtml(s))" in js
+    assert ".on('mouseover',()=>marker.openPopup())" in js
+    assert 'selectStation(b.dataset.stationId)' in js
+    assert 'data-i18n="addEnergy"' in html
+    assert 'id="energy-editor"' in html
+    assert 'data-energy-edit=' in js and 'data-energy-remove=' in js
+    assert 'archiveEnergyConfirm' in js

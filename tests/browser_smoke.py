@@ -35,6 +35,7 @@ async def main():
             browser = await p.chromium.launch(executable_path='/usr/bin/chromium',
                                               headless=True, args=['--no-sandbox'])
             page = await browser.new_page(viewport={'width':1440,'height':1000}, accept_downloads=True)
+            page.set_default_timeout(5000)
             errors = []
             page.on('pageerror', lambda err: errors.append(str(err)))
             await page.set_content(html)
@@ -118,12 +119,27 @@ async def main():
             await page.locator('[data-view=energy]').click()
             assert (await page.locator('#energy-form button[type=submit]').inner_text()) == 'Enregistrer'
             await page.screenshot(path='reports/energy_save_fr.png',full_page=True)
+            assert await page.locator('#energy-editor').is_hidden()
+            await page.locator('#add-energy').click()
+            assert await page.locator('#energy-editor').is_visible()
             await page.locator('#energy-form input[name=price_per_unit]').fill('2')
             await page.locator('#energy-form input[name=direct]').fill('2.7')
             await page.locator('#energy-form input[name=well_to_wheel]').fill('3.3')
             await page.locator('#energy-form input[name=source]').fill('Fixture de recette, non nationale')
             await page.locator('#energy-form button[type=submit]').click()
             await page.locator('#energy-table').get_by_text('2 EUR/L',exact=False).wait_for()
+            assert await page.locator('#energy-editor').is_hidden()
+            await page.locator('[data-energy-edit="DIESEL"]').click()
+            assert await page.locator('#energy-editor').is_visible()
+            assert await page.locator('#energy-code').is_disabled()
+            assert await page.locator('#energy-form input[name=price_per_unit]').input_value() == '2'
+            await page.locator('#energy-form input[name=price_per_unit]').fill('2.25')
+            await page.locator('#energy-form button[type=submit]').click()
+            await page.locator('#energy-table').get_by_text('2,25',exact=False).wait_for()
+            await page.locator('[data-energy-history="DIESEL"]').click()
+            await page.locator('#energy-history').get_by_text('v1',exact=False).wait_for()
+            await page.screenshot(path='reports/energy_table_fr.png',full_page=True)
+
 
             await page.locator('[data-view=vehicles]').click()
             await page.locator('#vehicle-form input[name=label]').fill('Bus diesel fictif')
@@ -161,7 +177,17 @@ async def main():
             await page.locator('#station-list').get_by_text('H₂ · Rouen').wait_for()
             assert await page.locator('.station-card').count() == 8
             assert await page.locator('#station-map-fallback').is_visible()
-            assert await check_clipping('station-map','station-filter')
+            assert await check_clipping('station-map','station-filter-h2')
+            assert await page.locator('#station-filter-h2').is_checked()
+            await page.locator('#station-filter-h2').uncheck()
+            assert await page.locator('.station-card').count() == 1
+            await page.locator('#station-filter-h2').check()
+            assert await page.locator('.station-card').count() == 8
+            await page.locator('#station-list .station-card').first.click()
+            assert await page.locator('#station-details').is_visible()
+            assert 'H₂' in await page.locator('#station-details').inner_text()
+
+            await page.screenshot(path='reports/stations_list_fr.png',full_page=True)
             await page.locator('#language-toggle').click()
             assert await page.locator('[data-i18n=stationTitle]').inner_text() == 'Stations in Normandy'
             assert 'Coach access' in await page.locator('.station-card').first.inner_text() or \

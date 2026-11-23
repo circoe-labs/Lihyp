@@ -77,6 +77,15 @@
       selectForScenario:'Choisir pour simuler', vehicleSource:'Provenance', savedVehicle:'Enregistré',
       internalHistoryNote:'Les anciens calculs conservent leurs données, même après modification.',
       energyHistoryNote:'Une modification du tarif n’altère pas les simulations déjà réalisées.',
+      addEnergy:'Ajouter une énergie', editEnergy:'Modifier une énergie', removeEnergy:'Retirer du catalogue',
+      archiveEnergyConfirm:'Retirer cette énergie du catalogue actif ? Les simulations précédentes resteront inchangées.',
+      archivedEnergy:'Énergie retirée du catalogue. Les anciennes simulations sont conservées.',
+      petrolBadge:'Essence',dieselBadge:'Gazole',stationListTitle:'Stations',
+      stationEnergy:'Énergies disponibles',stationPressure:'Pression annoncée',stationAvailability:'Disponibilité',
+      stationCompatibility:'Accès autocar',stationUnknown:'À confirmer',stationSource:'Source',
+      stationDetailsTitle:'Informations sur la station',stationChoose:'Afficher les détails',
+      stationNoPrice:'Aucun prix par station affiché.',stationNoData:'Aucune station pour ces filtres.',
+
       navRouting:'API de routage',compareHint:'Sélectionnez au moins deux véhicules. L’énergie et le prix national sont associés automatiquement.',
       selectAtLeastTwo:'Sélectionnez au moins deux véhicules différents à comparer.',
       missingEnergyOption:'Énergie non configurée',compareResultsTitle:'Comparaison des solutions',
@@ -178,6 +187,15 @@
       selectForScenario:'Use in simulation', vehicleSource:'Data source', savedVehicle:'Saved',
       internalHistoryNote:'Previous simulations keep their original values after edits.',
       energyHistoryNote:'Changing a price never alters previously saved simulations.',
+      addEnergy:'Add energy', editEnergy:'Edit energy', removeEnergy:'Remove from catalogue',
+      archiveEnergyConfirm:'Remove this energy from the active catalogue? Earlier simulations will remain unchanged.',
+      archivedEnergy:'Energy removed from the catalogue. Historical simulations are preserved.',
+      petrolBadge:'Petrol',dieselBadge:'Diesel',stationListTitle:'Stations',
+      stationEnergy:'Available fuels',stationPressure:'Reported pressure',stationAvailability:'Availability',
+      stationCompatibility:'Coach access',stationUnknown:'To be confirmed',stationSource:'Source',
+      stationDetailsTitle:'Station information',stationChoose:'Show details',
+      stationNoPrice:'No individual station prices displayed.',stationNoData:'No stations match these filters.',
+
       navRouting:'Routing API',compareHint:'Select at least two vehicles. Energy type and national price are matched automatically.',
       selectAtLeastTwo:'Select at least two different vehicles for the comparison.',
       missingEnergyOption:'Energy not configured',compareResultsTitle:'Transport options comparison',
@@ -253,7 +271,9 @@
     $('language-toggle').setAttribute('aria-label', language === 'fr' ? 'Switch to English' : 'Passer en français');
     const active = document.querySelector('.nav-item.active');
     $('page-title').textContent = t({scenarios:'navSimulations',stations:'navStations',vehicles:'navVehicles',energy:'navEnergy',routing:'navRouting'}[active?.dataset.view] || 'navSimulations');
-    renderEnergies(); renderVehicles(); renderScenarios(); renderRuns(); renderStations();
+    renderEnergies();
+    if (energyEditingCode) $('energy-editor-title').textContent=t('editEnergy');
+    renderVehicles(); renderScenarios(); renderRuns(); renderStations();
     fillScenarioSelects();
     if (currentRoute) renderRouteSummary(currentRoute);
     if (currentRun) showResult(currentRun, false);
@@ -321,32 +341,91 @@
     try { energies = await api('/energies'); renderEnergies(); fillScenarioSelects(); }
     catch (error) { message(error.message, true); }
   }
+  let energyEditingCode = null;
+  function energyName(code) {
+    return t(({DIESEL:'diesel',ELECTRIC:'electric',H2:'hydrogen'})[code] || 'energy');
+  }
+  function closeEnergyEditor() {
+    $('energy-editor').classList.add('hidden');
+    $('add-energy').setAttribute('aria-expanded','false');
+    energyEditingCode = null;
+    $('energy-code').disabled = false;
+  }
+  function openEnergyEditor(version=null) {
+    const form=$('energy-form'); form.reset();
+    energyEditingCode=version?.payload.energy_code || null;
+    const today = new Date().toISOString().slice(0,10);
+    form.elements.namedItem('source_date').value=today;
+    form.elements.namedItem('country_iso').value=$('energy-country-filter').value;
+    if (version) {
+      const p=version.payload;
+      for (const key of ['country_iso','energy_code','price_per_unit','source','source_date','license'])
+        form.elements.namedItem(key).value=p[key] ?? '';
+      form.elements.namedItem('direct').value=p.factors?.direct ?? '';
+      form.elements.namedItem('well_to_wheel').value=p.factors?.well_to_wheel ?? '';
+    }
+    $('energy-code').disabled=!!version;
+    $('energy-editor-title').textContent=t(version?'editEnergy':'energyFormTitle');
+    $('energy-editor').classList.remove('hidden');
+    $('add-energy').setAttribute('aria-expanded','true');
+    $('energy-editor').scrollIntoView({block:'nearest'});
+    form.elements.namedItem('price_per_unit').focus();
+  }
+  $('add-energy').addEventListener('click',()=>{
+    if (!$('energy-editor').classList.contains('hidden')) closeEnergyEditor();
+    else openEnergyEditor();
+  });
+  $('close-energy').addEventListener('click',closeEnergyEditor);
   function renderEnergies() {
     if (!$('energy-table')) return;
-    table($('energy-table'),[t('energy'),t('energyPrice'),t('factors'),t('actions')],energies.map(e => {
-      const p = e.payload;
-      return `<tr><td><strong>${esc(p.energy_code)}</strong><small>${esc(t('unverified'))}</small></td><td>${esc(p.price_per_unit)} EUR/${esc(p.unit)}</td><td>${esc(t('direct'))}: ${esc(p.factors.direct ?? '—')}<br>${esc(t('wtw'))}: ${esc(p.factors.well_to_wheel ?? '—')}</td><td><button class="table-action" data-energy-history="${esc(p.energy_code)}">${esc(t('history'))}</button></td></tr>`;
+    const rows=energies.filter(e=>e.payload.country_iso===$('energy-country-filter').value).map(e=> {
+      const p=e.payload,code=p.energy_code,unit=esc(p.unit);
+      const icon=({DIESEL:'⛽',ELECTRIC:'⚡',H2:'H₂'})[code]||'◉';
+      const srcUrl=safeUrl(p.source);
+      const source=srcUrl?`<a href="${esc(srcUrl)}" rel="noopener" target="_blank">${esc(p.source)}</a>`:esc(p.source);
+      return `<tr><td><span class="energy-name"><span class="energy-icon" aria-hidden="true">${icon}</span><span><strong>${esc(energyName(code))}</strong><small>${esc(t('unverified'))} · ${unit}</small></span></span></td>
+        <td><strong>${esc(number(Number(p.price_per_unit),2))}</strong> EUR/${unit}</td>
+        <td>${esc(p.factors.direct??'—')}</td><td>${esc(p.factors.well_to_wheel??'—')}</td>
+        <td>${source}<small>${esc(p.source_date)}</small></td>
+        <td><div class="energy-action-row"><button type="button" class="table-action" data-energy-edit="${esc(code)}">✎ ${esc(t('revise'))}</button>
+        <button type="button" class="table-action" data-energy-remove="${esc(code)}">× ${esc(t('removeEnergy'))}</button>
+        <button type="button" class="table-action" data-energy-history="${esc(code)}">${esc(t('history'))}</button></div></td></tr>`;
+    });
+    table($('energy-table'),[t('energy'),t('energyPrice'),t('directFactor'),t('wtwFactor'),t('source'),t('actions')],rows);
+    document.querySelectorAll('[data-energy-history]').forEach(b=>b.addEventListener('click',()=>loadEnergyHistory(b.dataset.energyHistory)));
+    document.querySelectorAll('[data-energy-edit]').forEach(b=>b.addEventListener('click',()=>{
+      const v=energies.find(v=>v.payload.energy_code===b.dataset.energyEdit);
+      if(v)openEnergyEditor(v);
     }));
-    document.querySelectorAll('[data-energy-history]').forEach(b => b.addEventListener('click', () => loadEnergyHistory(b.dataset.energyHistory)));
+    document.querySelectorAll('[data-energy-remove]').forEach(b=>b.addEventListener('click',async()=>{
+      const code=b.dataset.energyRemove;
+      if(!window.confirm(t('archiveEnergyConfirm')))return;
+      try{
+        await api(`/energies/${encodeURIComponent($('energy-country-filter').value)}/${encodeURIComponent(code)}/archive`,{method:'POST'});
+        closeEnergyEditor();await loadEnergies();message(t('archivedEnergy'));
+      }catch(error){message(error.message,true);}
+    }));
   }
+  $('energy-country-filter').addEventListener('change',renderEnergies);
   async function loadEnergyHistory(code) {
     energyHistoryCode = code;
     try {
-      const versions = await api(`/energies/FR/${encodeURIComponent(code)}/versions`);
+      const versions = await api(`/energies/${encodeURIComponent($('energy-country-filter').value)}/${encodeURIComponent(code)}/versions`);
       $('energy-history').innerHTML = `<h4>${esc(t('energyHistory'))} ${esc(code)}</h4><p>${esc(t('energyHistoryNote'))}</p><ul>${versions.map(v =>
         `<li>v${v.revision} · ${esc(v.payload.price_per_unit)} EUR/${esc(v.payload.unit)} · ${esc(v.payload.source)} · ${esc(v.created_at)}</li>`).join('')}</ul>`;
     } catch (error) { message(error.message, true); }
   }
   $('energy-form').addEventListener('submit', async event => {
-    event.preventDefault(); const d = dataOf(event.currentTarget), factors = {};
+    event.preventDefault(); const d=dataOf(event.currentTarget), factors = {};
     if (d.direct.trim()) factors.direct = d.direct.trim();
     if (d.well_to_wheel.trim()) factors.well_to_wheel = d.well_to_wheel.trim();
+    d.energy_code = energyEditingCode || d.energy_code;
     const unit = {DIESEL:'L',ELECTRIC:'kWh',H2:'kg'}[d.energy_code];
     try {
       await api('/energies', {method:'POST', body:JSON.stringify({country_iso:d.country_iso,
         energy_code:d.energy_code,unit,price_per_unit:d.price_per_unit, factors, source:d.source,
         source_date:d.source_date,license:d.license,quality:'unverified'})});
-      await loadEnergies(); message(t('createdVersion'));
+      closeEnergyEditor(); await loadEnergies(); message(t('createdVersion'));
     } catch(error) { message(error.message, true); }
   });
   $('reload-energy').addEventListener('click', loadEnergies);
@@ -723,7 +802,8 @@
     finally {stationLoading=false;}
   }
   $('reload-stations').addEventListener('click',loadStations);
-  $('station-filter').addEventListener('change',renderStations);
+  for(const id of ['station-filter-h2','station-filter-petrol','station-filter-diesel','station-filter-manual'])
+    $(id).addEventListener('change',renderStations);
   $('more-stations').addEventListener('click',async () => {
     if (!fuelPage?.has_more || stationLoading) return;
     stationLoading=true;
@@ -735,38 +815,101 @@
     } catch(error) { message(error.message,true); }
     finally { stationLoading=false; }
   });
+  const petrolCodes=new Set(['SP95','SP98','E10','E85','GPLc']);
+  let stationSelection=null;
+  let stationMarkers=new Map();
+  function stationHasDiesel(s){return s.category==='fuel' && (s.energy_codes||[]).includes('Gazole');}
+  function stationHasPetrol(s){return s.category==='fuel' && (s.energy_codes||[]).some(x=>petrolCodes.has(x));}
+  function stationVisible(s) {
+    if(s.category==='hydrogen') return $('station-filter-h2').checked;
+    if(s.category==='manual') return $('station-filter-manual').checked;
+    if(s.category!=='fuel')return false;
+    const fuels=s.energy_codes||[];
+    // Unknown fuel categories are shown when either fuel filter is enabled, not invented as both.
+    if(!fuels.length) return $('station-filter-petrol').checked||$('station-filter-diesel').checked;
+    return ($('station-filter-petrol').checked&&stationHasPetrol(s))||
+      ($('station-filter-diesel').checked&&stationHasDiesel(s));
+  }
+  function stationType(s) {
+    if(s.category==='hydrogen')return t('hydrogenBadge');
+    if(s.category==='manual')return t('manualBadge');
+    const kinds=[];
+    if(stationHasPetrol(s))kinds.push(t('petrolBadge'));
+    if(stationHasDiesel(s))kinds.push(t('dieselBadge'));
+    return kinds.join(' / ') || t('fuelBadge');
+  }
+  function stationPopupHtml(s) {
+    const url=safeUrl(s.source);
+    const fuelList=(s.energy_codes||[]).join(', ') || t('stationUnknown');
+    const pressure=s.category==='hydrogen'&&s.pressure_bar?`<p><strong>${esc(t('stationPressure'))}:</strong> ${esc(s.pressure_bar)} bar</p>`:'';
+    return `<div class="station-popup"><strong>${esc(s.name)}</strong>
+      <p>${esc(s.address||s.city||t('stationUnknown'))}</p>
+      <p><strong>${esc(t('stationEnergy'))}:</strong> ${esc(fuelList)}</p>${pressure}
+      <p><strong>${esc(t('stationCompatibility'))}:</strong> ${esc(t('stationUnknown'))}</p>
+      <p class="small">${esc(t('stationNoPrice'))}</p>
+      ${url?`<a href="${esc(url)}" target="_blank" rel="noopener">${esc(t('sourceLink'))} ↗</a>`:esc(s.source||'')}
+      </div>`;
+  }
+  function selectStation(id, openMap=true) {
+    stationSelection=id;
+    const s=[...h2Stations,...fuelStations,...customStations.map(normalizeManualStation)].find(x=>x.id===id);
+    if(!s)return;
+    document.querySelectorAll('[data-station-id]').forEach(el=>el.classList.toggle('active',el.dataset.stationId===id));
+    $('station-details').innerHTML=`<h4>${esc(t('stationDetailsTitle'))}</h4>${stationPopupHtml(s)}`;
+    $('station-details').classList.remove('hidden');
+    if(openMap&&stationsMap&&stationMarkers.has(id)) {
+      const marker=stationMarkers.get(id);
+      stationsMap.panTo(marker.getLatLng());marker.openPopup();
+    }
+  }
   function renderStations() {
     if (!$('station-list')) return;
-    const filter=$('station-filter').value;
     const all=[...h2Stations,...fuelStations,...customStations.map(normalizeManualStation)];
-    const filtered=all.filter(s=>filter==='all' ||
-      (filter==='h2' && s.category==='hydrogen') ||
-      (filter==='fuel' && s.category==='fuel') ||
-      (filter==='manual' && s.category==='manual'));
+    const filtered=all.filter(stationVisible);
+    $('station-count-h2').textContent=`(${all.filter(s=>s.category==='hydrogen').length})`;
+    $('station-count-petrol').textContent=`(${all.filter(stationHasPetrol).length})`;
+    $('station-count-diesel').textContent=`(${all.filter(stationHasDiesel).length})`;
+    $('station-count-manual').textContent=`(${all.filter(s=>s.category==='manual').length})`;
     $('station-counter').textContent=`${filtered.length} ${t('recordedLocations')}`;
+    $('station-list-count').textContent=filtered.length;
     $('station-data-status').textContent= fuelPage?.unavailable ? t('fuelUnavailable') :
       fuelPage?.has_more ? `${t('fuelPartial')} ${fuelStations.length}/${fuelPage.total}` : '';
-    $('more-stations').classList.toggle('hidden',!fuelPage?.has_more || filter==='h2' || filter==='manual');
-    $('station-list').innerHTML=filtered.map(s=> {
-      const label = t(s.category==='hydrogen'?'hydrogenBadge':s.category==='fuel'?'fuelBadge':'manualBadge');
-      const verified = s.category==='hydrogen' ? `${t('reportedOpen')} · ${esc(s.pressure_bar)} bar` : t('reportedListed');
-      const url=safeUrl(s.source);
-      return `<div class="station-card"><div><span class="station-type ${esc(s.category)}">${esc(label)}</span><strong>${esc(s.name)}</strong><small>${esc(s.address||`${s.latitude}, ${s.longitude}`)}</small><small>${esc(verified)}</small><small>${esc(s.category==='hydrogen'?t('h2Disclaimer'):s.category==='fuel'?t('fuelDisclaimer'):t('unverified'))}</small></div>${url?`<a href="${esc(url)}" target="_blank" rel="noopener" class="subtle-link">${esc(t('sourceLink'))} ↗</a>`:''}</div>`;
-    }).join('') || `<div class="empty-state">${esc(t('noData'))}</div>`;
+    $('more-stations').classList.toggle('hidden',!fuelPage?.has_more ||
+      (!$('station-filter-petrol').checked&&!$('station-filter-diesel').checked));
+    $('station-list').innerHTML=filtered.map(s=>`<button type="button" class="station-card${s.id===stationSelection?' active':''}" data-station-id="${esc(s.id)}" aria-label="${esc(t('stationChoose'))}: ${esc(s.name)}">
+        <span class="station-type ${esc(s.category)}">${esc(stationType(s))}</span>
+        <strong>${esc(s.name)}</strong><small>${esc(s.address||s.city||t('stationUnknown'))}</small>
+        <small>${esc(s.category==='hydrogen'?t('h2Disclaimer'):s.category==='fuel'?t('fuelDisclaimer'):t('unverified'))}</small>
+      </button>`).join('') || `<div class="empty-state">${esc(t('stationNoData'))}</div>`;
+    for(const b of $('station-list').querySelectorAll('[data-station-id]')) {
+      b.addEventListener('click',()=>selectStation(b.dataset.stationId));
+      b.addEventListener('mouseenter',()=>{
+        const m=stationMarkers.get(b.dataset.stationId);
+        if(m) { m.openTooltip();m.setStyle({weight:4}); }
+      });
+      b.addEventListener('mouseleave',()=>{const m=stationMarkers.get(b.dataset.stationId);if(m){m.closeTooltip();m.setStyle({weight:2});}});
+    }
+    if(stationSelection&&!filtered.some(s=>s.id===stationSelection)){
+      stationSelection=null;$('station-details').classList.add('hidden');
+    }else if(stationSelection)selectStation(stationSelection,false);
     if ($('view-stations').classList.contains('hidden')) return;
     if(!stationsMap) stationsMap=ensureMap('station-map');
     $('station-map-fallback').classList.toggle('hidden',!!stationsMap);
     $('station-map').classList.toggle('hidden', !stationsMap);
     if(!stationsMap) return;
-    stationDrawings.forEach(layer=>stationsMap.removeLayer(layer));stationDrawings=[];
+    stationDrawings.forEach(layer=>stationsMap.removeLayer(layer));stationDrawings=[];stationMarkers.clear();
     const positions=[];
     for(const s of filtered) {
       if(!Number.isFinite(Number(s.latitude)) || !Number.isFinite(Number(s.longitude))) continue;
       const point=[Number(s.latitude), Number(s.longitude)];
-      const marker=window.L.circleMarker(point,{radius:7,color:s.category==='hydrogen'?'#087e8b':s.category==='fuel'?'#d08a30':'#586577',weight:2,fillOpacity:.8})
-        .bindPopup(`<strong>${esc(s.name)}</strong><br>${esc(s.address)}`)
+      const marker=window.L.circleMarker(point,{radius:s.category==='hydrogen'?8:6,
+        color:s.category==='hydrogen'?'#087e8b':s.category==='fuel'?'#248455':'#586577',weight:2,fillOpacity:.8})
+        .bindPopup(stationPopupHtml(s))
+        .bindTooltip(esc(s.name),{direction:'top',offset:[0,-8]})
+        .on('mouseover',()=>marker.openPopup())
+        .on('click',()=>selectStation(s.id,false))
         .addTo(stationsMap);
-      stationDrawings.push(marker); positions.push(point);
+      stationDrawings.push(marker);stationMarkers.set(s.id,marker);positions.push(point);
     }
     requestAnimationFrame(() => {
       if (!stationsMap || $('view-stations').classList.contains('hidden')) return;

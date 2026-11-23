@@ -133,6 +133,11 @@ def create_app(db_path: str | Path | None = None, *, geocoder=None, routing_prov
     def add_energy(data: EnergyInput, actor: Actor, db: Db):
         return db.append_energy(data.model_dump(mode="json"), actor["id"])
 
+    @app.post("/energies/{country}/{code}/archive", status_code=204)
+    def archive_energy(country: str, code: str, actor: Actor, db: Db):
+        db.archive_energy(country, code, actor["id"])
+        return Response(status_code=204)
+
     @app.get("/vehicles")
     def vehicles(actor: Actor, db: Db):
         return db.list_vehicles()

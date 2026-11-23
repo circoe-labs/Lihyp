@@ -109,6 +109,28 @@ https://apidocs.geoapify.com/docs/routing/
 
 Voir `docs/multivehicule-et-api-routage.md` pour la recette, les API et les limites.
 
+## Tranche expérimentale : journée par autocar et plein sans attente (PR #4 complétée)
+
+Le comparatif propose maintenant des **tuiles par solution**, chacune avec les
+événements horodatés de ses véhicules. Le mode simple historique reste en place :
+il ne gagne **aucun trajet de retour fictif**. Cocher **« Planifier les rotations
+et les pleins de la journée »** active un planificateur indicatif sur une seule
+ligne et une seule journée. Ce mode recherche un réemploi des autocars, route les
+trajets retour séparément, et peut insérer une visite d'une station choisie sur la
+carte lorsque la réserve l'impose et que le débit est renseigné.
+
+**L'attente en station est toujours de zéro minute.** Le temps de remplissage
+est la quantité ajoutée divisée par le débit fourni, plus les manipulations
+facultatives. L'état énergétique, les minutes et km à vide, les coûts et les
+émissions sont conservés avec les données de source. **Ce n'est pas une
+optimisation certifiée**, et le choix d'une station ne prouve pas la compatibilité
+autocar ou la disponibilité réelle. Aucun temps de chauffeur réglementaire, recharge
+électrique, dépôt ou réseau multi-lignes n'est simulé. Si le heuristique ne trouve
+pas de solution, le résultat est **non résolu**, jamais « impossible prouvé ».
+
+Règles, tests et conditions de sortie :
+`docs/rotations-pleins-tuiles-journalieres.md`. La tâche 22 reste **partielle**.
+
 ## Parcours minimal testable
 
 1. Se connecter avec son compte.
@@ -158,8 +180,9 @@ silencieusement à la distance manuelle d'un scénario. Le profil `driving-hgv`
 ## Périmètre explicitement non livré
 
 Le moteur de service ne résout **pas** le problème de flotte complet : lignes
-multiples, mélange des véhicules, réemploi en rotations, multi-jours, dépôts,
-repositionnements, recharge et ravitaillement, import CSV/XLSX/GeoJSON, contraintes
+multiples, mélange des véhicules, réemploi/rotations optimisés, multi-jours, dépôts,
+repositionnements autres que ceux du mode journée, recharge et ravitaillement
+automatique multi-stations, import CSV/XLSX/GeoJSON, contraintes
 réglementaires, optimisation certifiée, scénarios de demande détaillée,
 optimisation multicritère, cartographie hors ligne et émissions ACV ne sont pas implémentées.
 La **comparaison de 2 à 8 modèles indépendants** est disponible, mais elle n'est

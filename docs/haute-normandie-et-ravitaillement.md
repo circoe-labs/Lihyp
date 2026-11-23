@@ -1,6 +1,6 @@
 # Haute-Normandie : annuaire des stations et futur calcul de ravitaillement
 
-**Statut :** correctif de carte et de recherche livré en PR ; **le planificateur avec plein en journée n'est pas encore implémenté**. Les données stations sont indicatives et ne valent pas preuve de compatibilité autocar.
+**Statut :** correctif de carte et de recherche livré en PR ; **un premier planning journalier opt-in (trajets retour, station choisie et plein sans attente) est disponible ; les autres niveaux du solveur restent à développer**. Les données stations sont indicatives et ne valent pas preuve de compatibilité autocar.
 
 ## Répertoire Haute-Normandie
 
@@ -11,22 +11,22 @@
 - Conformément à la décision métier Q19, aucun tarif individuel de station n'est envoyé au navigateur : les coûts du logiciel utilisent des **prix nationaux par énergie**, distincts des emplacements de stations.
 - Les repères H₂ sont issus d'un autre annuaire, non homologué ici pour les autocars ; ne pas utiliser les pressions/débits sans confirmation de l'exploitant.
 
-## Contrat métier du planificateur futur (tâche 22, **non livré dans cette PR**)
+## Contrat métier complet du planificateur (tâche 22, **partiellement couvert** dans cette PR)
 
-Les réponses métier verrouillées Q10 imposent trois stratégies : **régler automatiquement un besoin de plein**, **restreindre aux stations imposées**, ou **optimiser les arrêts**. Le moteur doit calculer un emploi du temps **par véhicule**, avec continuité du lieu et de l'énergie pendant la journée ; il doit pouvoir relancer le véhicule après son ravitaillement. Le prototype actuel `BaselineEngine` refuse tout `refuel_mode != no_refuel` et ne simule pas les rotations, le trajet retour ou la réutilisation d'un véhicule.
+Les réponses métier verrouillées Q10 imposent trois stratégies : **régler automatiquement un besoin de plein**, **restreindre aux stations imposées**, ou **optimiser les arrêts**. Le moteur doit calculer un emploi du temps **par véhicule**, avec continuité du lieu et de l'énergie pendant la journée ; il doit pouvoir relancer le véhicule après son ravitaillement. Le mode **simple** `BaselineEngine` conserve ce comportement. Le mode « Planifier la journée » utilise maintenant le planificateur heuristique décrit dans [`rotations-pleins-tuiles-journalieres.md`](rotations-pleins-tuiles-journalieres.md) pour une ligne, avec une station choisie et des jambes de route sourcées. Les trois politiques Q10 et l’optimisation complète ne sont pas livrées.
 
 Pour un ravitaillement, le plan doit déterminer :
 
 1. Heure et lieu de fin de service précédant le plein, énergie restante et réserve minimale.
 2. Station réellement **compatible** (type d'énergie, possibilité d'accès/autocar, horaires, pression/embout/débit, disponibilité et éventuelle capacité). Une station seulement **référencée** ne suffit pas pour prouver la faisabilité.
 3. Trajet **à vide** vers cette station et son temps routier, consommation et émissions associés.
-4. Approche/branchements, attente éventuelle en file, durée du remplissage calculée par quantité et débit (ou modèle de charge électrique avec courbe et limites) et durée de débranchement.
+4. Approche/branchements, **aucune attente en file (0 minute)**, durée du remplissage calculée par quantité et débit (ou modèle de charge électrique avec courbe et limites) et durée de débranchement.
 5. Trajet à vide de retour vers le point de reprise ; continuité des créneaux passagers et pauses réglementaires lorsqu'elles sont demandées et correctement paramétrées.
 6. Après reprise : voyages voyageurs possibles, énergie à bord, horaires de fin de service, coût global et bilan CO₂e. Un plein ne saurait rendre magiquement faisable une course qui ne peut atteindre aucune station avec sa réserve.
 
 **Durée du passage par la station :**
 
-`temps_plein = trajet_vers_station + attente + accès/branchements + quantité_à_remplir / débit + sortie/débranchements + trajet_reprise`.
+`temps_plein = trajet_vers_station + accès/branchements + quantité_à_remplir / débit + sortie/débranchements + trajet_reprise`, **attente = 0**.
 
 **Temps écoulé de la journée par véhicule :**
 
@@ -41,8 +41,8 @@ Les sorties attendues dans les tableaux et PDF sont : `trips`, `refuel_events`, 
 - Deux rotations avec un plein intermédiaire et reprise du service selon un planning faisable.
 - Station incompatible, fermée, inaccessible ou sans carburant : arrêt rejeté avec diagnostic.
 - Plein nécessaire mais aucune station accessible avant réserve : résultat non réalisable, jamais trajet fictif.
-- Temps de détour, de file et de remplissage variable, avec modification observable du planning, du TCO et des émissions.
+- Temps de détour et de remplissage variable (**aucune attente en file**), avec modification observable du planning, du TCO et des émissions.
 - Comparaison de véhicules à périmètres identiques et cohérence de l'énergie sur plusieurs jours ; limites réglementaires vérifiées à la source.
 - Données de stations figées par date/source pour chaque simulation reproductible ; mise à jour ultérieure ne modifie pas les anciens résultats.
 
-**Attention :** cette note est un contrat d'implémentation futur, pas une affirmation que les calculs ci-dessus sont opérationnels dans le moteur actuel.
+**Attention :** seul le sous-modèle mono-ligne volontairement limité est disponible en option. Les autres fonctionnalités décrites restent un contrat métier pour les travaux ultérieurs.

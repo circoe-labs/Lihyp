@@ -19,6 +19,7 @@ from simco2.api.schemas import (
     RoutePreviewInput, RouteResolveInput, RouteInput, ComparisonInput,
     RoutingConfigInput, RoutingKeyInput)
 from simco2.domain.engine import BaselineEngine
+from simco2.domain.service_day import schedule_day
 from simco2.domain.errors import DomainError, MissingReference, RoutingFailure
 from simco2.reporting import render_pdf
 
@@ -86,10 +87,10 @@ def create_app(db_path: str | Path | None = None, *, geocoder=None, routing_prov
         return {
             "ready_for_production": False,
             "implemented": ["user_login", "audit", "versioned_energy", "versioned_vehicle",
-                            "manual_stations", "single_line_snapshot", "baseline_fixed_consumption",
+                            "manual_stations", "single_line_snapshot", "limited_day_planner", "baseline_fixed_consumption",
                             "baseline_tco", "direct_and_wtw_co2e", "simple_report_pdf"],
             "not_implemented": ["multi_day", "network_optimizer", "mixed_fleet", "repositioning",
-                                "refuel", "charge", "regulatory_rules", "lifecycle_acv",
+                                "automatic_refuel_station_selection", "charge", "regulatory_rules", "lifecycle_acv",
                                 "jobs", "live_data_import", "map_dashboard"],
             "notice": "Les sources nationales/stations ne sont pas vérifiées, Q24 ouvert.",
         }
@@ -254,6 +255,43 @@ def create_app(db_path: str | Path | None = None, *, geocoder=None, routing_prov
         from simco2.api.schemas import ScenarioInput
         quote = db.get_route_quote(data.route_quote_id, actor["id"])
         energies = {e["energy_code"]: e for e in db.list_energies(data.country_iso)}
+        # Supplemental legs are routed once and frozen in all comparison snapshots.
+        # A mirrored distance is not a credible reverse itinerary.
+        day_legs = {}
+        day_station = (data.refuel_station.model_dump(mode="json")
+                       if data.day_plan and data.refuel_station else None)
+        if day_station:
+            day_station["quality"] = "user_selected_unverified"
+            day_station["station_operational_and_bus_access_verified"] = False
+        if data.day_plan:
+            origins = quote.get("origin_coordinates"), quote.get("destination_coordinates")
+            if not all(origins):
+                raise DomainError("day_route_coordinates_missing",
+                                  "Planification impossible sans coordonnees calculees cote serveur")
+            provider = active_router()
+            if provider is None:
+                raise RoutingFailure("provider_unconfigured", "Aucun fournisseur de routage")
+            from decimal import ROUND_HALF_UP
+            profile = quote.get("profile")
+            def frozen_leg(a, b, label):
+                result = provider.route(tuple(a), tuple(b), profile)
+                if (result.provider != quote.get("provider") or result.profile != profile
+                        or result.distance_m <= 0 or result.duration_s <= 0):
+                    raise RoutingFailure("mismatched_routing_provider",
+                                         "Routage retour/station incompatible avec le trajet initial")
+                return {"label": label, "distance_m": str(result.distance_m),
+                        "duration_s": str(result.duration_s), "provider": result.provider,
+                        "profile": result.profile, "valid_at": result.valid_at,
+                        "restrictions": list(result.restrictions)}
+            if any(data.passengers > db.get_vehicle(v)["payload"]["seats"]
+                   for v in data.vehicle_version_ids):
+                start_coordinates, end_coordinates = origins
+                day_legs["reverse"] = frozen_leg(end_coordinates, start_coordinates, "retour a vide")
+                if day_station:
+                    station_point = (day_station["longitude"], day_station["latitude"])
+                    day_legs["via_station"] = {
+                        "to_station": frozen_leg(end_coordinates, station_point, "detour station"),
+                        "from_station": frozen_leg(station_point, start_coordinates, "station vers origine")}
         entries = []
         for version_id in data.vehicle_version_ids:
             vehicle = db.get_vehicle(version_id)
@@ -275,17 +313,28 @@ def create_app(db_path: str | Path | None = None, *, geocoder=None, routing_prov
             check_references(scenario, db)
             scenario_doc = scenario.model_dump(mode="json", exclude={"route_quote_id"})
             scenario_doc["route"] = quote
+            if data.day_plan:
+                scenario_doc["schedule_mode"] = "single_line_day_greedy"
+                scenario_doc["refuel_mode"] = "imposed" if day_station else "no_refuel"
             revision_id = rid()
             snapshot = {
                 "scenario_revision_id": revision_id, "scenario_revision_number": 1,
                 "scenario": scenario_doc, "vehicle_version": vehicle,
                 "energy_version": energy, "routing_snapshot": quote,
-                "solver_version": engine.ENGINE_VERSION, "country": data.country_iso,
+                "day_legs": day_legs if data.day_plan else None,
+                "day_station": day_station,
+                "day_refuel_rates_per_min": {
+                    "DIESEL": data.diesel_flow_l_per_min,
+                    "H2": data.hydrogen_flow_kg_per_min,
+                } if data.day_plan else None,
+                "day_handling_minutes": data.handling_minutes if data.day_plan else None,
+                "solver_version": "single-line-day-v0.1" if data.day_plan else engine.ENGINE_VERSION,
+                "country": data.country_iso,
                 "timezone": "Europe/Paris",
                 "units": {"distance": "m", "time": "s", "money": "EUR", "co2e": "kgCO2e"},
                 "random_seed": None, "time_limit_seconds": None,
             }
-            result = engine.solve(snapshot).result
+            result = (schedule_day(snapshot) if data.day_plan else engine.solve(snapshot)).result
             entries.append({"scenario_id": rid(), "revision_id": revision_id,
                             "run_id": rid(), "scenario": scenario_doc,
                             "snapshot": snapshot, "result": result})
@@ -297,7 +346,16 @@ def create_app(db_path: str | Path | None = None, *, geocoder=None, routing_prov
             "emission_scope": data.emission_scope,
             "infrastructure_daily_eur": data.infrastructure_daily_eur,
             "vehicle_version_ids": list(data.vehicle_version_ids),
-            "comparison_kind": "independent_homogeneous_cases",
+            "comparison_kind": "independent_homogeneous_day_plans" if data.day_plan
+                               else "independent_homogeneous_cases",
+            "day_plan": data.day_plan,
+            "day_legs": day_legs if data.day_plan else None,
+            "day_station": day_station,
+            "day_refuel_rates_per_min": {
+                "DIESEL": data.diesel_flow_l_per_min,
+                "H2": data.hydrogen_flow_kg_per_min,
+            } if data.day_plan else None,
+            "day_handling_minutes": data.handling_minutes if data.day_plan else None,
             "optimality_proven": False,
         }
         return db.record_comparison(data.name, shared, entries, actor["id"])

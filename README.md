@@ -54,3 +54,7 @@ Stations en Normandie : filtres H₂/essence/gazole, carte + liste synchronisée
 La page **Stations en Normandie** propose désormais le secteur **Haute-Normandie (Eure 27 et Seine-Maritime 76)**, en plus de toute la région, avec chargement des stations essence/gazole depuis le flux officiel DGCCRF. Au survol d'un point, sa taille augmente et une fiche de renseignements apparaît ; le clic conserve la sélection. Les données restent indicatives, notamment pour l'accès autocar.
 
 La possibilité d'effectuer un plein pendant la journée puis de reprendre les rotations figure dans les décisions métier **Q10 et tâche 22**, **mais le moteur actuel ne la calcule pas encore**. Le détail des temps, détours, files, coûts, émissions et tests attendus est décrit dans `docs/haute-normandie-et-ravitaillement.md`.
+
+## Comparaison avec chronologie journalière (prototype PR #4)
+
+La comparaison dispose de **tuiles par véhicule** avec les heures de courses et, sur option, le retour à vide et le plein dans la journée (**attente station = 0**). Les distances/durées de détour sont demandées au serveur de routage ; l’utilisateur doit choisir une station et saisir un débit de remplissage, sans valeur inventée. Le calcul est heuristique et limité à une ligne et une journée ; la tâche 22 reste ouverte pour l’optimisation, les contraintes réelles et les modes multi-stations. Lire `docs/rotations-pleins-tuiles-journalieres.md`.

@@ -119,8 +119,8 @@ class EquipmentInput(StrictInput):
 
 class StationInput(StrictInput):
     name: str = Field(min_length=2, max_length=150)
-    longitude: float = Field(ge=-180, le=180)
-    latitude: float = Field(ge=-90, le=90)
+    longitude: float = Field(ge=-2.1, le=2.6)
+    latitude: float = Field(ge=48.0, le=50.5)
     access: Literal["public", "private", "restricted"]
     operational_status: Literal["unverified", "unavailable"] = "unverified"
     equipments: list[EquipmentInput] = Field(min_length=1)
@@ -216,6 +216,24 @@ class RouteResolveInput(StrictInput):
     profile: Literal["driving-car", "driving-hgv", "bus", "truck", "heavy_truck"] | None = None
 
 
+class DayStationInput(StrictInput):
+    """Indicative point selected by the user; not an access/availability certificate."""
+    id: str = Field(min_length=1, max_length=120)
+    name: str = Field(min_length=1, max_length=200)
+    longitude: float = Field(ge=-2.1, le=2.6)
+    latitude: float = Field(ge=48.0, le=50.5)
+    energy_codes: list[str] = Field(min_length=1, max_length=12)
+    source: str = Field(min_length=5, max_length=500)
+
+    @field_validator("energy_codes")
+    @classmethod
+    def known_codes(cls, values):
+        if any(code not in {"DIESEL", "H2", "ELECTRIC", "SP95", "SP98", "E10", "Gazole"}
+               for code in values):
+            raise ValueError("Code de station inconnu")
+        return ["DIESEL" if x == "Gazole" else x for x in values]
+
+
 class ComparisonInput(StrictInput):
     """Même demande et même route pour plusieurs modèles séparés (pas flotte mixte)."""
     name: str = Field(min_length=2, max_length=200)
@@ -230,6 +248,19 @@ class ComparisonInput(StrictInput):
     tco_scope: Literal["variable", "vehicle", "complete"] = "variable"
     emission_scope: Literal["direct", "well_to_wheel"] = "direct"
     infrastructure_daily_eur: str = "0"
+    day_plan: bool = False
+    refuel_station: DayStationInput | None = None
+    diesel_flow_l_per_min: str = "0"
+    hydrogen_flow_kg_per_min: str = "0"
+    handling_minutes: str = "0"
+
+    @field_validator("diesel_flow_l_per_min", "hydrogen_flow_kg_per_min", "handling_minutes")
+    @classmethod
+    def rate(cls, value):
+        parsed = require_decimal(value)
+        if len(parsed) > 24 or dec(parsed) > Decimal("100000"):
+            raise ValueError("Debit ou duree hors du perimetre du prototype")
+        return parsed
 
     @field_validator("vehicle_version_ids")
     @classmethod

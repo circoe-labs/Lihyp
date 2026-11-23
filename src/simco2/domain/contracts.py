@@ -14,6 +14,7 @@ class SolveStatus(StrEnum):
     INFEASIBLE_PROVEN = "infeasible_proven"
     TIMEOUT_WITH_INCUMBENT = "timeout_with_incumbent"
     TIMEOUT_NO_SOLUTION = "timeout_no_solution"
+    NO_SOLUTION_FOUND = "no_solution_found"
     INVALID_INPUT = "invalid_input"
     PROVIDER_ERROR = "provider_error"
 

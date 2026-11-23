@@ -15,12 +15,31 @@ from playwright.async_api import async_playwright
 from simco2.api.app import create_app
 
 from test_discovery_and_resolved_routing import FakeGeocoder, FakeRouter, FakeFuelDirectory
+from decimal import Decimal
+from simco2.domain.contracts import RouteResult
+
+
+class BrowserDayRouter(FakeRouter):
+    """Route fixtures for the day-planner browser flow (no external requests)."""
+    def route(self, origin, destination, profile):
+        legs={
+            ((1.099,49.443),(-0.362,49.183)):(120000,6300),
+            ((1.099,49.443),(0.1,49.1)):(15000,900),
+            ((0.1,49.1),(-0.362,49.183)):(50000,3600),
+        }
+        key=tuple(origin),tuple(destination)
+        if key not in legs:
+            return super().route(origin,destination,profile)
+        m,s=legs[key]
+        return RouteResult(Decimal(m),Decimal(s),profile,'osrm_demo','fake-day',
+            '2026-11-23T09:00:00Z',
+            geometry={'type':'LineString','coordinates':[list(origin),list(destination)]})
 
 
 async def main():
     with tempfile.TemporaryDirectory() as tmp:
         app = create_app(Path(tmp)/'web.db', geocoder=FakeGeocoder(),
-                         routing_provider=FakeRouter(), fuel_directory=FakeFuelDirectory())
+                         routing_provider=BrowserDayRouter(), fuel_directory=FakeFuelDirectory())
         app.state.db.create_user('admin', 'smoke-long-passphrase-123')
         client = TestClient(app)
         ui = Path(__file__).parents[1]/'src'/'simco2'/'ui'
@@ -157,7 +176,10 @@ async def main():
             assert 'kg' in await page.locator('#comparison-results').inner_text()
             assert await page.locator('#comparison-results tbody tr').count() == 2
             assert len(set(await page.locator('#comparison-results tbody tr td:nth-child(5)').all_inner_texts())) == 2
-            assert await page.locator('#comparison-results [data-compare-pdf]').count() == 2
+            assert await page.locator('#comparison-results .comparison-table [data-compare-pdf]').count() == 2
+            assert await page.locator('#comparison-results .day-solution-card').count() == 2
+            assert await page.locator('#comparison-results .day-bus').count() == 4
+            assert 'Course avec voyageurs' in await page.locator('#comparison-results').inner_text()
             await page.screenshot(path='reports/new_results_inline.png',full_page=True)
             await page.locator('[data-view=routing]').click()
             await page.locator('#routing-config-form').wait_for(state='visible')
@@ -191,6 +213,27 @@ async def main():
             await page.locator('#station-list .station-card').first.click()
             assert await page.locator('#station-details').is_visible()
             assert 'H₂' in await page.locator('#station-details').inner_text()
+            await page.locator('#use-station-day-plan').click()
+            assert await page.locator('#day-plan-enabled').is_checked()
+            assert await page.locator('#day-plan-details').is_visible()
+            assert 'Rouen' in await page.locator('#day-station-name').inner_text()
+            await page.locator('[data-view=stations]').click()
+            # Use the test fuel station to exercise real day events, not the H2 listing.
+            await page.locator('#station-list .station-card').last.click()
+            assert 'Station test' in await page.locator('#station-details').inner_text()
+            await page.locator('#use-station-day-plan').click()
+            await page.locator('#scenario-form input[name=passengers]').fill('140')
+            await page.locator('#day-plan-details input[name=diesel_flow_l_per_min]').fill('30')
+            await page.locator('#scenario-form .advanced-settings summary').click()
+            await page.locator('#scenario-form input[name=window_end]').fill('20:00')
+            await page.locator('#scenario-form input[name=max_vehicles]').fill('1')
+            await page.locator('#scenario-submit').click()
+            await page.wait_for_function("document.querySelectorAll('#comparison-results .day-solution-card').length === 2")
+            assert 'Ravitaillement' in await page.locator('#comparison-results').inner_text()
+            assert 'Attente en station: 0 min' in await page.locator('#comparison-results').inner_text() or \
+                   'Attente en station : 0 min' in await page.locator('#comparison-results').inner_text()
+            await page.screenshot(path='reports/day_plan_timeline_fr.png',full_page=True)
+            await page.locator('[data-view=stations]').click()
 
             await page.screenshot(path='reports/stations_list_fr.png',full_page=True)
             await page.locator('#language-toggle').click()

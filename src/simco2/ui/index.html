@@ -77,6 +77,20 @@
                 <p class="wide small muted" data-i18n="compareHint">Sélectionnez au moins deux modèles. Les prix et facteurs de chaque énergie proviennent du référentiel France.</p>
                 <div class="wide form-note hidden" id="catalogue-notice"></div>
                 <div class="wide compare-options" id="vehicle-compare-options" role="group" aria-label="Véhicules à comparer"></div>
+                <div class="wide day-planner-settings">
+                  <label class="day-plan-toggle"><input type="checkbox" name="day_plan" id="day-plan-enabled" /> <span data-i18n="dayPlanToggle">Planifier les rotations et les pleins de la journée (prototype)</span></label>
+                  <p class="small muted" data-i18n="dayPlanNotice">Calcule les trajets retour à vide et les arrêts éventuels. Fin de plage = fin du dernier trajet. Aucune attente à la station.</p>
+                  <div id="day-plan-details" class="day-plan-details hidden">
+                    <p class="small"><span data-i18n="selectedRefuelStation">Station choisie :</span> <strong id="day-station-name" data-i18n="noRefuelStation">Aucune. Sélectionnez un point dans Stations en Normandie si nécessaire.</strong></p>
+                    <div class="actions"><button type="button" class="button outline" id="day-plan-select-station" data-i18n="browseRefuelStations">Choisir une station sur la carte</button><button type="button" class="button outline" id="day-plan-remove-station" data-i18n="clearRefuelStation">Effacer la sélection</button></div>
+                    <div class="form-grid">
+                      <label><span data-i18n="dieselRate">Débit diesel (L/min, à renseigner)</span><input name="diesel_flow_l_per_min" value="0" inputmode="decimal" /></label>
+                      <label><span data-i18n="hydrogenRate">Débit hydrogène (kg/min, à renseigner)</span><input name="hydrogen_flow_kg_per_min" value="0" inputmode="decimal" /></label>
+                      <label><span data-i18n="handlingTime">Manipulation (minutes)</span><input name="handling_minutes" value="0" inputmode="decimal" /></label>
+                    </div>
+                    <p class="small muted" data-i18n="refuelNoQueue">Attente en station : 0 min. Les débits ne sont pas préremplis : fournissez des hypothèses documentées.</p>
+                  </div>
+                </div>
                 <details class="wide advanced-settings"><summary data-i18n="advancedSettings">Options avancées (facultatif)</summary><div class="form-grid">
                   <label><span data-i18n="windowStart">Départs de</span><input name="window_start" type="time" value="09:00" required /></label>
                   <label><span data-i18n="windowEnd">à</span><input name="window_end" type="time" value="11:00" required /></label>

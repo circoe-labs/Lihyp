@@ -24,3 +24,12 @@ La question 24 (visibilité et rangement des simulations entre utilisateurs) est
 ## Lot applicatif ajouté (2026-11-20)
 
 Un prototype local **exécutable mais non homologué** a été ajouté à ce paquet de transfert. Démarrage : `IMPLEMENTATION.md`; état de la recette, tâches acceptées et ouvertes : `reports/implementation-review.md`. Tous les critères du produit final ne sont **pas** livrés.
+
+## Nouvelle interface (23/11/2026)
+
+Navigation directe vers Simulations après connexion, estimation de trajet
+demandée à un fournisseur de routage, carte départ/arrivée, annuaire H₂ et
+stations-service de Normandie, commutateur **FR/EN**, PDF dans la simulation.
+Tout ceci reste un prototype non déployé en public et sans données nationales
+de prix ou d'émissions vérifiées. Lire `IMPLEMENTATION.md` et
+`docs/ux-routing-i18n-stations.md` avant utilisation.

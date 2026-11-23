@@ -167,3 +167,14 @@ CREATE TRIGGER IF NOT EXISTS coordinate_no_update BEFORE UPDATE ON station_coord
 BEGIN SELECT RAISE(ABORT, 'station coordinates are immutable'); END;
 CREATE TRIGGER IF NOT EXISTS coordinate_no_delete BEFORE DELETE ON station_coordinates
 BEGIN SELECT RAISE(ABORT, 'station coordinates are immutable'); END;
+
+-- Jeton de calcul routier lié à l'utilisateur, temporaire et non réutilisable
+-- comme preuve d'un itinéraire provenant d'un prestataire extérieur.
+CREATE TABLE IF NOT EXISTS route_quotes (
+  id TEXT PRIMARY KEY,
+  owner_id TEXT NOT NULL REFERENCES users(id),
+  payload_json TEXT NOT NULL,
+  expires_at TEXT NOT NULL,
+  created_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_route_quotes_owner ON route_quotes(owner_id, expires_at);

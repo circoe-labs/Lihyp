@@ -9,22 +9,36 @@ from fastapi.responses import HTMLResponse, Response, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from simco2.adapters.db import Database
-from simco2.adapters.routing import ORSRoutingProvider
+from simco2.adapters.routing import (ORSRoutingProvider, OSRMRoutingProvider,
+                                      GeoplatformGeocoder)
+from simco2.adapters.discovery import NORMANDY_H2, FuelStationDirectory, FUEL_SOURCE
 from simco2.api.schemas import (
     EnergyInput, VehicleInput, StationInput, ScenarioInput, LoginInput, RunInput,
-    RoutePreviewInput)
+    RoutePreviewInput, RouteResolveInput, RouteInput)
 from simco2.domain.engine import BaselineEngine
 from simco2.domain.errors import DomainError, MissingReference, RoutingFailure
 from simco2.reporting import render_pdf
 
 
-def create_app(db_path: str | Path | None = None) -> FastAPI:
+def create_app(db_path: str | Path | None = None, *, geocoder=None, routing_provider=None,
+               fuel_directory=None) -> FastAPI:
     app = FastAPI(title="SimCO2 — prototype de simulation transport voyageurs",
                   version="0.1.0", description="Prototype mono-ligne et données non vérifiées")
     db = Database(db_path or os.getenv("SIMCO2_DB_PATH", "./simco2.sqlite"))
     db.setup()
     app.state.db = db
     engine = BaselineEngine()
+    app.state.geocoder = geocoder if geocoder is not None else GeoplatformGeocoder()
+    app.state.fuel_directory = fuel_directory if fuel_directory is not None else FuelStationDirectory()
+    mode = os.getenv("SIMCO2_ROUTING_MODE", "demo").strip().lower()
+    if routing_provider is not None:
+        app.state.routing_provider = routing_provider
+    elif mode == "disabled":
+        app.state.routing_provider = None
+    elif mode == "ors" or (mode == "demo" and os.getenv("ORS_API_KEY")):
+        app.state.routing_provider = None if not os.getenv("ORS_API_KEY") else ORSRoutingProvider(os.environ["ORS_API_KEY"])
+    else:
+        app.state.routing_provider = OSRMRoutingProvider(os.getenv("SIMCO2_OSRM_URL"))
 
     @app.exception_handler(DomainError)
     async def handle_domain_error(request, exc: DomainError):
@@ -149,10 +163,18 @@ def create_app(db_path: str | Path | None = None) -> FastAPI:
     def scenarios(actor: Actor, db: Db):
         return db.list_scenarios(actor["id"])
 
+    def scenario_payload(data: ScenarioInput, actor: dict, db: Database) -> dict:
+        payload = data.model_dump(mode="json", exclude={"route_quote_id"})
+        if data.route_quote_id:
+            payload["route"] = db.get_route_quote(data.route_quote_id, actor["id"])
+        # En particulier, on n'accepte jamais un itinéraire externe forgé par le client.
+        RouteInput.model_validate(payload["route"])
+        return payload
+
     @app.post("/scenarios", status_code=201)
     def add_scenario(data: ScenarioInput, actor: Actor, db: Db):
         check_references(data, db)
-        return db.create_scenario(data.model_dump(mode="json"), actor["id"])
+        return db.create_scenario(scenario_payload(data, actor, db), actor["id"])
 
     @app.get("/scenarios/{scenario_id}")
     def scenario(scenario_id: str, actor: Actor, db: Db):
@@ -161,7 +183,7 @@ def create_app(db_path: str | Path | None = None) -> FastAPI:
     @app.post("/scenarios/{scenario_id}/revisions", status_code=201)
     def scenario_revision(scenario_id: str, data: ScenarioInput, actor: Actor, db: Db):
         check_references(data, db)
-        return db.append_scenario_revision(scenario_id, data.model_dump(mode="json"), actor["id"])
+        return db.append_scenario_revision(scenario_id, scenario_payload(data, actor, db), actor["id"])
 
     @app.get("/runs")
     def runs(actor: Actor, db: Db):
@@ -199,20 +221,67 @@ def create_app(db_path: str | Path | None = None) -> FastAPI:
         return db.get_run(run_id, actor["id"])["result"]
 
     @app.get("/runs/{run_id}/report.pdf")
-    def report(run_id: str, actor: Actor, db: Db):
+    def report(run_id: str, actor: Actor, db: Db, lang: str = "fr"):
+        if lang not in ("fr", "en"):
+            raise HTTPException(status_code=422, detail="Unsupported language")
         saved = db.get_run(run_id, actor["id"])
-        pdf = render_pdf(saved)
+        pdf = render_pdf(saved, lang=lang)
         return Response(content=pdf, media_type="application/pdf",
                         headers={"Content-Disposition": f'attachment; filename="simulation-{run_id}.pdf"'})
 
+    @app.get("/stations/discovery")
+    def station_discovery(actor: Actor, offset: int = 0, limit: int = 100):
+        if offset < 0 or offset > 10000 or not 1 <= limit <= 100:
+            raise HTTPException(status_code=422, detail="Pagination invalide")
+        fuel = app.state.fuel_directory.page(offset, limit)
+        return {"hydrogen": list(NORMANDY_H2), "fuel": fuel,
+                "coverage": "Normandie; carburants officiels paginés, H2 indicatif",
+                "warnings": ["Données à vérifier avant déplacement ou planification.",
+                             "Les stations H2 listées ne sont pas certifiées pour autocars.",
+                             "Aucun tarif par station n'est utilisé."],
+                "fuel_source": FUEL_SOURCE}
+
     @app.get("/routing/status")
     def routing_status(actor: Actor):
-        # Ne jamais exposer la cle du fournisseur.
-        return {"provider": "openrouteservice", "configured": bool(os.getenv("ORS_API_KEY")),
-                "note": "ORS à vérifier pour les limitations de gabarit/autocars."}
+        provider = app.state.routing_provider
+        return {"provider": "openrouteservice" if isinstance(provider, ORSRoutingProvider)
+                else "osrm_demo" if isinstance(provider, OSRMRoutingProvider) and provider.is_demo
+                else "osrm" if provider else "disabled",
+                "configured": bool(os.getenv("ORS_API_KEY")),
+                "available": provider is not None,
+                "prototype_only": isinstance(provider, OSRMRoutingProvider) and provider.is_demo,
+                "note": "Les profils routiers ne certifient pas les limitations d'autocars."}
+
+    @app.post("/routing/resolve")
+    def resolve_route(data: RouteResolveInput, actor: Actor, db: Db):
+        provider = app.state.routing_provider
+        if provider is None:
+            raise RoutingFailure("provider_unconfigured", "Routage non configuré sur le serveur")
+        start, start_label = app.state.geocoder.locate(data.origin)
+        stop, stop_label = app.state.geocoder.locate(data.destination)
+        route = provider.route(start, stop, data.profile)
+        if not route.geometry or route.geometry.get("type") != "LineString":
+            raise RoutingFailure("invalid_geometry", "Le fournisseur n'a pas fourni de tracé")
+        from decimal import ROUND_HALF_UP
+        distance = int(route.distance_m.to_integral_value(rounding=ROUND_HALF_UP))
+        duration = int(route.duration_s.to_integral_value(rounding=ROUND_HALF_UP))
+        if not distance or not duration:
+            raise RoutingFailure("invalid_result", "Distance ou durée calculée invalide")
+        payload = RouteInput.model_validate({
+            "origin": start_label, "destination": stop_label,
+            "distance_m": distance, "duration_s": duration,
+            "provider": route.provider, "source": "Routage automatique: " + route.provider,
+            "origin_coordinates": start, "destination_coordinates": stop,
+            "geometry": route.geometry, "valid_at": route.valid_at,
+            "profile": data.profile, "restrictions": list(route.restrictions),
+        }).model_dump(mode="json")
+        quote_id = db.save_route_quote(actor["id"], payload)
+        return {"quote_id": quote_id, "route": payload,
+                "expires_in_seconds": 1800}
 
     @app.post("/routing/preview")
     def route_preview(data: RoutePreviewInput, actor: Actor):
+        # Compatibilité de l'ancienne API, utile aux tests et aux outils experts.
         router = ORSRoutingProvider(os.getenv("ORS_API_KEY", ""))
         out = router.route(data.origin, data.destination, data.profile)
         return {"distance_m": str(out.distance_m), "duration_s": str(out.duration_s),

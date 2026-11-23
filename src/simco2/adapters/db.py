@@ -268,6 +268,25 @@ class Database:
                         self._version_row(prev) if prev else None, payload)
             return {"id": sid, "station_key": key, "revision": rev, "payload": payload}
 
+    def save_route_quote(self, actor: str, payload: dict) -> str:
+        """Un devis de route doit venir du serveur, pas d'un formulaire modifiable."""
+        qid = rid()
+        expires = (datetime.now(timezone.utc) + timedelta(minutes=30)).isoformat()
+        with self.session() as con:
+            con.execute("DELETE FROM route_quotes WHERE expires_at < ?", (utc_now(),))
+            con.execute("INSERT INTO route_quotes VALUES (?, ?, ?, ?, ?)",
+                        (qid, actor, jdump(payload), expires, utc_now()))
+        return qid
+
+    def get_route_quote(self, quote_id: str, actor: str) -> dict:
+        with self.session() as con:
+            row = con.execute("SELECT payload_json FROM route_quotes WHERE id=? "
+                              "AND owner_id=? AND expires_at>?",
+                              (quote_id, actor, utc_now())).fetchone()
+        if not row:
+            raise MissingReference("Itinéraire expiré ou non accessible : recalculer l'itinéraire")
+        return json.loads(row["payload_json"])
+
     def create_scenario(self, payload: dict, actor: str) -> dict:
         sid, rev_id = rid(), rid()
         with self.session() as con:

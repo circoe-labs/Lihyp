@@ -38,13 +38,13 @@
       consumptionHour:'Consommation / h',capacity:'Réservoir / batterie utile',reserve:'Réserve',advancedVehicle:'Coûts avancés (facultatif)',
       maintenance:'Maintenance EUR/km',labor:'Personnel EUR/h',purchase:'Acquisition EUR',residual:'Valeur résiduelle EUR',
       life:'Durée de vie (ans)',insurance:'Assurance EUR/an',saveVehicle:'Enregistrer le véhicule',cancel:'Annuler',
-      vehicleCatalog:'Catalogue de véhicules',energyIntro:"Un prix national par énergie, des facteurs d'émissions sourcés et versionnés. Aucun tarif par station.",
-      energyFormTitle:'Enregistrer un tarif et des facteurs',energyUnverified:'Les valeurs ne sont pas préremplies : les sources nationales et les périmètres doivent être validés.',
+      vehicleCatalog:'Solutions de transport',energyIntro:"Un prix national par énergie, avec des facteurs d’émissions et leurs sources. Aucun tarif par station.",
+      energyFormTitle:'Prix et facteurs d’émission',energyUnverified:'Les valeurs ne sont pas préremplies : les sources nationales et les périmètres doivent être validés.',
       country:'Pays',france:'France (FR)',nationalPrice:'Prix national EUR/unité',directFactor:'Facteur direct kgCO₂e/unité',
       wtwFactor:'Facteur puits-roue kgCO₂e/unité',optional:'facultatif',license:'Licence / droit de réutilisation',
-      saveEnergy:'Enregistrer une version',savedEnergies:'Énergies enregistrées',fuelSourceLink:'Source officielle des prix à la pompe (DGCCRF)',
+      saveEnergy:'Enregistrer',savedEnergies:'Énergies enregistrées',fuelSourceLink:'Source officielle des prix à la pompe (DGCCRF)',
       noData:'Aucune donnée. Commencez par créer une fiche.',unverified:'Non vérifié',revision:'Version',history:'Historique',
-      revise:'Réviser',view:'Voir',run:'Calculer',routeReady:'Itinéraire calculé',routeLoading:'Calcul de la route en cours…',
+      revise:'Modifier',view:'Voir',run:'Calculer',routeReady:'Itinéraire calculé',routeLoading:'Calcul de la route en cours…',
       routeRequired:"Calculez d'abord l'itinéraire pour obtenir une distance et une durée réelles.",
       routeStale:'Les lieux ont changé : recalculez l’itinéraire.',routeKilometers:'Distance routière',routeDuration:'Temps de route',
       demoRouting:'Démonstration OSRM : disponibilité non garantie, gabarit autocar non pris en compte.',
@@ -56,7 +56,7 @@
       passengers:'Voyageurs',consumption:'Consommation',technicalLimits:'Hypothèses et limites',
       noResult:'Aucun résultat disponible pour cette configuration.',downloadPDF:'Télécharger le PDF',
       energyPrice:'Prix national',factors:'Facteurs',direct:'Direct',wtw:'Puits-roue',energyHistory:'Historique de l’énergie',
-      modelLabel:'Modèle',createdVersion:'Version enregistrée',savedUnverified:'Station ajoutée (non vérifiée).',
+      modelLabel:'Modèle',createdVersion:'Enregistrement effectué',savedUnverified:'Station ajoutée (non vérifiée).',
       pastRuns:'Exécutions',when:'Date',actions:'Actions',hydrogenBadge:'Hydrogène',fuelBadge:'Station-service',manualBadge:'Manuelle',
       reportedOpen:'Signalée ouverte',reportedListed:'Référencée',sourceLink:'Voir la source',
       h2Disclaimer:'Véhicules légers / utilitaires recensés : autocars non confirmés',fuelDisclaimer:'Prix individuels volontairement masqués',
@@ -64,11 +64,19 @@
       fuelPartial:'Stations essence/gazole chargées par lots : cette carte ne constitue pas un inventaire exhaustif.',
       recordedLocations:'stations visibles',stationData:'Données',reportNotOptimal:'Optimisation non prouvée',
       infoRequired:'Renseignez les catalogues avant la simulation.',pdfError:'Le PDF n’a pas pu être téléchargé.',
-      failure:'Échec',loadError:'Impossible de charger les données',editVehicle:`Révision en cours : l'ancienne version reste conservée.`,
+      failure:'Échec',loadError:'Impossible de charger les données',editVehicle:`Modification du véhicule : les anciennes simulations restent inchangées.`,
       status_feasible_not_proven:'Faisable, optimum non prouvé',status_infeasible_proven:'Non réalisable',
       status_invalid_input:'Données invalides',status_provider_error:'Service de routage indisponible',
       routeExternalNotice:'Distance et temps issus du fournisseur de routage, enregistrés avec la simulation.',
       engineInFrench:'Certains diagnostics techniques sont conservés en français pour la traçabilité.',
+      demoBadge:'EXEMPLE FICTIF', demoName:'Autocar diesel de démonstration', demoMake:'Aucun constructeur',
+      demoModel:'Autocar générique', demoSource:'Jeu de données synthétique de démonstration, sans validation constructeur.',
+      demoDescription:'Pour illustrer les solutions possibles : données non vérifiées, à remplacer avant toute étude réelle.',
+      addDemo:'Ajouter cet exemple', demoAdded:'Autocar de démonstration ajouté au catalogue (valeurs fictives).',
+      availableSeats:'Places', consumption100:'Consommation / 100 km', tankSize:'Capacité utile',
+      selectForScenario:'Choisir pour simuler', vehicleSource:'Provenance', savedVehicle:'Enregistré',
+      internalHistoryNote:'Les anciens calculs conservent leurs données, même après modification.',
+      energyHistoryNote:'Une modification du tarif n’altère pas les simulations déjà réalisées.',
     },
     en: {
       loginKicker:'PASSENGER TRANSPORT SIMULATOR · PROTOTYPE',loginIntro:'Estimate costs and emissions for a passenger route using computed road distances.',
@@ -102,13 +110,13 @@
       consumptionHour:'Consumption / hour',capacity:'Usable tank / battery capacity',reserve:'Reserve',advancedVehicle:'Advanced costs (optional)',
       maintenance:'Maintenance EUR/km',labor:'Staff EUR/hour',purchase:'Purchase price EUR',residual:'Residual value EUR',
       life:'Lifetime (years)',insurance:'Insurance EUR/year',saveVehicle:'Save vehicle',cancel:'Cancel',
-      vehicleCatalog:'Vehicle catalogue',energyIntro:'One national price per energy type, with sourced, versioned emission factors. No station pricing.',
-      energyFormTitle:'Set price and emission factors',energyUnverified:'Values are not preloaded: national sources and emission boundaries must be validated.',
+      vehicleCatalog:'Transport options',energyIntro:'One national price per energy type, with sourced emission factors. No station pricing.',
+      energyFormTitle:'Price and emission factors',energyUnverified:'Values are not preloaded: national sources and emission boundaries must be validated.',
       country:'Country',france:'France (FR)',nationalPrice:'National price EUR/unit',directFactor:'Direct factor kgCO₂e/unit',
       wtwFactor:'Well-to-wheel factor kgCO₂e/unit',optional:'optional',license:'Licence / reuse rights',
-      saveEnergy:'Save version',savedEnergies:'Saved energies',fuelSourceLink:'Official fuel pump-price source (DGCCRF)',
+      saveEnergy:'Save',savedEnergies:'Saved energies',fuelSourceLink:'Official fuel pump-price source (DGCCRF)',
       noData:'No data yet. Create an entry to begin.',unverified:'Unverified',revision:'Version',history:'History',
-      revise:'Revise',view:'View',run:'Run',routeReady:'Route calculated',routeLoading:'Calculating road route…',
+      revise:'Edit',view:'View',run:'Run',routeReady:'Route calculated',routeLoading:'Calculating road route…',
       routeRequired:'Calculate the route first to get a real distance and duration.',
       routeStale:'The places changed: calculate the route again.',routeKilometers:'Road distance',routeDuration:'Travel time',
       demoRouting:'OSRM demo: uptime not guaranteed; coach size restrictions not applied.',
@@ -120,7 +128,7 @@
       passengers:'Passengers',consumption:'Consumption',technicalLimits:'Assumptions and limitations',
       noResult:'No results available for this setup.',downloadPDF:'Download PDF',
       energyPrice:'National price',factors:'Factors',direct:'Direct',wtw:'Well-to-wheel',energyHistory:'Energy version history',
-      modelLabel:'Model',createdVersion:'Version saved',savedUnverified:'Station added (unverified).',
+      modelLabel:'Model',createdVersion:'Saved successfully',savedUnverified:'Station added (unverified).',
       pastRuns:'Runs',when:'Date',actions:'Actions',hydrogenBadge:'Hydrogen',fuelBadge:'Filling station',manualBadge:'Manual',
       reportedOpen:'Reported open',reportedListed:'Listed',sourceLink:'View source',
       h2Disclaimer:'Light/utility vehicles listed; coach compatibility not confirmed',fuelDisclaimer:'Per-station prices deliberately hidden',
@@ -128,11 +136,19 @@
       fuelPartial:'Petrol/diesel stations are loaded in batches: this map is not a complete inventory.',
       recordedLocations:'stations shown',stationData:'Data',reportNotOptimal:'Optimality not proven',
       infoRequired:'Configure the catalogues before running a simulation.',pdfError:'Could not download the PDF.',
-      failure:'Failure',loadError:'Could not load data',editVehicle:'Editing a new version; the previous version is retained.',
+      failure:'Failure',loadError:'Could not load data',editVehicle:'Edit this vehicle. Past simulation results will remain unchanged.',
       status_feasible_not_proven:'Feasible; optimality not proven',status_infeasible_proven:'Infeasible',
       status_invalid_input:'Invalid input',status_provider_error:'Routing service unavailable',
       routeExternalNotice:'Distance and duration are supplied by the routing provider and saved with this simulation.',
       engineInFrench:'Some technical diagnostics are kept in French for traceability.',
+      demoBadge:'ILLUSTRATIVE EXAMPLE', demoName:'Demo diesel coach', demoMake:'No manufacturer',
+      demoModel:'Generic coach', demoSource:'Synthetic demonstration fixture, not validated by any manufacturer.',
+      demoDescription:'Shows how a solution is presented. Values are unverified and must be replaced for real studies.',
+      addDemo:'Add this example', demoAdded:'Demo coach added to catalogue (illustrative figures).',
+      availableSeats:'Seats', consumption100:'Consumption / 100 km', tankSize:'Usable capacity',
+      selectForScenario:'Use in simulation', vehicleSource:'Data source', savedVehicle:'Saved',
+      internalHistoryNote:'Previous simulations keep their original values after edits.',
+      energyHistoryNote:'Changing a price never alters previously saved simulations.',
     },
   };
   let language = 'fr';
@@ -198,7 +214,11 @@
     if (view === 'stations') loadStations();
     if (view === 'scenarios') { loadScenarios(); loadRuns(); }
     // Leaflet ne sait pas mesurer une carte initialisée dans une section masquée.
-    setTimeout(() => { if(view === 'stations') stationsMap?.invalidateSize(); if(view === 'scenarios') routeMap?.invalidateSize(); }, 0);
+    requestAnimationFrame(() => {
+      if (view === 'stations') stationsMap?.invalidateSize({pan:false});
+      if (view === 'scenarios' && !$('route-map-container').classList.contains('hidden'))
+        routeMap?.invalidateSize({pan:false});
+    });
   }
   document.querySelectorAll('.nav-item').forEach(el => el.addEventListener('click', () => show(el.dataset.view)));
   document.addEventListener('click', event => {
@@ -240,9 +260,9 @@
   }
   function renderEnergies() {
     if (!$('energy-table')) return;
-    table($('energy-table'),[t('energy'),t('energyPrice'),t('factors'),t('revision')],energies.map(e => {
+    table($('energy-table'),[t('energy'),t('energyPrice'),t('factors'),t('actions')],energies.map(e => {
       const p = e.payload;
-      return `<tr><td><strong>${esc(p.energy_code)}</strong><small>${esc(t('unverified'))}</small></td><td>${esc(p.price_per_unit)} EUR/${esc(p.unit)}</td><td>${esc(t('direct'))}: ${esc(p.factors.direct ?? '—')}<br>${esc(t('wtw'))}: ${esc(p.factors.well_to_wheel ?? '—')}</td><td>v${e.revision}<button class="table-action" data-energy-history="${esc(p.energy_code)}">${esc(t('history'))}</button></td></tr>`;
+      return `<tr><td><strong>${esc(p.energy_code)}</strong><small>${esc(t('unverified'))}</small></td><td>${esc(p.price_per_unit)} EUR/${esc(p.unit)}</td><td>${esc(t('direct'))}: ${esc(p.factors.direct ?? '—')}<br>${esc(t('wtw'))}: ${esc(p.factors.well_to_wheel ?? '—')}</td><td><button class="table-action" data-energy-history="${esc(p.energy_code)}">${esc(t('history'))}</button></td></tr>`;
     }));
     document.querySelectorAll('[data-energy-history]').forEach(b => b.addEventListener('click', () => loadEnergyHistory(b.dataset.energyHistory)));
   }
@@ -250,7 +270,7 @@
     energyHistoryCode = code;
     try {
       const versions = await api(`/energies/FR/${encodeURIComponent(code)}/versions`);
-      $('energy-history').innerHTML = `<h4>${esc(t('energyHistory'))} ${esc(code)}</h4><ul>${versions.map(v =>
+      $('energy-history').innerHTML = `<h4>${esc(t('energyHistory'))} ${esc(code)}</h4><p>${esc(t('energyHistoryNote'))}</p><ul>${versions.map(v =>
         `<li>v${v.revision} · ${esc(v.payload.price_per_unit)} EUR/${esc(v.payload.unit)} · ${esc(v.payload.source)} · ${esc(v.created_at)}</li>`).join('')}</ul>`;
     } catch (error) { message(error.message, true); }
   }
@@ -272,18 +292,74 @@
     try { vehicles = await api('/vehicles'); renderVehicles(); fillScenarioSelects(); }
     catch(error) { message(error.message, true); }
   }
+  // Clearly labelled synthetic example. It is a preview, not a manufacturer specification
+  // and is only stored after the user clicks the button (never on an implicit GET/login).
+  function demoCoach() {
+    return {
+      label:t('demoName'), manufacturer:t('demoMake'), model:t('demoModel'),
+      kind:'bus', seats:50, energy_code:'DIESEL', unit:'L',
+      consumption_per_km:'0.2', consumption_per_hour:'0', usable_capacity:'100', reserve:'5',
+      maintenance_eur_per_km:'0', labor_eur_per_h:'0', purchase_eur:'0', residual_eur:'0',
+      life_years:10, insurance_eur_year:'0', connectors:[],
+      source:t('demoSource'), quality:'unverified',
+    };
+  }
+  function solutionCard(p, vehicle=null) {
+    const isDemo = !vehicle;
+    const key = isDemo ? '' : esc(vehicle.id);
+    const energyName = t(({DIESEL:'diesel', ELECTRIC:'electric', H2:'hydrogen'})[p.energy_code] || 'diesel');
+    const c100 = number(Number(p.consumption_per_km) * 100, 1);
+    const badge = isDemo ? t('demoBadge') : t('unverified');
+    const specs = [
+      [t('availableSeats'), `${esc(p.seats)}`],
+      [t('consumption100'), `${esc(c100)} ${esc(p.unit)}/100 km`],
+      [t('tankSize'), `${esc(p.usable_capacity)} ${esc(p.unit)}`],
+    ];
+    const actions = isDemo
+      ? `<button type="button" class="button primary" id="add-demo-vehicle">${esc(t('addDemo'))}</button>`
+      : `<button type="button" class="button primary" data-vehicle-simulate="${key}">${esc(t('selectForScenario'))}</button>
+         <button type="button" class="button outline" data-vehicle-edit="${key}">${esc(t('revise'))}</button>
+         <button type="button" class="table-action" data-vehicle-history="${esc(vehicle.vehicle_key)}">${esc(t('history'))}</button>`;
+    return `<article class="solution-card${isDemo ? ' solution-demo' : ''}">
+       <header class="solution-header"><div><span class="solution-badge">${esc(badge)}</span>
+         <h4>${esc(p.label)}</h4><p class="small muted">${esc(p.manufacturer)} · ${esc(p.model)}</p></div>
+         <span class="solution-energy">${esc(energyName)}</span></header>
+       ${isDemo ? `<p class="solution-description">${esc(t('demoDescription'))}</p>` : ''}
+       <div class="solution-specs">${specs.map(([label,value]) =>
+         `<div><small>${esc(label)}</small><strong>${value}</strong></div>`).join('')}</div>
+       <p class="solution-source"><strong>${esc(t('vehicleSource'))} :</strong> ${esc(p.source)}</p>
+       <div class="solution-actions">${actions}</div>
+     </article>`;
+  }
   function renderVehicles() {
-    table($('vehicle-table'),[t('modelLabel'),t('seats'),t('energy'),t('revision')],vehicles.map(v => {
-      const p = v.payload;
-      return `<tr><td><strong>${esc(p.label)}</strong><small>${esc(p.manufacturer)} ${esc(p.model)}</small></td><td>${esc(p.seats)}</td><td>${esc(p.energy_code)}</td><td>v${v.revision}<button class="table-action" data-vehicle-edit="${esc(v.id)}">${esc(t('revise'))}</button><button class="table-action" data-vehicle-history="${esc(v.vehicle_key)}">${esc(t('history'))}</button></td></tr>`;
+    const node = $('vehicle-table');
+    node.classList.add('solution-list');
+    node.innerHTML = vehicles.length
+      ? vehicles.map(v => solutionCard(v.payload, v)).join('')
+      : solutionCard(demoCoach());
+    const addDemo = $('add-demo-vehicle');
+    if (addDemo) addDemo.addEventListener('click', async () => {
+      addDemo.disabled = true;
+      try {
+        await api('/vehicles', {method:'POST', body:JSON.stringify(demoCoach())});
+        await loadVehicles(); message(t('demoAdded'));
+      } catch (error) { message(error.message, true); addDemo.disabled = false; }
+    });
+    document.querySelectorAll('[data-vehicle-simulate]').forEach(b => b.addEventListener('click', () => {
+      show('scenarios'); fillScenarioSelects();
+      $('scenario-vehicle').value = b.dataset.vehicleSimulate; matchEnergy();
     }));
-    document.querySelectorAll('[data-vehicle-edit]').forEach(b => b.addEventListener('click', () => editVehicle(b.dataset.vehicleEdit)));
+    document.querySelectorAll('[data-vehicle-edit]').forEach(b =>
+      b.addEventListener('click', () => editVehicle(b.dataset.vehicleEdit)));
     document.querySelectorAll('[data-vehicle-history]').forEach(b => b.addEventListener('click', async () => {
-      try { const vs = await api(`/vehicles/${encodeURIComponent(b.dataset.vehicleHistory)}/versions`);
-        $('vehicle-history').innerHTML = `<ul>${vs.map(v => `<li>v${v.revision} · ${esc(v.payload.label)} · ${esc(v.created_at)}</li>`).join('')}</ul>`;
-      } catch(error) {message(error.message,true);}
+      try {
+        const vs = await api(`/vehicles/${encodeURIComponent(b.dataset.vehicleHistory)}/versions`);
+        $('vehicle-history').innerHTML = `<p>${esc(t('internalHistoryNote'))}</p><ul>${vs.map(v =>
+          `<li>v${v.revision} · ${esc(v.payload.label)} · ${esc(v.created_at)}</li>`).join('')}</ul>`;
+      } catch (error) { message(error.message, true); }
     }));
   }
+
   function editVehicle(id) {
     const v = vehicles.find(v => v.id === id); if (!v) return;
     editingVehicleKey = v.vehicle_key;
@@ -356,13 +432,34 @@
     if(route.provider === 'osrm_demo') node.innerHTML += `<p class="small warning-text">${esc(t('demoRouting'))}</p>`;
     node.classList.remove('hidden');
   }
+  // Map tiles are always clipped by locally served CSS, even if unpkg's CSS is
+  // blocked while its JS is available. Observe the size to handle hidden tabs,
+  // resize and the narrow desktop/mobile layouts without letting tiles escape.
+  const mapObserver = typeof ResizeObserver === 'function'
+    ? new ResizeObserver(entries => {
+        for (const entry of entries) {
+          const map = entry.target.id === 'route-map' ? routeMap : stationsMap;
+          if (map && entry.target.offsetWidth && entry.target.offsetHeight)
+            requestAnimationFrame(() => map.invalidateSize({pan:false}));
+        }
+      }) : null;
   function ensureMap(mapId) {
     if (typeof window.L === 'undefined') return null;
-    const map = window.L.map(mapId, {scrollWheelZoom:false});
-    window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-      maxZoom:18,attribution:'© OpenStreetMap contributors',crossOrigin:true,
-    }).addTo(map);
-    return map;
+    const node = $(mapId);
+    if (!node || !node.offsetWidth || !node.offsetHeight) return null;
+    try {
+      const map = window.L.map(mapId, {scrollWheelZoom:false});
+      window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom:18, attribution:'© OpenStreetMap contributors', crossOrigin:true,
+      }).addTo(map);
+      mapObserver?.observe(node);
+      return map;
+    } catch (error) {
+      // An unavailable or partially initialized mapping library must never
+      // break the rest of the form or mask buttons with loose tile layers.
+      node.replaceChildren();
+      return null;
+    }
   }
   function showRouteMap(route) {
     $('route-map-container').classList.remove('hidden');
@@ -375,13 +472,22 @@
     if (!start || !end || !route.geometry) return;
     const feature = window.L.geoJSON(route.geometry, {style:{color:'#0b7f8b',weight:5}}).addTo(routeMap);
     routeDrawings.push(feature);
-    for (const [point,label] of [[start,route.origin],[end,route.destination]]) {
-      routeDrawings.push(window.L.marker([point[1],point[0]]).bindPopup(esc(label)).addTo(routeMap));
+    for (const [i,[point,label]] of [[start,route.origin],[end,route.destination]].entries()) {
+      // SVG dots avoid external marker-image requests when the CDN is restricted.
+      routeDrawings.push(window.L.circleMarker([point[1],point[0]], {
+        radius:8, color:'#fff', weight:3,
+        fillColor:i === 0 ? '#087e8b' : '#ca8137', fillOpacity:1,
+      }).bindPopup(esc(label)).addTo(routeMap));
     }
-    routeMap.invalidateSize();
-    const bounds = feature.getBounds();
-    if(bounds.isValid()) routeMap.fitBounds(bounds.pad(0.14));
+    // Let the browser finish showing the container before measuring its pixels.
+    requestAnimationFrame(() => {
+      if (!routeMap || $('route-map-container').classList.contains('hidden')) return;
+      routeMap.invalidateSize({pan:false});
+      const bounds = feature.getBounds();
+      if(bounds.isValid()) routeMap.fitBounds(bounds.pad(0.14));
+    });
   }
+
   $('calculate-route').addEventListener('click',async () => {
     const origin = field($('scenario-form'), 'origin').trim();
     const destination = field($('scenario-form'), 'destination').trim();
@@ -554,9 +660,12 @@
         .addTo(stationsMap);
       stationDrawings.push(marker); positions.push(point);
     }
-    stationsMap.invalidateSize();
-    if (positions.length) stationsMap.fitBounds(window.L.latLngBounds(positions).pad(0.1),{maxZoom:11});
-    else stationsMap.setView([49.12,0.25],7);
+    requestAnimationFrame(() => {
+      if (!stationsMap || $('view-stations').classList.contains('hidden')) return;
+      stationsMap.invalidateSize({pan:false});
+      if (positions.length) stationsMap.fitBounds(window.L.latLngBounds(positions).pad(0.1),{maxZoom:11});
+      else stationsMap.setView([49.12,0.25],7);
+    });
   }
   $('station-form').addEventListener('submit',async event => {
     event.preventDefault();const d=dataOf(event.currentTarget);

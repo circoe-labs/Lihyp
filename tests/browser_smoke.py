@@ -38,6 +38,7 @@ async def main():
             errors = []
             page.on('pageerror', lambda err: errors.append(str(err)))
             await page.set_content(html)
+            await page.add_style_tag(content=(ui/'leaflet-layout.css').read_text(encoding='utf-8'))
             await page.add_style_tag(content=(ui/'style.css').read_text(encoding='utf-8'))
 
             async def bridge(source, url, method, headers, body):
@@ -76,13 +77,47 @@ async def main():
             await page.locator('#route-summary').wait_for(state='visible')
             assert '132.5 km' in await page.locator('#route-summary').inner_text()
             assert await page.locator('#route-map-fallback').is_visible()
+            # Reproduce the reported failure: Leaflet DOM present but its CDN CSS blocked.
+            # A deliberately oversized tile must not cover the vehicle form below the map.
+            async def check_clipping(map_id, outside_id):
+                return await page.evaluate('''([mapId, outsideId]) => {
+                  const el = document.getElementById(mapId);
+                  el.classList.remove('hidden'); el.classList.add('leaflet-container');
+                  el.innerHTML = '<div class="leaflet-pane leaflet-tile-pane">' +
+                    '<img class="leaflet-tile leaflet-tile-loaded" alt="" ' +
+                    'src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" ' +
+                    'style="width:3000px;height:3000px" /></div>';
+                  const tile=el.querySelector('.leaflet-tile');
+                  const target=document.getElementById(outsideId);
+                  const b=target.getBoundingClientRect();
+                  const node=document.elementFromPoint(b.left+10,b.top+10);
+                  const valid = getComputedStyle(el).overflow==='hidden' &&
+                    getComputedStyle(tile).position==='absolute' &&
+                    !node?.closest('.leaflet-container');
+                  el.replaceChildren();el.classList.remove('leaflet-container');
+                  el.classList.add('hidden');
+                  return valid;
+                }''', [map_id, outside_id])
+            assert await check_clipping('route-map','scenario-vehicle')
             await page.locator('#language-toggle').click()
             assert (await page.locator('[data-i18n=scenarioIntro]').inner_text()).startswith('Renseignez les lieux')
             assert await page.locator('#calculate-route').inner_text() == "Calculer l'itinéraire"
             (Path('reports')).mkdir(exist_ok=True)
             await page.screenshot(path='reports/new_simulations_fr.png',full_page=True)
 
+            await page.locator('[data-view=vehicles]').click()
+            assert await page.locator('#vehicle-table .solution-demo').is_visible()
+            assert 'EXEMPLE FICTIF' in await page.locator('#vehicle-table').inner_text()
+            assert '50' in await page.locator('#vehicle-table .solution-specs').inner_text()
+            await page.screenshot(path='reports/demo_catalogue_fr.png',full_page=True)
+            await page.locator('#add-demo-vehicle').click()
+            await page.locator('#vehicle-table .solution-demo').wait_for(state='detached')
+            assert 'Autocar diesel de démonstration' in await page.locator('#vehicle-table').inner_text()
+            assert await page.locator('#vehicle-table [data-vehicle-simulate]').count() == 1
+
             await page.locator('[data-view=energy]').click()
+            assert (await page.locator('#energy-form button[type=submit]').inner_text()) == 'Enregistrer'
+            await page.screenshot(path='reports/energy_save_fr.png',full_page=True)
             await page.locator('#energy-form input[name=price_per_unit]').fill('2')
             await page.locator('#energy-form input[name=direct]').fill('2.7')
             await page.locator('#energy-form input[name=well_to_wheel]').fill('3.3')
@@ -108,6 +143,7 @@ async def main():
             await page.locator('#station-list').get_by_text('H₂ · Rouen').wait_for()
             assert await page.locator('.station-card').count() == 8
             assert await page.locator('#station-map-fallback').is_visible()
+            assert await check_clipping('station-map','station-filter')
             await page.locator('#language-toggle').click()
             assert await page.locator('[data-i18n=stationTitle]').inner_text() == 'Stations in Normandy'
             assert 'Coach access' in await page.locator('.station-card').first.inner_text() or \

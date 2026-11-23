@@ -53,6 +53,27 @@ Configuration facultative pour un routage autre que la démonstration OSRM :
 `SIMCO2_ROUTING_PROVIDER=osrm` avec `SIMCO2_OSRM_URL` privé.
 **Ce prototype local n'est pas encore hébergé pour les utilisateurs externes.**
 
+
+## Correctif cartes et catalogue de démonstration (23 novembre 2026)
+
+- La feuille `/assets/leaflet-layout.css` est désormais servie localement : les cartes
+  d'itinéraire et de stations restent confinées à leur cadre, même si la feuille
+  Leaflet externe ne charge pas. Les tuiles et le script Leaflet demandent
+  toujours une connexion Internet ; le service de routage reste estimatif.
+- Dans **Véhicules**, un **autocar diesel fictif 50 places** est présenté dans le
+  catalogue vide (20 L/100 km, réservoir de 100 L). Cliquer sur **Ajouter cet exemple**
+  pour l'enregistrer volontairement ; aucun constructeur réel ou donnée nationale
+  validée n'est ainsi attribué à tort. Il pourra ensuite être sélectionné dans
+  les simulations après création d'une énergie compatible.
+- Dans **Énergies**, le bouton affiche **Enregistrer** et non **Enregistrer une version** ;
+  la protection de l'historique des anciennes simulations est inchangée.
+- Les tests navigateur reproduisent les tuiles débordantes **sans CSS CDN**.
+  Voir `docs/cartes-et-catalogue-exemple.md` pour les détails et la recette Windows.
+
+Pour actualiser un environnement local après fusion : `git pull origin main`, puis
+redémarrer Uvicorn. Si une ancienne page reste visible dans le navigateur,
+recharger sans cache avec `Ctrl+F5`.
+
 ## Parcours minimal testable
 
 1. Se connecter avec son compte.

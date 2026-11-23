@@ -175,14 +175,19 @@ async def main():
 
             await page.locator('[data-view=stations]').click()
             await page.locator('#station-list').get_by_text('H₂ · Rouen').wait_for()
-            assert await page.locator('.station-card').count() == 8
+            assert await page.locator('#station-area').input_value() == 'upper_normandy'
+            assert await page.locator('.station-card').count() == 6  # 5 H2 + one fictional fuel fixture
             assert await page.locator('#station-map-fallback').is_visible()
             assert await check_clipping('station-map','station-filter-h2')
             assert await page.locator('#station-filter-h2').is_checked()
             await page.locator('#station-filter-h2').uncheck()
             assert await page.locator('.station-card').count() == 1
             await page.locator('#station-filter-h2').check()
-            assert await page.locator('.station-card').count() == 8
+            assert await page.locator('.station-card').count() == 6
+            await page.locator('#station-area').select_option('normandy')
+            await page.wait_for_function("document.querySelectorAll('#station-list .station-card').length === 8")
+            await page.locator('#station-area').select_option('upper_normandy')
+            await page.wait_for_function("document.querySelectorAll('#station-list .station-card').length === 6")
             await page.locator('#station-list .station-card').first.click()
             assert await page.locator('#station-details').is_visible()
             assert 'H₂' in await page.locator('#station-details').inner_text()

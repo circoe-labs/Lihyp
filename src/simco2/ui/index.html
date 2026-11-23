@@ -111,6 +111,12 @@
           <div class="section-heading"><div><div class="eyebrow" data-i18n="stationKicker">RÉFÉRENTIELS GÉOGRAPHIQUES</div><h2 data-i18n="stationTitle">Stations en Normandie</h2><p data-i18n="stationIntro">Stations hydrogène répertoriées et stations essence/gazole issues de la DGCCRF. Informations indicatives, sans garantie d'accès pour les autocars.</p></div><button class="button outline" id="reload-stations" data-i18n="refresh">Actualiser</button></div>
           <article class="panel station-explorer">
             <div class="station-toolbar" role="group" aria-label="Filtres des stations">
+              <label class="station-area-field"><span data-i18n="stationArea">Secteur</span>
+                <select id="station-area" aria-label="Secteur géographique">
+                  <option value="upper_normandy" data-i18n="upperNormandy">Haute-Normandie (Eure 27, Seine-Maritime 76)</option>
+                  <option value="normandy" data-i18n="allNormandy">Toute la Normandie (5 départements)</option>
+                </select>
+              </label>
               <label class="station-filter-chip"><input type="checkbox" id="station-filter-h2" checked /><span data-i18n="hydrogenBadge">Hydrogène</span> <strong id="station-count-h2">(0)</strong></label>
               <label class="station-filter-chip"><input type="checkbox" id="station-filter-petrol" checked /><span data-i18n="petrolBadge">Essence</span> <strong id="station-count-petrol">(0)</strong></label>
               <label class="station-filter-chip"><input type="checkbox" id="station-filter-diesel" checked /><span data-i18n="dieselBadge">Gazole</span> <strong id="station-count-diesel">(0)</strong></label>

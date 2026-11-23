@@ -85,6 +85,10 @@
       stationCompatibility:'Accès autocar',stationUnknown:'À confirmer',stationSource:'Source',
       stationDetailsTitle:'Informations sur la station',stationChoose:'Afficher les détails',
       stationNoPrice:'Aucun prix par station affiché.',stationNoData:'Aucune station pour ces filtres.',
+      stationArea:'Secteur',upperNormandy:'Haute-Normandie (Eure 27, Seine-Maritime 76)',
+      allNormandy:'Toute la Normandie (5 départements)',stationLastUpdate:'Dernier relevé carburant déclaré',
+      stationHeavyLane:'Piste poids lourds déclarée',station24h:'Automate 24 h déclaré',
+      stationYes:'Oui',stationNo:'Non précisé',stationServices:'Services déclarés',
 
       navRouting:'API de routage',compareHint:'Sélectionnez au moins deux véhicules. L’énergie et le prix national sont associés automatiquement.',
       selectAtLeastTwo:'Sélectionnez au moins deux véhicules différents à comparer.',
@@ -195,6 +199,10 @@
       stationCompatibility:'Coach access',stationUnknown:'To be confirmed',stationSource:'Source',
       stationDetailsTitle:'Station information',stationChoose:'Show details',
       stationNoPrice:'No individual station prices displayed.',stationNoData:'No stations match these filters.',
+      stationArea:'Area',upperNormandy:'Upper Normandy (Eure 27, Seine-Maritime 76)',
+      allNormandy:'All Normandy (5 departments)',stationLastUpdate:'Latest reported fuel observation',
+      stationHeavyLane:'Reported heavy vehicle lane',station24h:'Reported 24h pump',
+      stationYes:'Yes',stationNo:'Not specified',stationServices:'Reported services',
 
       navRouting:'Routing API',compareHint:'Select at least two vehicles. Energy type and national price are matched automatically.',
       selectAtLeastTwo:'Select at least two different vehicles for the comparison.',
@@ -791,26 +799,49 @@
       latitude:Number(p.latitude),category:'manual',energy_codes:p.equipments.map(e=>e.energy_code),
       operational_status:'unverified',source:p.source,notice:t('stationCaution')};
   }
+  // First 100 places become visible immediately, then automatically fetch the other
+  // pages for the selected department scope. The page counter always refers to loaded
+  // data, never an invented region-wide number. Keep the manual load-more fallback.
   async function loadStations() {
     if (stationLoading) return;
     stationLoading = true;
+    const area = $('station-area').value;
     try {
-      const [manual,data] = await Promise.all([api('/stations'),api('/stations/discovery?offset=0&limit=100')]);
-      customStations=manual; h2Stations=data.hydrogen; fuelStations=data.fuel.stations;fuelPage=data.fuel;
+      const [manual,data] = await Promise.all([
+        api('/stations'), api(`/stations/discovery?area=${encodeURIComponent(area)}&offset=0&limit=100`),
+      ]);
+      customStations=manual; h2Stations=data.hydrogen;
+      fuelStations=data.fuel.stations; fuelPage=data.fuel;
+      stationSelection=null;$('station-details').classList.add('hidden');
+      renderStations();
+      let pages=0;
+      while (fuelPage.has_more && !fuelPage.unavailable && pages<9 && $('station-area').value===area) {
+        const nextOffset=fuelPage.offset+fuelPage.limit;
+        const next=await api(`/stations/discovery?area=${encodeURIComponent(area)}&offset=${nextOffset}&limit=100`);
+        if (next.fuel.unavailable) { fuelPage={...fuelPage,unavailable:true};break; }
+        fuelStations.push(...next.fuel.stations);fuelPage=next.fuel;pages++;
+        renderStations();
+      }
       renderStations();
     } catch(error) { message(error.message,true); }
-    finally {stationLoading=false;}
+    finally {
+      stationLoading=false;
+      if ($('station-area').value!==area) loadStations();
+    }
   }
   $('reload-stations').addEventListener('click',loadStations);
+  $('station-area').addEventListener('change',()=>loadStations());
   for(const id of ['station-filter-h2','station-filter-petrol','station-filter-diesel','station-filter-manual'])
     $(id).addEventListener('change',renderStations);
   $('more-stations').addEventListener('click',async () => {
     if (!fuelPage?.has_more || stationLoading) return;
     stationLoading=true;
     try {
-      const offset=fuelPage.offset + fuelPage.limit;
-      const data=await api(`/stations/discovery?offset=${offset}&limit=100`);
-      fuelStations.push(...data.fuel.stations); fuelPage=data.fuel;
+      const offset=fuelPage.offset+fuelPage.limit;
+      const area=$('station-area').value;
+      const data=await api(`/stations/discovery?area=${encodeURIComponent(area)}&offset=${offset}&limit=100`);
+      if (data.fuel.unavailable) fuelPage={...fuelPage,unavailable:true};
+      else { fuelStations.push(...data.fuel.stations);fuelPage=data.fuel; }
       renderStations();
     } catch(error) { message(error.message,true); }
     finally { stationLoading=false; }
@@ -826,7 +857,7 @@
     if(s.category!=='fuel')return false;
     const fuels=s.energy_codes||[];
     // Unknown fuel categories are shown when either fuel filter is enabled, not invented as both.
-    if(!fuels.length) return $('station-filter-petrol').checked||$('station-filter-diesel').checked;
+    if(!fuels.length) return false; // Never present an unknown fuel as petrol or diesel.
     return ($('station-filter-petrol').checked&&stationHasPetrol(s))||
       ($('station-filter-diesel').checked&&stationHasDiesel(s));
   }
@@ -842,24 +873,55 @@
     const url=safeUrl(s.source);
     const fuelList=(s.energy_codes||[]).join(', ') || t('stationUnknown');
     const pressure=s.category==='hydrogen'&&s.pressure_bar?`<p><strong>${esc(t('stationPressure'))}:</strong> ${esc(s.pressure_bar)} bar</p>`:'';
+    const lane=s.category==='fuel'&&s.heavy_vehicle_lane_reported
+      ? `<p><strong>${esc(t('stationHeavyLane'))}:</strong> ${esc(t('stationYes'))}</p>` : '';
+    const pump=s.category==='fuel'&&s.automatic_24h_reported
+      ? `<p><strong>${esc(t('station24h'))}:</strong> ${esc(t('stationYes'))}</p>` : '';
+    const update=s.source_updated_at?`<p><strong>${esc(t('stationLastUpdate'))}:</strong> ${esc(s.source_updated_at)}</p>`:'';
+    const services=Array.isArray(s.fuel_services)&&s.fuel_services.length
+      ? `<p><strong>${esc(t('stationServices'))}:</strong> ${esc(s.fuel_services.join(', '))}</p>` : '';
     return `<div class="station-popup"><strong>${esc(s.name)}</strong>
       <p>${esc(s.address||s.city||t('stationUnknown'))}</p>
-      <p><strong>${esc(t('stationEnergy'))}:</strong> ${esc(fuelList)}</p>${pressure}
+      <p><strong>${esc(t('stationEnergy'))}:</strong> ${esc(fuelList)}</p>${pressure}${lane}${pump}${update}${services}
       <p><strong>${esc(t('stationCompatibility'))}:</strong> ${esc(t('stationUnknown'))}</p>
       <p class="small">${esc(t('stationNoPrice'))}</p>
       ${url?`<a href="${esc(url)}" target="_blank" rel="noopener">${esc(t('sourceLink'))} ↗</a>`:esc(s.source||'')}
       </div>`;
   }
+  function baseMarkerRadius(marker) {
+    return marker.options.stationBaseRadius || 6;
+  }
+  function emphasizeMarker(id, openPopup=true) {
+    const marker=stationMarkers.get(id);
+    if (!marker) return;
+    marker.setRadius(baseMarkerRadius(marker)*1.7);
+    marker.setStyle({weight:4,fillOpacity:1});
+    marker.bringToFront();
+    if(openPopup) marker.openPopup();
+  }
+  function restoreMarker(id) {
+    const marker=stationMarkers.get(id);
+    if (!marker || id===stationSelection) return;
+    marker.setRadius(baseMarkerRadius(marker));
+    marker.setStyle({weight:2,fillOpacity:.8});
+    marker.closePopup();
+  }
   function selectStation(id, openMap=true) {
+    const previous=stationSelection;
     stationSelection=id;
+    if(previous && previous!==id) {
+      // A previously selected marker is no longer sticky after choosing another.
+      stationSelection=null;restoreMarker(previous);stationSelection=id;
+    }
     const s=[...h2Stations,...fuelStations,...customStations.map(normalizeManualStation)].find(x=>x.id===id);
     if(!s)return;
     document.querySelectorAll('[data-station-id]').forEach(el=>el.classList.toggle('active',el.dataset.stationId===id));
     $('station-details').innerHTML=`<h4>${esc(t('stationDetailsTitle'))}</h4>${stationPopupHtml(s)}`;
     $('station-details').classList.remove('hidden');
-    if(openMap&&stationsMap&&stationMarkers.has(id)) {
-      const marker=stationMarkers.get(id);
-      stationsMap.panTo(marker.getLatLng());marker.openPopup();
+    const marker=stationMarkers.get(id);
+    if(marker) {
+      if (openMap&&stationsMap) stationsMap.panTo(marker.getLatLng());
+      emphasizeMarker(id,true);
     }
   }
   function renderStations() {
@@ -883,11 +945,10 @@
       </button>`).join('') || `<div class="empty-state">${esc(t('stationNoData'))}</div>`;
     for(const b of $('station-list').querySelectorAll('[data-station-id]')) {
       b.addEventListener('click',()=>selectStation(b.dataset.stationId));
-      b.addEventListener('mouseenter',()=>{
-        const m=stationMarkers.get(b.dataset.stationId);
-        if(m) { m.openTooltip();m.setStyle({weight:4}); }
-      });
-      b.addEventListener('mouseleave',()=>{const m=stationMarkers.get(b.dataset.stationId);if(m){m.closeTooltip();m.setStyle({weight:2});}});
+      b.addEventListener('mouseenter',()=>emphasizeMarker(b.dataset.stationId,true));
+      b.addEventListener('mouseleave',()=>restoreMarker(b.dataset.stationId));
+      b.addEventListener('focus',()=>emphasizeMarker(b.dataset.stationId,true));
+      b.addEventListener('blur',()=>restoreMarker(b.dataset.stationId));
     }
     if(stationSelection&&!filtered.some(s=>s.id===stationSelection)){
       stationSelection=null;$('station-details').classList.add('hidden');
@@ -902,15 +963,17 @@
     for(const s of filtered) {
       if(!Number.isFinite(Number(s.latitude)) || !Number.isFinite(Number(s.longitude))) continue;
       const point=[Number(s.latitude), Number(s.longitude)];
-      const marker=window.L.circleMarker(point,{radius:s.category==='hydrogen'?8:6,
+      const radius=s.category==='hydrogen'?8:6;
+      const marker=window.L.circleMarker(point,{radius,stationBaseRadius:radius,
         color:s.category==='hydrogen'?'#087e8b':s.category==='fuel'?'#248455':'#586577',weight:2,fillOpacity:.8})
         .bindPopup(stationPopupHtml(s))
-        .bindTooltip(esc(s.name),{direction:'top',offset:[0,-8]})
-        .on('mouseover',()=>marker.openPopup())
+        .on('mouseover',()=>emphasizeMarker(s.id,true))
+        .on('mouseout',()=>restoreMarker(s.id))
         .on('click',()=>selectStation(s.id,false))
         .addTo(stationsMap);
       stationDrawings.push(marker);stationMarkers.set(s.id,marker);positions.push(point);
     }
+    if (stationSelection) emphasizeMarker(stationSelection,false);
     requestAnimationFrame(() => {
       if (!stationsMap || $('view-stations').classList.contains('hidden')) return;
       stationsMap.invalidateSize({pan:false});

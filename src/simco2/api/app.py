@@ -12,7 +12,8 @@ from simco2.adapters.db import Database, rid
 from simco2.adapters.routing import (ORSRoutingProvider, OSRMRoutingProvider,
                                       GeoplatformGeocoder)
 from simco2.adapters.routing_settings import RoutingSettings
-from simco2.adapters.discovery import NORMANDY_H2, FuelStationDirectory, FUEL_SOURCE
+from simco2.adapters.discovery import (NORMANDY_H2, FuelStationDirectory,
+                                        FUEL_SOURCE, AREA_DEPARTMENTS)
 from simco2.api.schemas import (
     EnergyInput, VehicleInput, StationInput, ScenarioInput, LoginInput, RunInput,
     RoutePreviewInput, RouteResolveInput, RouteInput, ComparisonInput,
@@ -310,12 +311,15 @@ def create_app(db_path: str | Path | None = None, *, geocoder=None, routing_prov
         return db.get_comparison(comparison_id, actor["id"])
 
     @app.get("/stations/discovery")
-    def station_discovery(actor: Actor, offset: int = 0, limit: int = 100):
-        if offset < 0 or offset > 10000 or not 1 <= limit <= 100:
-            raise HTTPException(status_code=422, detail="Pagination invalide")
-        fuel = app.state.fuel_directory.page(offset, limit)
-        return {"hydrogen": list(NORMANDY_H2), "fuel": fuel,
-                "coverage": "Normandie; carburants officiels paginés, H2 indicatif",
+    def station_discovery(actor: Actor, offset: int = 0, limit: int = 100,
+                          area: str = "normandy"):
+        if offset < 0 or offset > 10000 or not 1 <= limit <= 100 or area not in AREA_DEPARTMENTS:
+            raise HTTPException(status_code=422, detail="Zone ou pagination invalide")
+        fuel = app.state.fuel_directory.page(offset, limit, area=area)
+        hydrogen = [station for station in NORMANDY_H2
+                    if station.get("department_code") in AREA_DEPARTMENTS[area]]
+        return {"hydrogen": hydrogen, "fuel": fuel,
+                "coverage": "Eure et Seine-Maritime" if area == "upper_normandy" else "Normandie",
                 "warnings": ["Données à vérifier avant déplacement ou planification.",
                              "Les stations H2 listées ne sont pas certifiées pour autocars.",
                              "Aucun tarif par station n'est utilisé."],

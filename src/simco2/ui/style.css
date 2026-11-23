@@ -182,3 +182,11 @@
 .energy-editor .form-grid{margin-top:17px}
 @media(max-width:950px){.station-explorer-grid{grid-template-columns:1fr}.station-results .station-list{height:250px}}
 @media(max-width:690px){.station-explorer{padding:12px}.station-explorer-grid .station-map{height:310px}.energy-country{width:100%}.energy-country select{width:100%}.energy-toolbar .button{width:100%}}
+
+/* Department scope and accessible map-marker emphasis. */
+.station-area-field{display:flex!important;align-items:center!important;gap:9px!important;font-size:12px;font-weight:700;color:#234455}
+.station-area-field select{background:#fff;max-width:345px;min-width:230px;min-height:38px;border:1px solid #cedee5;border-radius:8px;padding:6px 10px;font-size:12px}
+.station-map .leaflet-interactive{transition:stroke-width .11s,fill-opacity .11s}
+.station-map .leaflet-popup-content{font-size:12px;line-height:1.45;max-width:300px;overflow-wrap:anywhere}
+.station-popup p{margin:6px 0}.station-popup strong{font-size:12px}
+@media(max-width:650px){.station-area-field{width:100%;flex-direction:column;align-items:flex-start!important}.station-area-field select{max-width:100%;min-width:0;width:100%}}

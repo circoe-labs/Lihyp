@@ -178,3 +178,29 @@ CREATE TABLE IF NOT EXISTS route_quotes (
   created_at TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_route_quotes_owner ON route_quotes(owner_id, expires_at);
+
+-- Groupes de comparaison : plusieurs configurations homogènes évaluées sur le même trajet.
+CREATE TABLE IF NOT EXISTS comparison_groups (
+  id TEXT PRIMARY KEY,
+  owner_id TEXT NOT NULL REFERENCES users(id),
+  name TEXT NOT NULL,
+  shared_json TEXT NOT NULL,
+  shared_sha256 TEXT NOT NULL,
+  created_at TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS comparison_members (
+  comparison_id TEXT NOT NULL REFERENCES comparison_groups(id),
+  run_id TEXT NOT NULL REFERENCES simulation_runs(id),
+  display_order INTEGER NOT NULL,
+  PRIMARY KEY(comparison_id, run_id),
+  UNIQUE(comparison_id, display_order)
+);
+CREATE INDEX IF NOT EXISTS ix_comparison_owner ON comparison_groups(owner_id, created_at);
+CREATE TRIGGER IF NOT EXISTS comparison_no_update BEFORE UPDATE ON comparison_groups
+BEGIN SELECT RAISE(ABORT, 'comparisons are immutable'); END;
+CREATE TRIGGER IF NOT EXISTS comparison_no_delete BEFORE DELETE ON comparison_groups
+BEGIN SELECT RAISE(ABORT, 'comparisons are immutable'); END;
+CREATE TRIGGER IF NOT EXISTS member_no_update BEFORE UPDATE ON comparison_members
+BEGIN SELECT RAISE(ABORT, 'comparison members are immutable'); END;
+CREATE TRIGGER IF NOT EXISTS member_no_delete BEFORE DELETE ON comparison_members
+BEGIN SELECT RAISE(ABORT, 'comparison members are immutable'); END;

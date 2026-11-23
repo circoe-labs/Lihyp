@@ -49,8 +49,9 @@ Voir `docs/ux-routing-i18n-stations.md` pour les fournisseurs, avertissements,
 conditions de réutilisation et prérequis de mise en ligne.
 
 Configuration facultative pour un routage autre que la démonstration OSRM :
-`SIMCO2_ROUTING_PROVIDER=ors` avec `ORS_API_KEY` côté serveur, ou
-`SIMCO2_ROUTING_PROVIDER=osrm` avec `SIMCO2_OSRM_URL` privé.
+`SIMCO2_ROUTING_MODE=geoapify` et `SIMCO2_GEOAPIFY_API_KEY`, ou
+`SIMCO2_ROUTING_MODE=ors` et `ORS_API_KEY` côté serveur. Un OSRM administré
+est disponible avec `SIMCO2_ROUTING_MODE=osrm` et `SIMCO2_OSRM_URL`.
 **Ce prototype local n'est pas encore hébergé pour les utilisateurs externes.**
 
 
@@ -74,13 +75,47 @@ Pour actualiser un environnement local après fusion : `git pull origin main`, p
 redémarrer Uvicorn. Si une ancienne page reste visible dans le navigateur,
 recharger sans cache avec `Ctrl+F5`.
 
+## Comparaisons et paramètres de routage (PR #2 complétée)
+
+La page Simulations évalue **2 à 8 modèles** sous les mêmes hypothèses : date,
+trajet calculé (devis serveur), demande, flotte maximale, périmètre TCO et CO₂e.
+Les prix/facteurs proviennent de la dernière version enregistrée du référentiel
+France correspondant à l'énergie du modèle. Si elle manque, le comparatif est
+refusé avec une explication, jamais chiffré avec un prix inventé. Chaque modèle
+est résolu **séparément** (pas de flotte mixte) et conserve son diagnostic,
+son PDF individuel et un snapshot SHA-256. Une solution irréalisable reste affichée.
+Les groupes sont consultables dans « Comparaisons enregistrées » ; un ancien
+résultat reste inchangé après modification des références.
+
+Dans **Paramètres > API de routage** : consulter le fournisseur, l'endpoint, le
+profil et les clés présentes (jamais la valeur), puis tester un itinéraire.
+En local, l'utilisateur **admin** sur l'interface loopback peut enregistrer une clé
+Geoapify ou ORS et choisir le fournisseur/profil. Les clés sont conservées
+**dans un fichier serveur hors dépôt** (`~/.simco2/routing-settings.json`), avec
+permissions restreintes sur POSIX, et non dans les données de simulation ou
+le stockage du navigateur. **Ce fichier est un stockage de confort local, pas un
+coffre-fort pour une application hébergée.** En production, fournir des variables
+d'environnement/secrets (jamais de clés dans Git), supprimer la gestion de clés
+par navigateur, et déployer l'authentification, les quotas, HTTPS et la supervision.
+Un compte externe ou une connexion non locale ne peut pas modifier ces paramètres.
+
+La sélection automatique privilégie Geoapify **si sa clé existe**, sinon ORS,
+puis OSRM public **à titre de démonstration uniquement**. Les profils Geoapify
+sont `bus` (autocar par défaut), `truck` (22 t) et `heavy_truck` (40 t) ; leurs
+restrictions dépendent des données cartographiques et ne prouvent pas la
+conformité locale. Les calculs de distance et de temps ne sont pas vérifiés en
+conditions réelles dans cette livraison (tests mockés). Source :
+https://apidocs.geoapify.com/docs/routing/
+
+Voir `docs/multivehicule-et-api-routage.md` pour la recette, les API et les limites.
+
 ## Parcours minimal testable
 
 1. Se connecter avec son compte.
 2. Dans « Énergies », enregistrer une hypothèse de prix et deux facteurs directs / puits-roue ; renseigner une source et une date. Ces valeurs sont **non vérifiées**.
 3. Ajouter un véhicule compatible (capacité, unité, consommation, réserve, origine de l'information).
-4. Créer un scénario d'une journée et d'une seule ligne, à distance/durée **manuelles**, préciser la demande, l'horizon de départ et le plafond de flotte.
-5. Lancer le calcul, inspecter les diagnostics et le statut `feasible_not_proven`, puis exporter son rapport PDF. Les valeurs des référentiels sont copiées dans un snapshot SHA-256.
+4. Dans « Simulations », saisir le départ, l'arrivée et les voyageurs, puis calculer le trajet avec le fournisseur configuré.
+5. Choisir **au moins deux véhicules** et lancer la comparaison de solutions indépendantes ; inspecter coût, CO₂e et faisabilité par véhicule, puis exporter le PDF propre à chacun. Les valeurs des référentiels sont copiées dans un snapshot SHA-256.
 
 **Fixture de recette synthétique (non officielle)** : 80 voyageurs, 50 places,
 100 000 m par course, 7 200 s, 0,2 L/km, 0 L/h, capacité 100 L,
@@ -126,7 +161,9 @@ Le moteur de service ne résout **pas** le problème de flotte complet : lignes
 multiples, mélange des véhicules, réemploi en rotations, multi-jours, dépôts,
 repositionnements, recharge et ravitaillement, import CSV/XLSX/GeoJSON, contraintes
 réglementaires, optimisation certifiée, scénarios de demande détaillée,
-comparaisons multicritères, cartes et émissions ACV ne sont pas implémentés.
+optimisation multicritère, cartographie hors ligne et émissions ACV ne sont pas implémentées.
+La **comparaison de 2 à 8 modèles indépendants** est disponible, mais elle n'est
+ni une flotte mixte ni une optimisation d'affectation.
 Les modes correspondants sont rejetés ou laissés indisponibles, **jamais annoncés
 comme optimisés ou vérifiés**. Les calculs TCO complet sont limités aux postes
 explicitement saisis. Le prix est unique par pays/énergie; aucun prix station n'existe.

@@ -33,3 +33,14 @@ stations-service de Normandie, commutateur **FR/EN**, PDF dans la simulation.
 Tout ceci reste un prototype non déployé en public et sans données nationales
 de prix ou d'émissions vérifiées. Lire `IMPLEMENTATION.md` et
 `docs/ux-routing-i18n-stations.md` avant utilisation.
+
+
+## Comparer des véhicules et configurer le routage (PR #2)
+
+La page **Simulations** permet désormais de comparer **2 à 8 véhicules** sur un
+même itinéraire, avec coûts, CO₂e, faisabilité et PDF par solution, sans
+optimisation de flotte mixte. L'onglet **Paramètres > API de routage** expose
+Geoapify (profil `bus` par défaut), les options `truck`/`heavy_truck`, ORS et
+le routage OSRM de démonstration. Seul l'exploitant connecté localement peut
+saisir/supprimer des clés dans l'interface ; en production, utiliser un
+système de secrets côté serveur. Lire `docs/multivehicule-et-api-routage.md`.

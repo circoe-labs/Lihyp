@@ -35,3 +35,13 @@ Le bouton des énergies affiche désormais **« Enregistrer »** (anglais **« S
 - `node --check src/simco2/ui/app.js` et `python -m compileall -q src`.
 
 La version reste un **prototype mono-ligne** : aucun fournisseur de routage ne garantit pour l'instant les contraintes d'un autocar ; les données stations et les facteurs nationaux ne sont pas certifiés.
+
+
+## Complément PR #2 : comparaison et paramètres de routage
+
+La simulation est désormais **comparative** : sélectionner au moins deux
+véhicules, lire côte à côte coût, CO₂e, consommation et faisabilité ; l'ancien
+résultat individuel n'est plus le mode principal de l'interface. Les cartes
+conservent les règles de confinement locales et le panneau du trajet est séparé
+des formulaires. Voir `docs/multivehicule-et-api-routage.md` pour l'API Geoapify
+et la gestion locale des secrets.

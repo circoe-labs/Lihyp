@@ -372,3 +372,64 @@ class Database:
             rows = con.execute("""SELECT id FROM simulation_runs WHERE owner_id=?
                 ORDER BY created_at DESC LIMIT 100""", (actor,)).fetchall()
         return [self.get_run(r["id"], actor) for r in rows]
+
+    def record_comparison(self, name: str, shared: dict, entries: list[dict], actor: str) -> dict:
+        """Persiste un groupe et tous ses runs d'un seul coup, ou rien du tout."""
+        cid = rid()
+        shared_json = jdump(shared)
+        digest = hashlib.sha256(shared_json.encode("utf-8")).hexdigest()
+        with self.session() as con:
+            con.execute("BEGIN IMMEDIATE")
+            con.execute("INSERT INTO comparison_groups VALUES (?, ?, ?, ?, ?, ?)",
+                        (cid, actor, name, shared_json, digest, utc_now()))
+            for i, item in enumerate(entries):
+                scenario_id, revision_id, run_id = (item[k] for k in (
+                    "scenario_id", "revision_id", "run_id"))
+                snapshot = item["snapshot"]
+                result = item["result"]
+                snap_json = jdump(snapshot)
+                snap_digest = hashlib.sha256(snap_json.encode("utf-8")).hexdigest()
+                con.execute("INSERT INTO scenarios VALUES (?, ?, ?, ?)",
+                            (scenario_id, actor, item["scenario"]["name"], utc_now()))
+                con.execute("INSERT INTO scenario_revisions VALUES (?, ?, 1, ?, ?, ?)",
+                            (revision_id, scenario_id, jdump(item["scenario"]), actor, utc_now()))
+                con.execute("INSERT INTO simulation_runs VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                            (run_id, revision_id, actor, snap_json, snap_digest,
+                             jdump(result), result["status"], utc_now()))
+                con.execute("INSERT INTO comparison_members VALUES (?, ?, ?)", (cid, run_id, i))
+                self._event(con, actor, "simulation_run", run_id, "compare", None,
+                            {"comparison_id": cid, "snapshot_sha256": snap_digest})
+            self._event(con, actor, "comparison", cid, "create", None,
+                        {"members": len(entries), "shared_sha256": digest})
+        return self.get_comparison(cid, actor)
+
+    def get_comparison(self, comparison_id: str, actor: str) -> dict:
+        with self.session() as con:
+            row = con.execute("SELECT * FROM comparison_groups WHERE id=? AND owner_id=?",
+                              (comparison_id, actor)).fetchone()
+            if not row:
+                raise MissingReference("Comparaison introuvable ou non accessible")
+            runs = con.execute("""SELECT r.*, m.display_order FROM comparison_members m
+                JOIN simulation_runs r ON r.id=m.run_id WHERE m.comparison_id=?
+                ORDER BY m.display_order""", (comparison_id,)).fetchall()
+            shared = json.loads(row["shared_json"])
+            results = []
+            for entry in runs:
+                snapshot = json.loads(entry["snapshot_json"])
+                results.append({"run_id": entry["id"], "snapshot_sha256": entry["snapshot_sha256"],
+                                "vehicle_version": snapshot["vehicle_version"],
+                                "energy_version": snapshot["energy_version"],
+                                "result": json.loads(entry["result_json"]),
+                                "status": entry["status"]})
+            return {"id": row["id"], "name": row["name"],
+                    "shared": shared, "shared_sha256": row["shared_sha256"],
+                    "created_at": row["created_at"], "entries": results,
+                    "notice": "Comparaison de cas indépendants, sans flotte mixte ni optimum certifié."}
+
+    def list_comparisons(self, actor: str) -> list[dict]:
+        with self.session() as con:
+            rows = con.execute("""SELECT c.id, c.name, c.created_at, COUNT(m.run_id) AS count
+                FROM comparison_groups c JOIN comparison_members m ON m.comparison_id=c.id
+                WHERE c.owner_id=? GROUP BY c.id ORDER BY c.created_at DESC LIMIT 100""",
+                (actor,)).fetchall()
+            return [dict(row) for row in rows]

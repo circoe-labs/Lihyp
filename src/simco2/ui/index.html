@@ -43,6 +43,7 @@
         <div class="sidebar-label compact" data-i18n="settings">PARAMÈTRES</div>
         <button class="nav-item" data-view="vehicles"><span>▣</span> <span data-i18n="navVehicles">Véhicules</span></button>
         <button class="nav-item" data-view="energy"><span>◉</span> <span data-i18n="navEnergy">Énergies par pays</span></button>
+        <button class="nav-item" data-view="routing"><span>⌁</span> <span data-i18n="navRouting">API de routage</span></button>
       </nav>
       <div class="sidebar-bottom">
         <div class="prototype-note" data-i18n="prototypeNotice">Prototype : 1 ligne, 1 jour, sans trajets retour ni ravitaillement. Les résultats ne sont pas un optimum prouvé.</div>
@@ -60,7 +61,7 @@
         <div class="notice-banner"><strong data-i18n="uncertified">Données de calcul non certifiées.</strong> <span data-i18n="globalNotice">Les prix et facteurs CO₂ sont des hypothèses à renseigner. Les stations répertoriées sont indicatives.</span></div>
 
         <section id="view-scenarios" class="view">
-          <div class="section-heading"><div><div class="eyebrow" data-i18n="scenarioKicker">NOUVELLE ÉTUDE</div><h2 data-i18n="scenarioTitle">Simuler une ligne</h2><p data-i18n="scenarioIntro">Renseignez les lieux et les voyageurs. Le logiciel calcule la distance, le temps et affiche le trajet sur une carte.</p></div></div>
+          <div class="section-heading"><div><div class="eyebrow" data-i18n="scenarioKicker">NOUVELLE ÉTUDE</div><h2 data-i18n="scenarioTitle">Comparer plusieurs véhicules</h2><p data-i18n="scenarioIntro">Un même trajet et une même demande pour comparer coûts, émissions et faisabilité de plusieurs solutions.</p></div></div>
           <div class="simulator-layout">
             <article class="panel">
               <form id="scenario-form" class="form-grid">
@@ -72,11 +73,10 @@
                 <label><span data-i18n="destination">Arrivée</span><input id="route-destination" name="destination" required value="Rouen" data-i18n-placeholder="destinationExample" placeholder="Ville ou adresse en France" /></label>
                 <div class="wide route-compute-row"><button class="button outline" type="button" id="calculate-route" data-i18n="calculateRoute">Calculer l'itinéraire</button><span id="route-status" class="small muted" role="status" aria-live="polite" data-i18n="routeNotReady">Distance et durée calculées automatiquement</span></div>
                 <div class="wide route-summary hidden" id="route-summary" aria-live="polite"></div>
-                <div class="wide route-map-container hidden" id="route-map-container"><div id="route-map" class="map-canvas" aria-label="Carte de l'itinéraire"></div><p class="map-fallback hidden" id="route-map-fallback" data-i18n="mapUnavailable">Carte indisponible hors ligne. Les lieux et distances restent affichés.</p><p class="map-attribution"><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a> · <span data-i18n="routingMapNotice">Trajet estimatif, accès autocar non garanti</span></p></div>
-                <div class="wide form-section-title"><span class="step-number">2</span> <h3 data-i18n="stepVehicle">Véhicule et énergie</h3></div>
+                <div class="wide form-section-title"><span class="step-number">2</span> <h3 data-i18n="stepVehicle">Solutions à comparer</h3></div>
+                <p class="wide small muted" data-i18n="compareHint">Sélectionnez au moins deux modèles. Les prix et facteurs de chaque énergie proviennent du référentiel France.</p>
                 <div class="wide form-note hidden" id="catalogue-notice"></div>
-                <label><span data-i18n="vehicle">Véhicule</span><select name="vehicle_version_id" id="scenario-vehicle" required></select></label>
-                <label><span data-i18n="energy">Énergie et tarif</span><select name="energy_version_id" id="scenario-energy" required></select></label>
+                <div class="wide compare-options" id="vehicle-compare-options" role="group" aria-label="Véhicules à comparer"></div>
                 <details class="wide advanced-settings"><summary data-i18n="advancedSettings">Options avancées (facultatif)</summary><div class="form-grid">
                   <label><span data-i18n="windowStart">Départs de</span><input name="window_start" type="time" value="09:00" required /></label>
                   <label><span data-i18n="windowEnd">à</span><input name="window_end" type="time" value="11:00" required /></label>
@@ -85,12 +85,25 @@
                   <label><span data-i18n="co2Scope">Périmètre émissions</span><select name="emission_scope"><option value="direct" data-i18n="co2Direct">Direct</option><option value="well_to_wheel" data-i18n="co2Wtw">Puits à la roue</option></select></label>
                   <label><span data-i18n="infrastructureCost">Infrastructure EUR/jour</span><input name="infrastructure_daily_eur" value="0" inputmode="decimal" required /></label>
                 </div></details>
-                <div class="wide actions"><button class="button primary large" type="submit" id="scenario-submit" data-i18n="runSimulation">Lancer la simulation</button></div>
+                <div class="wide actions"><button class="button primary large" type="submit" id="scenario-submit" data-i18n="runSimulation">Comparer les véhicules</button></div>
                 <p class="wide small muted" data-i18n="oneWayWarning">Calcul sur un trajet simple sans retour ni réemploi de véhicules. Le routage ne certifie pas les restrictions autocars.</p>
               </form>
             </article>
-            <div class="simulator-side"><article class="panel"><h3 data-i18n="mySimulations">Mes simulations</h3><div id="scenario-table" class="table-wrap"></div></article><article class="panel"><h3 data-i18n="myResults">Résultats précédents</h3><div id="runs-table" class="table-wrap"></div></article></div>
+            <div class="simulator-side">
+              <article class="panel route-map-container" id="route-map-container">
+                <div class="panel-head"><h3 data-i18n="routeMapTitle">Carte de l'itinéraire</h3><span class="subtle-tag" data-i18n="routeMapHint">Caen → Rouen</span></div>
+                <div id="route-map" class="map-canvas" aria-label="Carte de l'itinéraire"></div>
+                <p class="map-fallback hidden" id="route-map-fallback" data-i18n="mapUnavailable">Carte indisponible hors ligne. Les lieux et distances restent affichés.</p>
+                <p class="map-attribution"><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a> · <span data-i18n="routingMapNotice">Trajet estimatif, accès autocar non garanti</span></p>
+              </article>
+              <article class="panel"><h3 data-i18n="myComparisons">Comparaisons enregistrées</h3><div id="comparison-history" class="comparison-history"></div></article>
+              <details class="panel past-details"><summary data-i18n="previousRuns">Anciennes simulations individuelles</summary>
+                <h3 data-i18n="mySimulations">Mes simulations</h3><div id="scenario-table" class="table-wrap"></div>
+                <h3 data-i18n="myResults">Résultats précédents</h3><div id="runs-table" class="table-wrap"></div>
+              </details>
+            </div>
           </div>
+          <article id="comparison-results" class="panel result-panel hidden" aria-live="polite"></article>
           <div id="result-detail" class="panel result-panel hidden"></div>
         </section>
 
@@ -129,6 +142,39 @@
             <label class="wide"><span data-i18n="source">Source / méthode</span><input name="source" required value="Hypothèse utilisateur non vérifiée" /></label>
             <div class="wide actions"><button class="button primary" type="submit" id="vehicle-submit" data-i18n="saveVehicle">Enregistrer le véhicule</button><button class="button outline hidden" type="button" id="vehicle-cancel" data-i18n="cancel">Annuler</button></div>
           </form></article><article class="panel"><h3 data-i18n="vehicleCatalog">Catalogue de véhicules</h3><div id="vehicle-table" class="table-wrap"></div><div id="vehicle-history" class="history"></div></article></div>
+        </section>
+
+        <section id="view-routing" class="view hidden">
+          <div class="section-heading"><div><div class="eyebrow" data-i18n="settings">PARAMÈTRES</div><h2 data-i18n="routingSettingsTitle">API de routage</h2><p data-i18n="routingSettingsIntro">Choisissez le fournisseur de calcul des trajets. Les clés sont conservées côté serveur, jamais dans la simulation.</p></div><button class="button outline" type="button" id="reload-routing" data-i18n="refresh">Actualiser</button></div>
+          <article class="panel routing-panel">
+            <div class="panel-head"><div><h3 data-i18n="routingPanelTitle">Calcul d'itinéraire bus et camion</h3><p class="small muted" data-i18n="routingPanelHelp">Geoapify propose les profils bus, camion 22 t et poids lourd 40 t. Ces profils ne certifient pas toutes les restrictions locales.</p></div><span class="subtle-tag" id="routing-availability" role="status"></span></div>
+            <div class="routing-data-grid">
+              <span data-i18n="providerLabel">Fournisseur</span><strong id="routing-provider-label">—</strong>
+              <span data-i18n="profileLabel">Profil</span><strong id="routing-profile-label">—</strong>
+              <span data-i18n="endpointLabel">Endpoint</span><code id="routing-endpoint-label">—</code>
+              <span data-i18n="geoKeyStatus">Clé Geoapify</span><strong id="routing-geo-status">—</strong>
+              <span data-i18n="orsKeyStatus">Clé ORS</span><strong id="routing-ors-status">—</strong>
+            </div>
+            <form id="routing-config-form" class="form-grid routing-config-form">
+              <label><span data-i18n="providerLabel">Fournisseur</span><select name="provider" id="routing-provider" required><option value="geoapify">Geoapify</option><option value="ors">openrouteservice (ORS)</option><option value="osrm_demo">OSRM (démonstration)</option></select></label>
+              <label><span data-i18n="profileLabel">Profil</span><select name="profile" id="routing-profile" required></select></label>
+              <div class="wide actions"><button type="submit" class="button primary" data-i18n="save">Enregistrer</button></div>
+            </form>
+            <p class="small warning-text" data-i18n="routingCaution">Le profil bus est préférable pour les autocars, mais les dimensions, la réglementation et l'accès réel restent à vérifier.</p>
+          </article>
+          <div class="two-column routing-keys" id="routing-key-controls">
+            <article class="panel"><h3 data-i18n="geoapifyKeyTitle">Geoapify — bus / camion</h3><p class="small muted" data-i18n="geoapifyKeyDesc">Profil bus par défaut ; camion standard 22 t et lourd 40 t disponibles.</p>
+              <form id="geoapify-key-form"><label><span data-i18n="apiKeyLabel">Clé API (stockage serveur local)</span><input type="password" autocomplete="off" name="key" placeholder="Geoapify API key" required minlength="8" /></label><div class="actions"><button class="button primary" type="submit" data-i18n="saveKey">Enregistrer la clé</button><button class="button outline" type="button" id="remove-geoapify-key" data-i18n="removeKey">Supprimer</button><a href="https://myprojects.geoapify.com/" target="_blank" rel="noopener" class="api-provider-link" data-i18n="getGeoapifyKey">Obtenir une clé Geoapify</a></div></form>
+            </article>
+            <article class="panel"><h3 data-i18n="orsKeyTitle">openrouteservice (ORS)</h3><p class="small muted" data-i18n="orsKeyDesc">Routage de secours configurable. Profil camion disponible, limitations à vérifier.</p>
+              <form id="ors-key-form"><label><span data-i18n="apiKeyLabel">Clé API (stockage serveur local)</span><input type="password" autocomplete="off" name="key" placeholder="ORS API key" required minlength="8" /></label><div class="actions"><button class="button primary" type="submit" data-i18n="saveKey">Enregistrer la clé</button><button class="button outline" type="button" id="remove-ors-key" data-i18n="removeKey">Supprimer</button><a href="https://openrouteservice.org/dev/#/signup" target="_blank" rel="noopener" class="api-provider-link" data-i18n="getOrsKey">Obtenir une clé ORS</a></div></form>
+            </article>
+          </div>
+          <p id="routing-operator-notice" class="panel small muted hidden" data-i18n="routingOperatorNotice">La configuration des clés est réservée à l'exploitant connecté sur le serveur local. Pour une application hébergée, utiliser des variables d'environnement ou un coffre-fort de secrets.</p>
+          <article class="panel"><h3 data-i18n="routingTestTitle">Tester le routage</h3><p class="small muted" data-i18n="routingTestHint">Exemple : Lyon, quai DPL → quai Lafayette. Longitude, latitude pour chaque point.</p>
+            <form class="routing-test-form" id="routing-test-form"><label><span data-i18n="testStart">Départ (longitude, latitude)</span><input name="origin" value="4.829709,45.716793" required /></label><label><span data-i18n="testEnd">Arrivée (longitude, latitude)</span><input name="destination" value="4.838694,45.763575" required /></label><button class="button outline" type="submit" data-i18n="testRouting">Tester l'itinéraire</button></form><div id="routing-test-result" class="small" role="status"></div>
+          </article>
+          <p class="small muted" data-i18n="routingSecurityNote">Les clés ne sont jamais renvoyées par l'API. Leur sauvegarde via cette page est réservée au serveur local.</p>
         </section>
 
         <section id="view-energy" class="view hidden">

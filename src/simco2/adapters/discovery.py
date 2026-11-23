@@ -7,6 +7,7 @@ Aucun prix par station n'est exposé ou introduit dans les calculs (Q19).
 from __future__ import annotations
 
 from datetime import datetime, timezone
+import re
 from threading import Lock
 from time import monotonic
 
@@ -18,6 +19,11 @@ FUEL_SOURCE = (
     "https://data.economie.gouv.fr/explore/dataset/"
     "prix-des-carburants-en-france-flux-instantane-v2/"
 )
+AREA_DEPARTMENTS = {
+    "normandy": frozenset({"14", "27", "50", "61", "76"}),
+    "upper_normandy": frozenset({"27", "76"}),
+}
+
 FUEL_API = (
     "https://data.economie.gouv.fr/api/explore/v2.1/catalog/datasets/"
     "prix-des-carburants-en-france-flux-instantane-v2/records"
@@ -26,9 +32,12 @@ FUEL_API = (
 
 def h2_station(city: str, address: str, lon: float, lat: float,
                pressure: str, detail: str) -> dict:
+    postal = re.search(r"\b(\d{5})\b", address)
+    department = postal.group(1)[:2] if postal else None
     return {
         "id": "h2-" + city.lower().replace(" ", "-"), "name": f"H₂ · {city}",
         "city": city, "address": address, "longitude": lon, "latitude": lat,
+        "department_code": department,
         "energy_codes": ["H2"], "category": "hydrogen", "pressure_bar": pressure,
         "access_reported": "public", "operational_status": "listed_open_unverified",
         "bus_compatibility": "not_confirmed", "vehicle_types_reported": ["light", "utility"],
@@ -66,9 +75,12 @@ def _coordinate(value):
     return number / 100000 if abs(number) > 180 else number
 
 
-def normalize_fuel_station(record: dict) -> dict | None:
+def normalize_fuel_station(record: dict, *, area: str = "normandy") -> dict | None:
     """Ne pas laisser une station hors Normandie fuiter depuis une réponse externe."""
-    if record.get("code_departement") not in {"14", "27", "50", "61", "76"}:
+    if area not in AREA_DEPARTMENTS:
+        raise ValueError("Unknown station area")
+    department = str(record.get("code_departement", ""))
+    if department not in AREA_DEPARTMENTS[area]:
         return None
     try:
         lat = _coordinate(record["latitude"])
@@ -86,14 +98,23 @@ def normalize_fuel_station(record: dict) -> dict | None:
     address = ", ".join(str(x) for x in (
         record.get("adresse"), record.get("cp"), record.get("ville")) if x)
     name = str(record.get("ville") or "Station-service")
+    services = record.get("services_service") or []
+    if not isinstance(services, list):
+        services = []
+    services = [str(service) for service in services if isinstance(service, str)][:16]
+    last_updated = max((str(record.get(f"{fuel}_maj")) for fuel in
+                        ("gazole", "sp95", "sp98", "e10", "e85", "gplc")
+                        if record.get(f"{fuel}_maj")), default=None)
     return {
         "id": f"fuel-{record.get('id')}", "name": f"Station-service · {name}",
         "city": name, "address": address + ", France", "longitude": lon,
+        "department_code": department, "source_updated_at": last_updated,
+        "fuel_services": services,
+        "automatic_24h_reported": record.get("horaires_automate_24_24") == "Oui",
         "latitude": lat, "category": "fuel", "energy_codes": fuels,
         "access_reported": "published", "operational_status": "listed_unverified",
         "bus_compatibility": "not_confirmed",
-        "heavy_vehicle_lane_reported": "Piste poids lourds" in (
-            record.get("services_service") or []),
+        "heavy_vehicle_lane_reported": "Piste poids lourds" in services,
         "source": FUEL_SOURCE, "license": "Licence Ouverte v2.0 (Etalab)",
         "notice": "Référencé par la DGCCRF ; horaires et accès autocar à vérifier",
     }
@@ -104,26 +125,31 @@ class FuelStationDirectory:
     def __init__(self, client: httpx.Client | None = None, cache_seconds: int = 900):
         self.client = client or httpx.Client(timeout=12, follow_redirects=False)
         self.cache_seconds = cache_seconds
-        self._cache: dict[tuple[int, int], tuple[float, dict]] = {}
+        self._cache: dict[tuple[str, int, int], tuple[float, dict]] = {}
         self._lock = Lock()
 
-    def page(self, offset: int = 0, limit: int = 100) -> dict:
+    def page(self, offset: int = 0, limit: int = 100, area: str = "normandy") -> dict:
         if offset < 0 or offset > 10000 or not 1 <= limit <= 100:
             raise ValueError("Invalid pagination")
-        key = offset, limit
+        if area not in AREA_DEPARTMENTS:
+            raise ValueError("Unknown station area")
+        key = area, offset, limit
         with self._lock:
             cached = self._cache.get(key)
             if cached and cached[0] > monotonic():
                 return cached[1]
         result = {
             "stations": [], "total": 0, "offset": offset, "limit": limit,
+            "area": area,
             "has_more": False, "source": FUEL_SOURCE,
             "retrieved_at": datetime.now(timezone.utc).isoformat(),
             "unavailable": False,
         }
         try:
+            where = ('code_departement="27" OR code_departement="76"'
+                     if area == "upper_normandy" else 'region="Normandie"')
             response = self.client.get(FUEL_API, params={
-                "where": 'region="Normandie"', "limit": limit, "offset": offset,
+                "where": where, "limit": limit, "offset": offset,
                 "order_by": "id",
             })
             response.raise_for_status()
@@ -132,7 +158,7 @@ class FuelStationDirectory:
             if not isinstance(rows, list):
                 raise ValueError("Invalid station payload")
             result["stations"] = [item for row in rows
-                                  if (item := normalize_fuel_station(row)) is not None]
+                                  if (item := normalize_fuel_station(row, area=area)) is not None]
             result["total"] = int(body.get("total_count", 0))
             result["has_more"] = offset + limit < result["total"]
         except (httpx.HTTPError, KeyError, ValueError, TypeError):

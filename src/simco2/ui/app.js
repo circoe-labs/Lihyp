@@ -10,7 +10,7 @@
       loginKicker:'SIMULATEUR DE TRANSPORT · PROTOTYPE', loginIntro:"Estimez le coût et les émissions d'une ligne de transport avec un itinéraire calculé.",
       username:'Identifiant',password:'Mot de passe',signIn:'Se connecter',loginHelp:"Compte créé par l'administrateur du service. En local : python -m simco2.cli create-user.",
       brandSubtitle:'Transport & climat',navTitle:'SIMULER ET EXPLORER',navSimulations:'Simulations',navStations:'Stations en Normandie',
-      settings:'PARAMÈTRES',navVehicles:'Véhicules',navEnergy:'Énergies par pays',prototypeNotice:'Prototype : 1 ligne, 1 jour, sans trajets retour ni ravitaillement. Les résultats ne sont pas un optimum prouvé.',
+      settings:'PARAMÈTRES',navVehicles:'Véhicules',navEnergy:'Énergies par pays',prototypeNotice:'Prototype : une ligne et une journée. Planning avec détours et pleins facultatif, sans optimisation garantie.',
       logout:'Déconnexion',topKicker:'SIMULATION DE TRANSPORT',localPrototype:'Prototype',uncertified:'Données de calcul non certifiées.',
       globalNotice:'Les prix et facteurs CO₂ sont des hypothèses à renseigner. Les stations répertoriées sont indicatives.',
       scenarioKicker:'NOUVELLE ÉTUDE',scenarioTitle:'Comparer plusieurs véhicules',scenarioIntro:'Un même trajet et une même demande pour comparer les coûts, les émissions et la faisabilité des solutions.',
@@ -22,7 +22,7 @@
       windowStart:'Départs de',windowEnd:'à',maxVehicles:'Véhicules disponibles',tcoScope:'Périmètre coût',tcoVariable:'Exploitation variable',
       tcoVehicle:'TCO véhicule',tcoComplete:'TCO exploitation partiel',co2Scope:'Périmètre émissions',co2Direct:'Direct',co2Wtw:'Puits à la roue',
       infrastructureCost:'Infrastructure EUR/jour',runSimulation:'Comparer les véhicules',
-      oneWayWarning:'Calcul sur un trajet simple sans retour ni réemploi de véhicules. Le routage ne certifie pas les restrictions autocars.',
+      oneWayWarning:'En mode simple, aucune rotation ni plein. En mode journée, calcul indicatif : accès autocar et pauses réglementaires non garantis.',
       mySimulations:'Mes simulations',myResults:'Résultats précédents',stationKicker:'RÉFÉRENTIELS GÉOGRAPHIQUES',
       stationTitle:'Stations en Normandie',stationIntro:'Stations hydrogène répertoriées et stations essence/gazole issues de la DGCCRF. Informations indicatives, sans garantie d’accès pour les autocars.',
       refresh:'Actualiser',filterType:'Afficher',filterAll:'Toutes les stations',filterH2:'Hydrogène H₂',filterFuel:'Essence / gazole',
@@ -85,7 +85,27 @@
       stationCompatibility:'Accès autocar',stationUnknown:'À confirmer',stationSource:'Source',
       stationDetailsTitle:'Informations sur la station',stationChoose:'Afficher les détails',
       stationNoPrice:'Aucun prix par station affiché.',stationNoData:'Aucune station pour ces filtres.',
+      stationArea:'Secteur',upperNormandy:'Haute-Normandie (Eure 27, Seine-Maritime 76)',
+      allNormandy:'Toute la Normandie (5 départements)',stationLastUpdate:'Dernier relevé carburant déclaré',
+      stationHeavyLane:'Piste poids lourds déclarée',station24h:'Automate 24 h déclaré',
+      stationYes:'Oui',stationNo:'Non précisé',stationServices:'Services déclarés',
 
+      dayPlanToggle:'Planifier les rotations et les pleins de la journée (prototype)',
+      dayPlanNotice:'Trajets retour routés séparément. La fin de plage devient la fin du service. Aucune attente à la station.',
+      selectedRefuelStation:'Station choisie :',noRefuelStation:'Aucune station sélectionnée (pleins non possibles).',
+      browseRefuelStations:'Choisir une station sur la carte',clearRefuelStation:'Effacer la sélection',
+      useForRefuel:'Choisir pour le planning',stationChosen:'Station retenue pour le planning journalier.',
+      dieselRate:'Débit gazole (L/min, hypothèse à fournir)',hydrogenRate:'Débit hydrogène (kg/min, hypothèse à fournir)',
+      handlingTime:'Manipulation (minutes)',refuelNoQueue:'Attente à la station : 0 min. Débit non prérempli, vérifier la compatibilité de la station.',
+      dayTileTitle:'Journée par solution de véhicule',dayService:'Course avec voyageurs',
+      dayDeadhead:'Retour à vide',dayDetour:'Détour vers station',dayRefuel:'Ravitaillement',
+      dayHandling:'Manipulation',dayWaiting:'Attente en station',dayTimeTotal:'Amplitude du service',
+      dayVehicleTime:'Heures-véhicules cumulées',dayFuelStops:'Pleins',dayVehicleNumber:'Autocar',
+      dayPlanUnverified:'Planning indicatif : pauses, restrictions autocars et disponibilité des stations non vérifiées.',
+      dayBasicNotice:'Mode simple : une course par véhicule, sans rotation ni ravitaillement.',
+      dayNoSchedule:'Aucun planning réalisable calculé pour cette solution.',
+      status_no_solution_found:'Non résolu (pas de preuve d’impossibilité)',
+      dayRefuelGuide:'Pour autoriser un plein, choisissez une station sur la carte et renseignez un débit vérifié.',
       navRouting:'API de routage',compareHint:'Sélectionnez au moins deux véhicules. L’énergie et le prix national sont associés automatiquement.',
       selectAtLeastTwo:'Sélectionnez au moins deux véhicules différents à comparer.',
       missingEnergyOption:'Énergie non configurée',compareResultsTitle:'Comparaison des solutions',
@@ -120,7 +140,7 @@
       loginKicker:'PASSENGER TRANSPORT SIMULATOR · PROTOTYPE',loginIntro:'Estimate costs and emissions for a passenger route using computed road distances.',
       username:'Username',password:'Password',signIn:'Sign in',loginHelp:'An account is created by the service administrator. Locally: python -m simco2.cli create-user.',
       brandSubtitle:'Transport & climate',navTitle:'SIMULATE AND EXPLORE',navSimulations:'Simulations',navStations:'Stations in Normandy',
-      settings:'SETTINGS',navVehicles:'Vehicles',navEnergy:'Energy by country',prototypeNotice:'Prototype: one route, one day, no return trips or refuelling. Results are not proven optimal.',
+      settings:'SETTINGS',navVehicles:'Vehicles',navEnergy:'Energy by country',prototypeNotice:'Prototype: one line, one day. Optional indicative scheduling with refuelling, no certified optimization.',
       logout:'Sign out',topKicker:'TRANSPORT SIMULATION',localPrototype:'Prototype',uncertified:'Calculation data is not certified.',
       globalNotice:'Energy prices and CO₂ factors must be provided as assumptions. Listed stations are for reference only.',
       scenarioKicker:'NEW STUDY',scenarioTitle:'Compare transport options',scenarioIntro:'Compare costs, emissions and feasibility of several vehicles on the same route and passenger demand.',
@@ -195,7 +215,27 @@
       stationCompatibility:'Coach access',stationUnknown:'To be confirmed',stationSource:'Source',
       stationDetailsTitle:'Station information',stationChoose:'Show details',
       stationNoPrice:'No individual station prices displayed.',stationNoData:'No stations match these filters.',
+      stationArea:'Area',upperNormandy:'Upper Normandy (Eure 27, Seine-Maritime 76)',
+      allNormandy:'All Normandy (5 departments)',stationLastUpdate:'Latest reported fuel observation',
+      stationHeavyLane:'Reported heavy vehicle lane',station24h:'Reported 24h pump',
+      stationYes:'Yes',stationNo:'Not specified',stationServices:'Reported services',
 
+      dayPlanToggle:'Schedule daily rotations and refuelling (prototype)',
+      dayPlanNotice:'Reverse legs are separately routed. End time means service completion. No station waiting time.',
+      selectedRefuelStation:'Selected station:',noRefuelStation:'None selected (no refuelling available).',
+      browseRefuelStations:'Choose a station on the map',clearRefuelStation:'Clear selection',
+      useForRefuel:'Use for day schedule',stationChosen:'Station selected for the daily schedule.',
+      dieselRate:'Diesel pump flow (L/min, user-supplied)',hydrogenRate:'Hydrogen flow (kg/min, user-supplied)',
+      handlingTime:'Handling time (minutes)',refuelNoQueue:'Station waiting time: 0 min. Pump flow must be provided; verify station access.',
+      dayTileTitle:'Daily schedule by vehicle solution',dayService:'Passenger service',
+      dayDeadhead:'Empty return trip',dayDetour:'Detour to filling station',dayRefuel:'Refuelling',
+      dayHandling:'Handling',dayWaiting:'Waiting at station',dayTimeTotal:'Service elapsed time',
+      dayVehicleTime:'Total vehicle-hours',dayFuelStops:'Fuel stops',dayVehicleNumber:'Coach',
+      dayPlanUnverified:'Indicative plan: breaks, bus access and filling station availability not verified.',
+      dayBasicNotice:'Basic mode: one trip per vehicle, no rotations or refuelling.',
+      dayNoSchedule:'No feasible schedule found for this option.',
+      status_no_solution_found:'Unresolved (not proven infeasible)',
+      dayRefuelGuide:'To allow a fuel stop, choose a map station and supply a verified flow rate.',
       navRouting:'Routing API',compareHint:'Select at least two vehicles. Energy type and national price are matched automatically.',
       selectAtLeastTwo:'Select at least two different vehicles for the comparison.',
       missingEnergyOption:'Energy not configured',compareResultsTitle:'Transport options comparison',
@@ -233,6 +273,7 @@
   let token = '', actor = null, currentQuote = null, currentRoute = null, currentRun = null;
   let comparisons = [], currentComparison = null, selectedVehicleIds = new Set(), routingConfig = null;
   let comparisonSelectionInitialized = false;
+  let plannedStation = null;
   let energies = [], vehicles = [], customStations = [], h2Stations = [], fuelStations = [], scenarios = [], runs = [];
   let fuelPage = null, stationLoading = false, editingVehicleKey = null, energyHistoryCode = null;
   let routeMap = null, stationsMap = null, routeDrawings = [], stationDrawings = [];
@@ -269,6 +310,7 @@
     document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { el.placeholder = t(el.dataset.i18nPlaceholder); });
     $('language-toggle').textContent = language === 'fr' ? 'EN' : 'FR';
     $('language-toggle').setAttribute('aria-label', language === 'fr' ? 'Switch to English' : 'Passer en français');
+    if ($('day-station-name')) updatePlannedStation();
     const active = document.querySelector('.nav-item.active');
     $('page-title').textContent = t({scenarios:'navSimulations',stations:'navStations',vehicles:'navVehicles',energy:'navEnergy',routing:'navRouting'}[active?.dataset.view] || 'navSimulations');
     renderEnergies();
@@ -703,10 +745,88 @@
           <td>${valid?esc(number(total.energy_consumed,2))+' '+esc(total.energy_unit):'—'}</td>
           <td><button type="button" class="button outline" data-compare-pdf="${esc(entry.run_id)}">PDF</button></td></tr>`;
       }).join('')}</tbody></table></div>
-      <p class="small warning-text">${esc(t('compareReadOnly'))}</p>`;
+      <p class="small warning-text">${esc(t('compareReadOnly'))}</p>${scheduleTiles(comparison)}`;
     root.classList.remove('hidden'); $('result-detail').classList.add('hidden');
     root.querySelectorAll('[data-compare-pdf]').forEach(b=>b.addEventListener('click',()=>downloadPdf(b.dataset.comparePdf)));
     if (scroll) root.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+  function selectedStationData(s) {
+    return {id:String(s.id),name:String(s.name),longitude:Number(s.longitude),
+      latitude:Number(s.latitude),energy_codes:(s.energy_codes||[]).map(e=>e==='Gazole'?'DIESEL':e),
+      source:String(s.source||'Selected from user directory')};
+  }
+  function updatePlannedStation() {
+    const label = $('day-station-name');
+    if (label) label.textContent = plannedStation ? plannedStation.name : t('noRefuelStation');
+  }
+  $('day-plan-enabled').addEventListener('change', () => {
+    $('day-plan-details').classList.toggle('hidden', !$('day-plan-enabled').checked);
+  });
+  $('day-plan-select-station').addEventListener('click', () => {
+    show('stations'); message(t('dayRefuelGuide'));
+  });
+  $('day-plan-remove-station').addEventListener('click', () => {
+    plannedStation = null; updatePlannedStation();
+  });
+  function timelineRows(entry) {
+    const result = entry.result;
+    if(Array.isArray(result.vehicles) && result.vehicles.length) return result.vehicles;
+    // Historic/simple simulations: a single passenger run per coach, not a fabricated rotation.
+    const buckets = new Map();
+    for(const trip of (result.trips || [])) {
+      if (!buckets.has(trip.vehicle_instance)) buckets.set(trip.vehicle_instance, []);
+      const begin = Date.parse(trip.depart_utc), end = Date.parse(trip.arrive_utc);
+      buckets.get(trip.vehicle_instance).push({kind:'service',start_utc:trip.depart_utc,
+        end_utc:trip.arrive_utc,duration_s:String((end-begin)/1000),
+        distance_m:trip.distance_m,energy_used:trip.energy_used});
+    }
+    return [...buckets].map(([vehicle_instance,events])=>({vehicle_instance,events,
+      active_duration_s:String(events.reduce((sum,e)=>sum+Number(e.duration_s||0),0))}));
+  }
+  function eventLabel(kind) {
+    return t(({service:'dayService',deadhead_return:'dayDeadhead',station_detour:'dayDetour',
+      refuel:'dayRefuel',handling:'dayHandling'})[kind]||'dayService');
+  }
+  function localTime(iso) {
+    const date = new Date(iso);
+    return Number.isNaN(date.getTime()) ? '—' : new Intl.DateTimeFormat(language==='fr'?'fr-FR':'en-GB',
+      {hour:'2-digit',minute:'2-digit',timeZone:'Europe/Paris'}).format(date);
+  }
+  function scheduleTiles(comparison) {
+    const isPlan = !!comparison.shared.day_plan;
+    return `<div class="day-solution-section"><h3>${esc(t('dayTileTitle'))}</h3>
+      <p class="small warning-text">${esc(t(isPlan?'dayPlanUnverified':'dayBasicNotice'))}</p>
+      <div class="day-solutions">${comparison.entries.map(entry=>{
+        const result = entry.result, total=result.totals, vehicle=entry.vehicle_version.payload;
+        const buses=timelineRows(entry);
+        const allEvents=buses.flatMap(bus=>bus.events||[]);
+        const firstTime=Math.min(...allEvents.map(e=>Date.parse(e.start_utc)));
+        const lastTime=Math.max(...allEvents.map(e=>Date.parse(e.end_utc)));
+        const simpleElapsed=allEvents.length ? (lastTime-firstTime)/1000 : 0;
+        const simpleVehicleTime=allEvents.reduce((sum,e)=>sum+Number(e.duration_s||0),0);
+        return `<article class="day-solution-card">
+          <div class="day-solution-head"><div><h4>${esc(vehicle.label)}</h4>
+          <small>${esc(vehicle.seats)} ${esc(t('seatsShort'))} · ${esc(vehicle.energy_code)}</small></div>
+          <strong class="${total?'compare-good':'compare-bad'}">${esc(total?t('compareStatus'):(t('status_'+result.status)))}</strong></div>
+          ${total?`<div class="day-solution-metrics">
+            <div><small>${esc(t('dayTimeTotal'))}</small><strong>${esc(routeTime(Number(total.duration_elapsed_s??simpleElapsed)))}</strong></div>
+            <div><small>${esc(t('dayVehicleTime'))}</small><strong>${esc(routeTime(Number(total.duration_vehicle_s??simpleVehicleTime)))}</strong></div>
+            <div><small>${esc(t('dayFuelStops'))}</small><strong>${esc(total.refuel_count||0)}</strong></div>
+            <div><small>${esc(t('compareCost'))}</small><strong>${esc(number(total.eur_total,2))} €</strong></div>
+            <div><small>${esc(t('compareEmissions'))}</small><strong>${total.kgco2e_total===null?'—':esc(number(total.kgco2e_total,2))+' kg'}</strong></div>
+          </div>
+          ${buses.map((bus,i)=>`<details class="day-bus" ${i===0?'open':''}><summary>${esc(t('dayVehicleNumber'))} ${esc(bus.vehicle_instance)} · ${esc(routeTime(Number(bus.active_duration_s)))}</summary>
+           <ol class="day-events">${(bus.events||[]).map(e=>`<li>
+             <span class="day-event-time">${esc(localTime(e.start_utc))} – ${esc(localTime(e.end_utc))}</span>
+             <div><strong>${esc(eventLabel(e.kind))}</strong><small>${esc(routeTime(Number(e.duration_s)))}`+
+                `${Number(e.distance_m)?' · '+esc(number(Number(e.distance_m)/1000,1))+' km':''}`+
+                `${e.kind==='refuel'?' · +'+esc(number(e.energy_added,2))+' '+esc(vehicle.unit):''}</small></div>
+             </li>`).join('')}</ol></details>`).join('')}
+          ${isPlan?`<p class="small muted">${esc(t('dayWaiting'))}: <strong>0 min</strong></p>`:''}`
+          :`<p class="warning-text">${esc(t('dayNoSchedule'))} ${esc((result.constraints||[]).map(c=>translatedEngineMessage(c.message)).join(' · '))}</p>`}
+          <button type="button" class="button outline" data-compare-pdf="${esc(entry.run_id)}">${esc(t('downloadPDF'))}</button>
+        </article>`;
+      }).join('')}</div></div>`;
   }
   $('scenario-form').addEventListener('submit', async event => {
     event.preventDefault(); const d = dataOf(event.currentTarget);
@@ -718,7 +838,14 @@
     const body={name:d.name,route_quote_id:currentQuote,vehicle_version_ids:ids,
       country_iso:'FR',start_date:d.start_date,passengers:Number(d.passengers),
       window_start:d.window_start,window_end:d.window_end,max_vehicles:Number(d.max_vehicles),
-      tco_scope:d.tco_scope,emission_scope:d.emission_scope,infrastructure_daily_eur:d.infrastructure_daily_eur};
+      tco_scope:d.tco_scope,emission_scope:d.emission_scope,infrastructure_daily_eur:d.infrastructure_daily_eur,
+      day_plan:$('day-plan-enabled').checked};
+    if(body.day_plan) {
+      body.refuel_station=plannedStation;
+      body.diesel_flow_l_per_min=String(d.diesel_flow_l_per_min||'0').replace(',','.');
+      body.hydrogen_flow_kg_per_min=String(d.hydrogen_flow_kg_per_min||'0').replace(',','.');
+      body.handling_minutes=String(d.handling_minutes||'0').replace(',','.');
+    }
     const btn=$('scenario-submit'); btn.disabled=true;
     try {
       const result=await api('/comparisons',{method:'POST',body:JSON.stringify(body)});
@@ -791,26 +918,49 @@
       latitude:Number(p.latitude),category:'manual',energy_codes:p.equipments.map(e=>e.energy_code),
       operational_status:'unverified',source:p.source,notice:t('stationCaution')};
   }
+  // First 100 places become visible immediately, then automatically fetch the other
+  // pages for the selected department scope. The page counter always refers to loaded
+  // data, never an invented region-wide number. Keep the manual load-more fallback.
   async function loadStations() {
     if (stationLoading) return;
     stationLoading = true;
+    const area = $('station-area').value;
     try {
-      const [manual,data] = await Promise.all([api('/stations'),api('/stations/discovery?offset=0&limit=100')]);
-      customStations=manual; h2Stations=data.hydrogen; fuelStations=data.fuel.stations;fuelPage=data.fuel;
+      const [manual,data] = await Promise.all([
+        api('/stations'), api(`/stations/discovery?area=${encodeURIComponent(area)}&offset=0&limit=100`),
+      ]);
+      customStations=manual; h2Stations=data.hydrogen;
+      fuelStations=data.fuel.stations; fuelPage=data.fuel;
+      stationSelection=null;$('station-details').classList.add('hidden');
+      renderStations();
+      let pages=0;
+      while (fuelPage.has_more && !fuelPage.unavailable && pages<9 && $('station-area').value===area) {
+        const nextOffset=fuelPage.offset+fuelPage.limit;
+        const next=await api(`/stations/discovery?area=${encodeURIComponent(area)}&offset=${nextOffset}&limit=100`);
+        if (next.fuel.unavailable) { fuelPage={...fuelPage,unavailable:true};break; }
+        fuelStations.push(...next.fuel.stations);fuelPage=next.fuel;pages++;
+        renderStations();
+      }
       renderStations();
     } catch(error) { message(error.message,true); }
-    finally {stationLoading=false;}
+    finally {
+      stationLoading=false;
+      if ($('station-area').value!==area) loadStations();
+    }
   }
   $('reload-stations').addEventListener('click',loadStations);
+  $('station-area').addEventListener('change',()=>loadStations());
   for(const id of ['station-filter-h2','station-filter-petrol','station-filter-diesel','station-filter-manual'])
     $(id).addEventListener('change',renderStations);
   $('more-stations').addEventListener('click',async () => {
     if (!fuelPage?.has_more || stationLoading) return;
     stationLoading=true;
     try {
-      const offset=fuelPage.offset + fuelPage.limit;
-      const data=await api(`/stations/discovery?offset=${offset}&limit=100`);
-      fuelStations.push(...data.fuel.stations); fuelPage=data.fuel;
+      const offset=fuelPage.offset+fuelPage.limit;
+      const area=$('station-area').value;
+      const data=await api(`/stations/discovery?area=${encodeURIComponent(area)}&offset=${offset}&limit=100`);
+      if (data.fuel.unavailable) fuelPage={...fuelPage,unavailable:true};
+      else { fuelStations.push(...data.fuel.stations);fuelPage=data.fuel; }
       renderStations();
     } catch(error) { message(error.message,true); }
     finally { stationLoading=false; }
@@ -826,7 +976,7 @@
     if(s.category!=='fuel')return false;
     const fuels=s.energy_codes||[];
     // Unknown fuel categories are shown when either fuel filter is enabled, not invented as both.
-    if(!fuels.length) return $('station-filter-petrol').checked||$('station-filter-diesel').checked;
+    if(!fuels.length) return false; // Never present an unknown fuel as petrol or diesel.
     return ($('station-filter-petrol').checked&&stationHasPetrol(s))||
       ($('station-filter-diesel').checked&&stationHasDiesel(s));
   }
@@ -842,24 +992,61 @@
     const url=safeUrl(s.source);
     const fuelList=(s.energy_codes||[]).join(', ') || t('stationUnknown');
     const pressure=s.category==='hydrogen'&&s.pressure_bar?`<p><strong>${esc(t('stationPressure'))}:</strong> ${esc(s.pressure_bar)} bar</p>`:'';
+    const lane=s.category==='fuel'&&s.heavy_vehicle_lane_reported
+      ? `<p><strong>${esc(t('stationHeavyLane'))}:</strong> ${esc(t('stationYes'))}</p>` : '';
+    const pump=s.category==='fuel'&&s.automatic_24h_reported
+      ? `<p><strong>${esc(t('station24h'))}:</strong> ${esc(t('stationYes'))}</p>` : '';
+    const update=s.source_updated_at?`<p><strong>${esc(t('stationLastUpdate'))}:</strong> ${esc(s.source_updated_at)}</p>`:'';
+    const services=Array.isArray(s.fuel_services)&&s.fuel_services.length
+      ? `<p><strong>${esc(t('stationServices'))}:</strong> ${esc(s.fuel_services.join(', '))}</p>` : '';
     return `<div class="station-popup"><strong>${esc(s.name)}</strong>
       <p>${esc(s.address||s.city||t('stationUnknown'))}</p>
-      <p><strong>${esc(t('stationEnergy'))}:</strong> ${esc(fuelList)}</p>${pressure}
+      <p><strong>${esc(t('stationEnergy'))}:</strong> ${esc(fuelList)}</p>${pressure}${lane}${pump}${update}${services}
       <p><strong>${esc(t('stationCompatibility'))}:</strong> ${esc(t('stationUnknown'))}</p>
       <p class="small">${esc(t('stationNoPrice'))}</p>
       ${url?`<a href="${esc(url)}" target="_blank" rel="noopener">${esc(t('sourceLink'))} ↗</a>`:esc(s.source||'')}
       </div>`;
   }
+  function baseMarkerRadius(marker) {
+    return marker.options.stationBaseRadius || 6;
+  }
+  function emphasizeMarker(id, openPopup=true) {
+    const marker=stationMarkers.get(id);
+    if (!marker) return;
+    marker.setRadius(baseMarkerRadius(marker)*1.7);
+    marker.setStyle({weight:4,fillOpacity:1});
+    marker.bringToFront();
+    if(openPopup) marker.openPopup();
+  }
+  function restoreMarker(id) {
+    const marker=stationMarkers.get(id);
+    if (!marker || id===stationSelection) return;
+    marker.setRadius(baseMarkerRadius(marker));
+    marker.setStyle({weight:2,fillOpacity:.8});
+    marker.closePopup();
+  }
   function selectStation(id, openMap=true) {
+    const previous=stationSelection;
     stationSelection=id;
+    if(previous && previous!==id) {
+      // A previously selected marker is no longer sticky after choosing another.
+      stationSelection=null;restoreMarker(previous);stationSelection=id;
+    }
     const s=[...h2Stations,...fuelStations,...customStations.map(normalizeManualStation)].find(x=>x.id===id);
     if(!s)return;
     document.querySelectorAll('[data-station-id]').forEach(el=>el.classList.toggle('active',el.dataset.stationId===id));
-    $('station-details').innerHTML=`<h4>${esc(t('stationDetailsTitle'))}</h4>${stationPopupHtml(s)}`;
+    $('station-details').innerHTML=`<h4>${esc(t('stationDetailsTitle'))}</h4>${stationPopupHtml(s)}
+      <button type="button" class="button outline" id="use-station-day-plan">${esc(t('useForRefuel'))}</button>`;
     $('station-details').classList.remove('hidden');
-    if(openMap&&stationsMap&&stationMarkers.has(id)) {
-      const marker=stationMarkers.get(id);
-      stationsMap.panTo(marker.getLatLng());marker.openPopup();
+    $('use-station-day-plan').addEventListener('click', () => {
+      plannedStation=selectedStationData(s); updatePlannedStation();
+      $('day-plan-enabled').checked=true; $('day-plan-details').classList.remove('hidden');
+      show('scenarios'); message(t('stationChosen'));
+    });
+    const marker=stationMarkers.get(id);
+    if(marker) {
+      if (openMap&&stationsMap) stationsMap.panTo(marker.getLatLng());
+      emphasizeMarker(id,true);
     }
   }
   function renderStations() {
@@ -883,11 +1070,10 @@
       </button>`).join('') || `<div class="empty-state">${esc(t('stationNoData'))}</div>`;
     for(const b of $('station-list').querySelectorAll('[data-station-id]')) {
       b.addEventListener('click',()=>selectStation(b.dataset.stationId));
-      b.addEventListener('mouseenter',()=>{
-        const m=stationMarkers.get(b.dataset.stationId);
-        if(m) { m.openTooltip();m.setStyle({weight:4}); }
-      });
-      b.addEventListener('mouseleave',()=>{const m=stationMarkers.get(b.dataset.stationId);if(m){m.closeTooltip();m.setStyle({weight:2});}});
+      b.addEventListener('mouseenter',()=>emphasizeMarker(b.dataset.stationId,true));
+      b.addEventListener('mouseleave',()=>restoreMarker(b.dataset.stationId));
+      b.addEventListener('focus',()=>emphasizeMarker(b.dataset.stationId,true));
+      b.addEventListener('blur',()=>restoreMarker(b.dataset.stationId));
     }
     if(stationSelection&&!filtered.some(s=>s.id===stationSelection)){
       stationSelection=null;$('station-details').classList.add('hidden');
@@ -902,15 +1088,17 @@
     for(const s of filtered) {
       if(!Number.isFinite(Number(s.latitude)) || !Number.isFinite(Number(s.longitude))) continue;
       const point=[Number(s.latitude), Number(s.longitude)];
-      const marker=window.L.circleMarker(point,{radius:s.category==='hydrogen'?8:6,
+      const radius=s.category==='hydrogen'?8:6;
+      const marker=window.L.circleMarker(point,{radius,stationBaseRadius:radius,
         color:s.category==='hydrogen'?'#087e8b':s.category==='fuel'?'#248455':'#586577',weight:2,fillOpacity:.8})
         .bindPopup(stationPopupHtml(s))
-        .bindTooltip(esc(s.name),{direction:'top',offset:[0,-8]})
-        .on('mouseover',()=>marker.openPopup())
+        .on('mouseover',()=>emphasizeMarker(s.id,true))
+        .on('mouseout',()=>restoreMarker(s.id))
         .on('click',()=>selectStation(s.id,false))
         .addTo(stationsMap);
       stationDrawings.push(marker);stationMarkers.set(s.id,marker);positions.push(point);
     }
+    if (stationSelection) emphasizeMarker(stationSelection,false);
     requestAnimationFrame(() => {
       if (!stationsMap || $('view-stations').classList.contains('hidden')) return;
       stationsMap.invalidateSize({pan:false});

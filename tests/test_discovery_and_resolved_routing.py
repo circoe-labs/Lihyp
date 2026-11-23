@@ -28,9 +28,11 @@ class FakeRouter:
 
 
 class FakeFuelDirectory:
-    def page(self, offset, limit):
+    def page(self, offset, limit, area="normandy"):
         return {"stations": [{"id":"fuel-test", "name":"Station test",
-                              "category":"fuel", "longitude":0.1,"latitude":49.1}],
+                              "category":"fuel", "longitude":0.1,"latitude":49.1,
+                              "energy_codes":["Gazole", "SP95"], "department_code":"76",
+                              "address":"Rue Exemple, 76000 Rouen, France"}],
                 "offset": offset, "limit":limit, "total":1, "has_more":False,
                 "unavailable":False,"source":"DGCCRF fixture"}
 
@@ -143,3 +145,51 @@ def test_ign_geocoder_and_osrm_provider_mocked_without_network():
         route=OSRMRoutingProvider(client=client).route(coord,(1.099,49.443),'driving-car')
         assert route.distance_m==100000 and route.provider=='osrm_demo'
         assert route.geometry['coordinates'][0]==[-0.362,49.183]
+
+
+def test_upper_normandy_station_area_is_server_filtered_and_cached(tmp_path):
+    """Eure/Seine-Maritime only, without making local station prices accessible."""
+    c, _ = auth_client(tmp_path)
+    payload = c.get('/stations/discovery?area=upper_normandy')
+    assert payload.status_code == 200
+    assert payload.json()['coverage'] == 'Eure et Seine-Maritime'
+    assert len(payload.json()['hydrogen']) == 5
+    assert {station['department_code'] for station in payload.json()['hydrogen']} == {'27', '76'}
+    assert c.get('/stations/discovery?area=upper_normanndy').status_code == 422
+    assert c.get('/stations/discovery?area=normandy').status_code == 200
+
+    rows = [
+        {'id': 27001001, 'adresse': 'Avenue de la Gare', 'cp': '27000',
+         'ville': 'Évreux', 'code_departement': '27', 'latitude': 4902400,
+         'longitude': 115000, 'carburants_disponibles': ['Gazole', 'E10'],
+         'gazole_maj': '2026-11-23T08:00:00Z', 'gazole_prix': 1.99,
+         'horaires_automate_24_24': 'Oui',
+         'services_service': ['Piste poids lourds', 'Automate CB 24/24']},
+        {'id': 76001001, 'adresse': 'Quai du Port', 'cp': '76000',
+         'ville': 'Rouen', 'code_departement': '76', 'latitude': 4944000,
+         'longitude': 110000, 'carburants_disponibles': ['SP98'],
+         'sp98_prix': 2.22},
+        {'id': 14001001, 'adresse': 'Rue de Caen', 'cp': '14000',
+         'ville': 'Caen', 'code_departement': '14', 'latitude': 4918000,
+         'longitude': -36000, 'carburants_disponibles': ['Gazole']},
+    ]
+    calls = []
+    def request_mock(request):
+        query = request.url.params['where']
+        calls.append(query)
+        assert 'code_departement' in query or 'Normandie' in query
+        return httpx.Response(200, json={'results': rows, 'total_count': 3})
+    with httpx.Client(transport=httpx.MockTransport(request_mock)) as client:
+        directory = FuelStationDirectory(client)
+        result = directory.page(0, 100, area='upper_normandy')
+        assert [station['department_code'] for station in result['stations']] == ['27','76']
+        assert all(not any(key.endswith('_prix') or key == 'price' for key in station)
+                   for station in result['stations'])
+        first=result['stations'][0]
+        assert first['heavy_vehicle_lane_reported'] and first['automatic_24h_reported']
+        assert first['source_updated_at'].startswith('2026-11-23')
+        assert directory.page(0, 100, area='upper_normandy') is result
+        assert len(calls)==1
+        result2=directory.page(0, 100, area='normandy')
+        assert len(result2['stations'])==3
+        assert len(calls)==2

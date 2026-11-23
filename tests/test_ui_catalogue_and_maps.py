@@ -58,7 +58,9 @@ def test_stations_and_energy_catalogue_layout_matches_reviewed_mockups():
         assert f'id="{control}"' in html
     assert 'station-explorer-grid' in css
     assert "bindPopup(stationPopupHtml(s))" in js
-    assert ".on('mouseover',()=>marker.openPopup())" in js
+    assert ".on('mouseover',()=>emphasizeMarker(s.id,true))" in js
+    assert "marker.setRadius(baseMarkerRadius(marker)*1.7)" in js
+    assert 'id="station-area"' in html
     assert 'selectStation(b.dataset.stationId)' in js
     assert 'data-i18n="addEnergy"' in html
     assert 'id="energy-editor"' in html

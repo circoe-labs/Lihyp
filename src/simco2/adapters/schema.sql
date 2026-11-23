@@ -48,6 +48,14 @@ CREATE TABLE IF NOT EXISTS energy_versions (
   created_at TEXT NOT NULL,
   UNIQUE (country_iso, energy_code, revision)
 );
+-- Retrait réversible des énergies du catalogue visible. Les versions restent immuables.
+CREATE TABLE IF NOT EXISTS energy_catalog_archived (
+  country_iso TEXT NOT NULL REFERENCES country_catalog(iso),
+  energy_code TEXT NOT NULL REFERENCES energy_types(code),
+  archived_by TEXT NOT NULL REFERENCES users(id),
+  archived_at TEXT NOT NULL,
+  PRIMARY KEY(country_iso, energy_code)
+);
 CREATE TABLE IF NOT EXISTS emission_factors (
   energy_version_id TEXT NOT NULL REFERENCES energy_versions(id),
   perimeter TEXT NOT NULL CHECK (perimeter IN ('direct','well_to_wheel','lifecycle')),

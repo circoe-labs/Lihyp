@@ -143,3 +143,42 @@
 @media(max-width:1240px){.simulator-layout{grid-template-columns:1fr}.simulator-side{display:grid;grid-template-columns:1fr 1fr}}
 @media(max-width:850px){.simulator-side,.routing-test-form{display:grid;grid-template-columns:1fr}}
 @media(max-width:600px){.routing-data-grid{grid-template-columns:120px minmax(0,1fr)!important}.comparison-link{flex-direction:column;align-items:flex-start}}
+
+/* Station exploration: filters, contained map and selectable scroll list. */
+.station-explorer{padding:18px}
+.station-explorer .station-toolbar{justify-content:flex-start;margin-bottom:16px;gap:10px}
+.station-filter-chip{display:inline-flex!important;align-items:center!important;gap:6px!important;border:1px solid #dae6ec;border-radius:8px;padding:9px 12px;background:#fff;cursor:pointer;font-size:12px;font-weight:700;color:#234455}
+.station-filter-chip:has(input:checked){background:#eff8f8;border-color:#a7d5d6}
+.station-filter-chip input{accent-color:#087f87;width:16px;height:16px}
+.station-filter-chip strong{font-size:11px;color:#607f8b}
+.station-explorer-grid{display:grid;grid-template-columns:minmax(0,1.8fr) minmax(245px,.85fr);gap:15px;align-items:start}
+.station-map-container{position:relative;min-width:0;isolation:isolate}
+.station-map-container .station-map{height:475px;margin:0;overflow:hidden!important;contain:layout paint;isolation:isolate}
+.station-results{border:1px solid #dce7eb;border-radius:9px;min-width:0;overflow:hidden;background:#fff}
+.station-results-title{padding:13px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #dce7eb}
+.station-results-title h3{margin:0;font-size:14px}
+.station-results .station-list{height:380px;overflow:auto;display:flex;flex-direction:column;gap:0;margin:0}
+.station-card{width:100%;display:block;text-align:left;border:0;border-bottom:1px solid #e9eff2;border-radius:0;padding:12px 14px;background:#fff;color:var(--ink);font-family:inherit;cursor:pointer}
+.station-card:hover,.station-card:focus-visible,.station-card.active{background:#eaf6f6;outline-offset:-3px}
+.station-card strong{font-size:12px;margin:5px 0;line-height:1.4}
+.station-card small{font-size:11px;margin:3px 0;line-height:1.35}
+.station-card .station-type{font-size:9px;padding:3px 7px}
+.station-details{border-top:1px solid #cfe0e4;padding:14px;background:#f7fafb;font-size:12px}
+.station-details h4{margin:0 0 10px}.station-details p{margin:7px 0;overflow-wrap:anywhere}
+.station-details .subtle-link{display:inline-block;margin-top:6px}
+.station-explorer #station-data-status{margin:12px 0}
+/* Energy catalogue: a full-width, readable table and a separate editing panel. */
+.energy-manager .energy-toolbar{display:flex;align-items:end;justify-content:space-between;gap:15px;margin-bottom:19px;flex-wrap:wrap}
+.energy-country{display:flex;flex-direction:column;gap:8px;font-size:12px;font-weight:750}
+.energy-country select{min-width:220px;padding:11px;background:#fff;border:1px solid #cbd7df;border-radius:7px}
+.energy-table table{min-width:700px;font-size:13px}
+.energy-table th{background:#f1f7f9;padding:14px 10px}
+.energy-table td{padding:16px 10px;vertical-align:middle}
+.energy-name{display:flex;gap:12px;align-items:center}
+.energy-icon{width:29px;height:29px;border-radius:8px;display:grid;place-items:center;background:#e7f5f5;color:#087e8b;font-size:16px}
+.energy-action-row{display:flex;align-items:center;gap:3px}
+.energy-action-row button{font-size:13px;white-space:nowrap}
+.energy-editor{border:1px solid #8ac4c6;max-width:860px;margin:0 auto 24px}
+.energy-editor .form-grid{margin-top:17px}
+@media(max-width:950px){.station-explorer-grid{grid-template-columns:1fr}.station-results .station-list{height:250px}}
+@media(max-width:690px){.station-explorer{padding:12px}.station-explorer-grid .station-map{height:310px}.energy-country{width:100%}.energy-country select{width:100%}.energy-toolbar .button{width:100%}}

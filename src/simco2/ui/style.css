@@ -221,3 +221,11 @@
 .day-events small{display:block;font-size:11px;color:#748995;line-height:1.4}
 .day-solution-card>.button{margin-top:9px}
 @media(max-width:550px){.day-solution-metrics{grid-template-columns:repeat(2,1fr)}.day-events li{grid-template-columns:85px 1fr}}
+
+/* Route geometry fallback: no third-party library required. This is not a basemap. */
+.route-map-sketch{height:370px;display:flex;align-items:stretch;justify-content:center;background:#edf5f5}
+.route-sketch-svg{display:block;width:100%;height:100%;border-radius:9px}
+.comparison-inline-notice{margin:0;border-radius:8px;border:1px solid #b6dee3;background:#e8f5f5;padding:12px 14px;color:#1b5860;font-size:13px;font-weight:650}
+.comparison-inline-notice.error{background:#fff2e8;border-color:#eac7ab;color:#813b1c}
+.comparison-inline-notice.success{background:#e6f5f0;border-color:#b3d9cb;color:#1f6753}
+@media(max-width:600px){.route-map-sketch{height:260px}}

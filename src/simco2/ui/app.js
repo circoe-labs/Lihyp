@@ -108,6 +108,14 @@
       dayRefuelGuide:'Pour autoriser un plein, choisissez une station sur la carte et renseignez un débit vérifié.',
       navRouting:'API de routage',compareHint:'Sélectionnez au moins deux véhicules. L’énergie et le prix national sont associés automatiquement.',
       selectAtLeastTwo:'Sélectionnez au moins deux véhicules différents à comparer.',
+      compareNeedCatalog:'Pour comparer, ajoutez au moins deux véhicules avec une énergie configurée dans Paramètres.',
+      compareNeedRoute:'Calculez d’abord l’itinéraire : la distance et le tracé seront utilisés pour la comparaison.',
+      compareInvalidField:'Vérifiez ce champ avant la comparaison : ',
+      compareRunning:'Comparaison en cours…',compareFailed:'Comparaison impossible : ',
+      compareDone:'Comparaison enregistrée et affichée ci-dessous.',
+      routeSketchNotice:'Tracé schématique issu du calcul routier. Fond de carte interactif indisponible dans ce navigateur.',
+      routeSketchNoData:'Tracé indisponible : la géométrie de l’itinéraire est absente.',
+
       missingEnergyOption:'Énergie non configurée',compareResultsTitle:'Comparaison des solutions',
       myComparisons:'Comparaisons enregistrées',previousRuns:'Anciennes simulations individuelles',
       compareVehicle:'Véhicule',compareEnergy:'Énergie',compareCost:'Coût total',compareEmissions:'Émissions CO₂e',
@@ -238,6 +246,14 @@
       dayRefuelGuide:'To allow a fuel stop, choose a map station and supply a verified flow rate.',
       navRouting:'Routing API',compareHint:'Select at least two vehicles. Energy type and national price are matched automatically.',
       selectAtLeastTwo:'Select at least two different vehicles for the comparison.',
+      compareNeedCatalog:'To compare options, add at least two vehicles with configured energy types in Settings.',
+      compareNeedRoute:'Calculate the route first: distance and geometry are used for the comparison.',
+      compareInvalidField:'Check this field before comparing: ',
+      compareRunning:'Calculating comparison…',compareFailed:'Cannot compare: ',
+      compareDone:'Comparison saved and displayed below.',
+      routeSketchNotice:'Schematic of the calculated road route. Interactive base map is unavailable in this browser.',
+      routeSketchNoData:'Route shape unavailable: routing geometry is missing.',
+
       missingEnergyOption:'Energy not configured',compareResultsTitle:'Transport options comparison',
       myComparisons:'Saved comparisons',previousRuns:'Previous individual simulations',
       compareVehicle:'Vehicle',compareEnergy:'Energy',compareCost:'Total cost',compareEmissions:'CO₂e emissions',
@@ -286,6 +302,19 @@
   function message(msg, isError=false) {
     const box = $('feedback'); box.classList.remove('hidden');
     box.classList.toggle('error', isError); box.textContent = msg;
+  }
+  function compareNotice(text, isError=true) {
+    const node = $('compare-inline-notice');
+    if (!node) return;
+    node.textContent = text || '';
+    node.classList.toggle('hidden', !text);
+    node.classList.toggle('error', !!text && isError);
+    node.classList.toggle('success', !!text && !isError);
+  }
+  function compareProblem(text) {
+    compareNotice(text,true);
+    // Always show validation next to the submit button, not at the page top.
+    $('compare-inline-notice').scrollIntoView({block:'nearest',behavior:'smooth'});
   }
   async function api(url, options={}) {
     const h = {'Accept':'application/json', ...options.headers};
@@ -599,12 +628,17 @@
     const needed = eligible.length < 2;
     $('catalogue-notice').classList.toggle('hidden', !needed);
     if (needed) $('catalogue-notice').innerHTML = `${esc(t('configureCatalogs'))} <button type="button" class="table-action" data-goto="energy">${esc(t('configureEnergy'))}</button> · <button type="button" class="table-action" data-goto="vehicles">${esc(t('configureVehicle'))}</button>`;
+    if (needed && !$('comparison-results').classList.contains('hidden')) return;
+    if (needed) compareNotice(t('compareNeedCatalog'));
   }
 
   function invalidateRoute() {
     currentQuote = null; currentRoute = null;
     $('route-summary').classList.add('hidden');
     if (routeMap) { routeDrawings.forEach(layer => routeMap.removeLayer(layer)); routeDrawings = []; }
+    $('route-map-sketch').replaceChildren();
+    $('route-map-sketch').classList.add('hidden');
+    $('route-map-fallback').classList.add('hidden');
     $('route-status').textContent = t('routeStale');
   }
   $('route-origin').addEventListener('input', invalidateRoute);
@@ -645,30 +679,92 @@
       return null;
     }
   }
-  function showRouteMap(route) {
-    if (!routeMap) routeMap = ensureMap('route-map');
-    $('route-map-fallback').classList.toggle('hidden', !!routeMap);
-    $('route-map').classList.toggle('hidden', !routeMap);
-    if (!routeMap) return;
-    routeDrawings.forEach(layer => routeMap.removeLayer(layer)); routeDrawings = [];
-    const start = route.origin_coordinates, end = route.destination_coordinates;
-    if (!start || !end || !route.geometry) return;
-    const feature = window.L.geoJSON(route.geometry, {style:{color:'#0b7f8b',weight:5}}).addTo(routeMap);
-    routeDrawings.push(feature);
-    for (const [i,[point,label]] of [[start,route.origin],[end,route.destination]].entries()) {
-      // SVG dots avoid external marker-image requests when the CDN is restricted.
-      routeDrawings.push(window.L.circleMarker([point[1],point[0]], {
-        radius:8, color:'#fff', weight:3,
-        fillColor:i === 0 ? '#087e8b' : '#ca8137', fillOpacity:1,
-      }).bindPopup(esc(label)).addTo(routeMap));
+  function drawRouteSketch(route) {
+    // Draw the actual returned GeoJSON shape without claiming an online basemap.
+    // This also works when a browser/proxy blocks the Leaflet CDN.
+    const host = $('route-map-sketch');
+    host.replaceChildren();
+    $('route-map').classList.add('hidden');
+    host.classList.remove('hidden');
+    $('route-map-fallback').classList.remove('hidden');
+    $('route-map-fallback').textContent = t('routeSketchNotice');
+    const raw = route.geometry?.type === 'LineString' ? route.geometry.coordinates : [];
+    const coords = (raw || []).filter(p=>Array.isArray(p) && p.length>=2 &&
+       Number.isFinite(Number(p[0])) && Number.isFinite(Number(p[1])) &&
+       Math.abs(Number(p[0]))<=180 && Math.abs(Number(p[1]))<=90);
+    if (coords.length < 2) {
+      $('route-map-fallback').textContent = t('routeSketchNoData');
+      return;
     }
-    // Let the browser finish showing the container before measuring its pixels.
-    requestAnimationFrame(() => {
-      if (!routeMap || $('view-scenarios').classList.contains('hidden')) return;
-      routeMap.invalidateSize({pan:false});
-      const bounds = feature.getBounds();
-      if(bounds.isValid()) routeMap.fitBounds(bounds.pad(0.14));
-    });
+    const NS = 'http://www.w3.org/2000/svg', W = 840, H = 380;
+    const svg = document.createElementNS(NS,'svg');
+    svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+    svg.setAttribute('role','presentation');
+    svg.setAttribute('preserveAspectRatio','xMidYMid meet');
+    svg.classList.add('route-sketch-svg');
+    const rad = Math.PI/180, lat0 = coords.reduce((sum,p)=>sum+Number(p[1]),0)/coords.length;
+    const sx = Math.max(.05,Math.cos(lat0*rad));
+    const ll = coords.map(p=>[Number(p[0])*sx, -Number(p[1])]);
+    const xMin = Math.min(...ll.map(p=>p[0])), xMax = Math.max(...ll.map(p=>p[0]));
+    const yMin = Math.min(...ll.map(p=>p[1])), yMax = Math.max(...ll.map(p=>p[1]));
+    const dx = Math.max(0.00001,xMax-xMin), dy = Math.max(0.00001,yMax-yMin);
+    const scale = Math.min((W-140)/dx,(H-112)/dy);
+    const xOff = (W-dx*scale)/2, yOff = (H-dy*scale)/2;
+    const xy = ([x,y])=>[xOff+(x-xMin)*scale,yOff+(y-yMin)*scale];
+    const pathData = ll.filter((_,i)=>i===0 || i===ll.length-1 || i%Math.max(1,Math.ceil(ll.length/1000))===0)
+      .map((p,i)=>`${i?'L':'M'}${xy(p).map(n=>n.toFixed(1)).join(',')}`).join(' ');
+    const add = (parent,tag,attrs,text) => {
+      const el=document.createElementNS(NS,tag);
+      for(const [key,value] of Object.entries(attrs)) el.setAttribute(key,String(value));
+      if(text!==undefined) el.textContent=String(text);
+      parent.appendChild(el);return el;
+    };
+    add(svg,'rect',{width:W,height:H,fill:'#edf5f5'});
+    for(let x=70;x<W;x+=70)add(svg,'line',{x1:x,y1:0,x2:x,y2:H,stroke:'#d7e7e8','stroke-width':1});
+    for(let y=65;y<H;y+=65)add(svg,'line',{x1:0,y1:y,x2:W,y2:y,stroke:'#d7e7e8','stroke-width':1});
+    add(svg,'path',{d:pathData,fill:'none',stroke:'#fff','stroke-width':11,'stroke-linejoin':'round','stroke-linecap':'round'});
+    add(svg,'path',{d:pathData,fill:'none',stroke:'#087e8b','stroke-width':6,'stroke-linejoin':'round','stroke-linecap':'round'});
+    for(const [p,label,color] of [[ll[0],route.origin,'#138879'],[ll[ll.length-1],route.destination,'#ce6d32']]) {
+      const [x,y]=xy(p);add(svg,'circle',{cx:x,cy:y,r:10,fill:color,stroke:'#fff','stroke-width':3});
+      add(svg,'text',{x:x+14,y:y-13,fill:'#183244','font-size':17,'font-weight':'700',stroke:'#fff','stroke-width':4,'paint-order':'stroke'},label);
+    }
+    host.appendChild(svg);
+  }
+  function showRouteMap(route) {
+    if (!route.geometry || route.geometry.type!=='LineString') {
+      drawRouteSketch(route);
+      return;
+    }
+    // A previous schematic may have hidden the Leaflet container. Reveal it before measuring.
+    $('route-map').classList.remove('hidden');
+    if (!routeMap) routeMap = ensureMap('route-map');
+    if (!routeMap) { drawRouteSketch(route); return; }
+    try {
+      $('route-map-sketch').classList.add('hidden');
+      $('route-map-fallback').classList.add('hidden');
+      $('route-map').classList.remove('hidden');
+      routeDrawings.forEach(layer => routeMap.removeLayer(layer));routeDrawings=[];
+      const geometry=route.geometry;
+      const feature=window.L.geoJSON(geometry,{style:{color:'#0b7f8b',weight:5}}).addTo(routeMap);
+      routeDrawings.push(feature);
+      for (const [i,[point,label]] of [[route.origin_coordinates,route.origin],[route.destination_coordinates,route.destination]].entries()) {
+        if (!point || point.length<2) continue;
+        routeDrawings.push(window.L.circleMarker([point[1],point[0]], {
+          radius:8,color:'#fff',weight:3,
+          fillColor:i===0?'#087e8b':'#ca8137',fillOpacity:1,
+        }).bindPopup(esc(label)).addTo(routeMap));
+      }
+      requestAnimationFrame(()=>{
+        if(!routeMap || $('view-scenarios').classList.contains('hidden'))return;
+        routeMap.invalidateSize({pan:false});
+        const bounds=feature.getBounds();
+        if(bounds.isValid())routeMap.fitBounds(bounds.pad(0.14));
+      });
+    } catch (error) {
+      // A mapping rendering issue must never turn a computed route into a blank panel.
+      console.warn('Route drawing failed, displaying a geometry-only fallback');
+      drawRouteSketch(route);
+    }
   }
 
   $('calculate-route').addEventListener('click',async () => {
@@ -828,13 +924,46 @@
         </article>`;
       }).join('')}</div></div>`;
   }
+  function selectedComparableIds() {
+    return [...selectedVehicleIds].filter(id => {
+      const v=vehicles.find(v=>v.id===id);
+      return v && energies.some(e=>e.payload.energy_code===v.payload.energy_code);
+    });
+  }
+  function comparePreflight() {
+    if (selectedComparableIds().length<2) {
+      compareProblem(t('compareNeedCatalog'));
+      return false;
+    }
+    if (!currentQuote) {
+      compareProblem(t('compareNeedRoute'));
+      return false;
+    }
+    const form=$('scenario-form');
+    const invalid=form.querySelector(':invalid');
+    if (invalid) {
+      const details=invalid.closest('details');
+      if (details)details.open=true;
+      const label=invalid.closest('label')?.querySelector('span')?.textContent || invalid.name;
+      compareProblem(t('compareInvalidField')+label);
+      return false;
+    }
+    compareNotice('');
+    return true;
+  }
+  $('scenario-submit').addEventListener('click', event=>{
+    if(!comparePreflight())event.preventDefault();
+  });
+  $('scenario-form').addEventListener('invalid', event=>{
+    const details=event.target.closest('details');
+    if(details)details.open=true;
+    const label=event.target.closest('label')?.querySelector('span')?.textContent || event.target.name;
+    compareProblem(t('compareInvalidField')+label);
+  },true);
   $('scenario-form').addEventListener('submit', async event => {
     event.preventDefault(); const d = dataOf(event.currentTarget);
-    const ids = [...selectedVehicleIds].filter(id => {
-      const v=vehicles.find(v=>v.id===id);return v && energies.some(e=>e.payload.energy_code===v.payload.energy_code);
-    });
-    if (ids.length < 2) return message(t('selectAtLeastTwo'),true);
-    if (!currentQuote) return message(t('routeRequired'),true);
+    if (!comparePreflight()) return;
+    const ids=selectedComparableIds();
     const body={name:d.name,route_quote_id:currentQuote,vehicle_version_ids:ids,
       country_iso:'FR',start_date:d.start_date,passengers:Number(d.passengers),
       window_start:d.window_start,window_end:d.window_end,max_vehicles:Number(d.max_vehicles),
@@ -847,11 +976,14 @@
       body.handling_minutes=String(d.handling_minutes||'0').replace(',','.');
     }
     const btn=$('scenario-submit'); btn.disabled=true;
+    compareNotice(t('compareRunning'),false);
     try {
       const result=await api('/comparisons',{method:'POST',body:JSON.stringify(body)});
-      showComparison(result); await loadComparisons(); await loadScenarios(); await loadRuns();
+      showComparison(result);
+      compareNotice(t('compareDone'),false);
+      await loadComparisons(); await loadScenarios(); await loadRuns();
       message(t('runSaved'));
-    } catch(err) { message(err.message,true); }
+    } catch(err) { compareProblem(t('compareFailed')+err.message); }
     finally { btn.disabled=false; }
   });
 

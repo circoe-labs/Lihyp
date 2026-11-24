@@ -25,8 +25,8 @@ def test_energy_archive_is_reversible_and_keeps_versions(tmp_path):
 def test_archival_api_authenticated_and_does_not_delete_versions(tmp_path):
     app=create_app(tmp_path/'api.sqlite')
     db=app.state.db
-    db.create_user('operator','a-long-enough-password')
-    token=TestClient(app).post('/auth/login',json={'username':'operator','password':'a-long-enough-password'}).json()['access_token']
+    db.create_user('admin','a-long-enough-password')
+    token=TestClient(app).post('/auth/login',json={'username':'admin','password':'a-long-enough-password'}).json()['access_token']
     headers={'Authorization':f'Bearer {token}'}
     client=TestClient(app)
     created=client.post('/energies',json={'country_iso':'FR','energy_code':'H2','unit':'kg',

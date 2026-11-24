@@ -37,11 +37,9 @@ def test_save_labels_are_plain_language_but_db_keeps_revision_history():
 def test_bus_demo_is_not_silently_created_on_login(tmp_path):
     app = create_app(tmp_path / "test-ui-demo.sqlite")
     db = app.state.db
-    db.create_user("reader", "an-adequately-long-passphrase")
     client = TestClient(app)
-    token = client.post("/auth/login", json={
-        "username": "reader", "password": "an-adequately-long-passphrase"}).json()["access_token"]
-    vehicles = client.get("/vehicles", headers={"Authorization": f"Bearer {token}"}).json()
+    assert client.post("/public/session").status_code == 200
+    vehicles = client.get("/vehicles").json()
     assert vehicles == []  # one-click opt-in creates it; logging in does not mutate data
     js = (UI / "app.js").read_text(encoding="utf-8")
     assert 'solutionCard(demoCoach())' in js

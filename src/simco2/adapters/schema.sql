@@ -139,6 +139,8 @@ INSERT OR IGNORE INTO energy_types(code, label, unit)
 VALUES ('ELECTRIC', 'Electricite (hypotheses utilisateur requises)', 'kWh');
 INSERT OR IGNORE INTO energy_types(code, label, unit)
 VALUES ('H2', 'Hydrogene (hypotheses utilisateur requises)', 'kg');
+INSERT OR IGNORE INTO energy_types(code, label, unit)
+VALUES ('BIOGNV', 'BioGNV (hypotheses utilisateur requises)', 'kg');
 
 -- Protection supplémentaire : une révision utilisée dans un résultat ne peut
 -- jamais être modifiée ou effacée, y compris par manipulation SQL directe.

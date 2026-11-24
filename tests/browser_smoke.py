@@ -265,6 +265,19 @@ async def main():
             assert 'Coach access' in await page.locator('.station-card').first.inner_text() or \
                    'not confirmed' in (await page.locator('.station-card').first.inner_text()).lower()
             await page.screenshot(path='reports/new_stations_en.png',full_page=True)
+            # The indicative references are visible, but their missing specifications remain blank.
+            await page.locator('#language-toggle').click()  # French
+            await page.locator('[data-view=vehicles]').click()
+            await page.wait_for_function("document.querySelectorAll('#reference-library .reference-card').length === 9")
+            assert 'Comparaison indicative' in await page.locator('.reference-comparison').inner_text()
+            await page.locator('[data-prefill-reference="biognv-12"]').click()
+            assert await page.locator('#vehicle-form select[name=energy_code]').input_value() == 'BIOGNV'
+            assert await page.locator('#vehicle-form input[name=seats]').input_value() == ''
+            assert await page.locator('#vehicle-form input[name=consumption_per_km]').input_value() == ''
+            assert await page.locator('#vehicle-form input[name=usable_capacity]').input_value() == ''
+            assert 'Énergies par pays' in await page.locator('#reference-form-note').inner_text()
+            await page.locator('[data-prefill-reference="h2-retrofit-12"]').click()
+            assert await page.locator('#vehicle-form input[name=purchase_eur]').input_value() == ''
             assert not errors, 'Browser JS errors: '+repr(errors)
             print('Browser smoke OK: FR/EN login/navigation, automatic route, inline results, H2/fuel stations.')
             await browser.close()

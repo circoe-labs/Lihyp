@@ -69,3 +69,7 @@ véhicule gazole. Une valeur illustrative de 30 L/min est proposée pour le gazo
 présélection est bornée et **ne prouve pas un optimum global**. Consulter
 `docs/optimisation-stations-rotations-comparaison.md` pour les critères, limites
 et recette. Le logiciel demeure un prototype local, non prêt pour un service public.
+
+## Bibliothèque indicative de véhicules (24/11/2026)
+
+Dans **Véhicules**, 9 références issues du tableau fourni par l'utilisateur sont présentées avec leurs fourchettes HT et un comparatif partiel énergie + maintenance pour 100 km. Les véhicules doivent être **complétés et enregistrés explicitement** avant les simulations. BioGNV (kg) est pris en charge comme énergie, sans prix ni facteur CO₂e inventé. Voir `docs/catalogue-utilisateur-neuf-autocars.md`.

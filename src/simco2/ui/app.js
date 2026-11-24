@@ -22,7 +22,7 @@
       windowStart:'Départs de',windowEnd:'à',maxVehicles:'Véhicules disponibles',tcoScope:'Périmètre coût',tcoVariable:'Exploitation variable',
       tcoVehicle:'TCO véhicule',tcoComplete:'TCO exploitation partiel',co2Scope:'Périmètre émissions',co2Direct:'Direct',co2Wtw:'Puits à la roue',
       infrastructureCost:'Infrastructure EUR/jour',runSimulation:'Comparer les véhicules',
-      oneWayWarning:'En mode simple, aucune rotation ni plein. En mode journée, calcul indicatif : accès autocar et pauses réglementaires non garantis.',
+      oneWayWarning:'Planning journalier activé par défaut. Étude indicative : restrictions autocars, pauses réglementaires et disponibilité des stations à vérifier.',
       mySimulations:'Mes simulations',myResults:'Résultats précédents',stationKicker:'RÉFÉRENTIELS GÉOGRAPHIQUES',
       stationTitle:'Stations en Normandie',stationIntro:'Stations hydrogène répertoriées et stations essence/gazole issues de la DGCCRF. Informations indicatives, sans garantie d’accès pour les autocars.',
       refresh:'Actualiser',filterType:'Afficher',filterAll:'Toutes les stations',filterH2:'Hydrogène H₂',filterFuel:'Essence / gazole',
@@ -92,20 +92,27 @@
 
       dayPlanToggle:'Planifier les rotations et les pleins de la journée (prototype)',
       dayPlanNotice:'Trajets retour routés séparément. La fin de plage devient la fin du service. Aucune attente à la station.',
-      selectedRefuelStation:'Station choisie :',noRefuelStation:'Aucune station sélectionnée (pleins non possibles).',
+      selectedRefuelStation:'Station imposée :',noRefuelStation:'Aucune station imposée.',
+      stationPolicy:'Politique de ravitaillement',stationAuto:'Automatique : station compatible si un plein est nécessaire',
+      stationImposed:'Station imposée (avancé)',stationNone:'Aucun plein pendant la journée',
+      stationRequired:'Choisissez une station pour le mode imposé, ou revenez au mode automatique.',
+      stationIncompatible:'La station imposée ne distribue pas les énergies des véhicules sélectionnés. Choisissez le mode automatique.',
       browseRefuelStations:'Choisir une station sur la carte',clearRefuelStation:'Effacer la sélection',
       useForRefuel:'Choisir pour le planning',stationChosen:'Station retenue pour le planning journalier.',
-      dieselRate:'Débit gazole (L/min, hypothèse à fournir)',hydrogenRate:'Débit hydrogène (kg/min, hypothèse à fournir)',
-      handlingTime:'Manipulation (minutes)',refuelNoQueue:'Attente à la station : 0 min. Débit non prérempli, vérifier la compatibilité de la station.',
+      dieselRate:'Débit gazole (L/min, hypothèse non vérifiée)',hydrogenRate:'Débit hydrogène (kg/min, à fournir)',
+      handlingTime:'Manipulation (minutes)',refuelNoQueue:'Attente à la station : 0 min. Le débit gazole 30 L/min est une hypothèse de démonstration, à vérifier ; 0 interdit un plein.',
       dayTileTitle:'Journée par solution de véhicule',dayService:'Course avec voyageurs',
       dayDeadhead:'Retour à vide',dayDetour:'Détour vers station',dayRefuel:'Ravitaillement',
       dayHandling:'Manipulation',dayWaiting:'Attente en station',dayTimeTotal:'Amplitude du service',
       dayVehicleTime:'Heures-véhicules cumulées',dayFuelStops:'Pleins',dayVehicleNumber:'Autocar',
+      dayRotations:'Rotations réalisées',bestIndicative:'Coût le plus faible parmi les cas calculés (non optimal garanti)',
+      stationAutoExplanation:'Recherche automatique par énergie et temps de détour. Échantillon non exhaustif, accès autocars non vérifié.',
+      stationSearchLimits:'Limites de la recherche de stations',
       dayPlanUnverified:'Planning indicatif : pauses, restrictions autocars et disponibilité des stations non vérifiées.',
       dayBasicNotice:'Mode simple : une course par véhicule, sans rotation ni ravitaillement.',
       dayNoSchedule:'Aucun planning réalisable calculé pour cette solution.',
       status_no_solution_found:'Non résolu (pas de preuve d’impossibilité)',
-      dayRefuelGuide:'Pour autoriser un plein, choisissez une station sur la carte et renseignez un débit vérifié.',
+      dayRefuelGuide:'Station imposée : seuls les véhicules compatibles pourront y faire le plein. Le mode automatique est recommandé.',
       navRouting:'API de routage',compareHint:'Sélectionnez au moins deux véhicules. L’énergie et le prix national sont associés automatiquement.',
       selectAtLeastTwo:'Sélectionnez au moins deux véhicules différents à comparer.',
       compareNeedCatalog:'Pour comparer, ajoutez au moins deux véhicules avec une énergie configurée dans Paramètres.',
@@ -160,7 +167,7 @@
       windowStart:'Departures from',windowEnd:'until',maxVehicles:'Available vehicles',tcoScope:'Cost scope',tcoVariable:'Variable operating cost',
       tcoVehicle:'Vehicle TCO',tcoComplete:'Partial operating TCO',co2Scope:'Emissions scope',co2Direct:'Direct',co2Wtw:'Well-to-wheel',
       infrastructureCost:'Infrastructure EUR/day',runSimulation:'Compare vehicles',
-      oneWayWarning:'One-way calculation without vehicle reuse or return journeys. Routing does not certify coach road restrictions.',
+      oneWayWarning:'Daily scheduling enabled by default. Indicative study: coach restrictions, legal breaks and station availability require verification.',
       mySimulations:'My simulations',myResults:'Previous results',stationKicker:'LOCATION DIRECTORY',
       stationTitle:'Stations in Normandy',stationIntro:'Listed hydrogen stations and official petrol/diesel stations from DGCCRF. Indicative information; coach access is not guaranteed.',
       refresh:'Refresh',filterType:'Show',filterAll:'All stations',filterH2:'Hydrogen H₂',filterFuel:'Petrol / diesel',
@@ -230,20 +237,27 @@
 
       dayPlanToggle:'Schedule daily rotations and refuelling (prototype)',
       dayPlanNotice:'Reverse legs are separately routed. End time means service completion. No station waiting time.',
-      selectedRefuelStation:'Selected station:',noRefuelStation:'None selected (no refuelling available).',
+      selectedRefuelStation:'Required station:',noRefuelStation:'No required station.',
+      stationPolicy:'Refuelling policy',stationAuto:'Automatic: compatible station if refuelling is needed',
+      stationImposed:'Required station (advanced)',stationNone:'No refuelling during the day',
+      stationRequired:'Choose a station for required-station mode, or switch to automatic.',
+      stationIncompatible:'The required station does not supply any selected vehicle energy. Use automatic mode.',
       browseRefuelStations:'Choose a station on the map',clearRefuelStation:'Clear selection',
       useForRefuel:'Use for day schedule',stationChosen:'Station selected for the daily schedule.',
-      dieselRate:'Diesel pump flow (L/min, user-supplied)',hydrogenRate:'Hydrogen flow (kg/min, user-supplied)',
-      handlingTime:'Handling time (minutes)',refuelNoQueue:'Station waiting time: 0 min. Pump flow must be provided; verify station access.',
+      dieselRate:'Diesel pump flow (L/min, unverified assumption)',hydrogenRate:'Hydrogen flow (kg/min, required)',
+      handlingTime:'Handling time (minutes)',refuelNoQueue:'Station waiting: 0 min. Diesel flow 30 L/min is an illustrative assumption to verify; 0 disables refuelling.',
       dayTileTitle:'Daily schedule by vehicle solution',dayService:'Passenger service',
       dayDeadhead:'Empty return trip',dayDetour:'Detour to filling station',dayRefuel:'Refuelling',
       dayHandling:'Handling',dayWaiting:'Waiting at station',dayTimeTotal:'Service elapsed time',
       dayVehicleTime:'Total vehicle-hours',dayFuelStops:'Fuel stops',dayVehicleNumber:'Coach',
+      dayRotations:'Trips completed',bestIndicative:'Lowest cost among calculated cases (not proven optimal)',
+      stationAutoExplanation:'Automatic search by fuel and routed detour time. Non-exhaustive sample, coach access unverified.',
+      stationSearchLimits:'Station search limitations',
       dayPlanUnverified:'Indicative plan: breaks, bus access and filling station availability not verified.',
       dayBasicNotice:'Basic mode: one trip per vehicle, no rotations or refuelling.',
       dayNoSchedule:'No feasible schedule found for this option.',
       status_no_solution_found:'Unresolved (not proven infeasible)',
-      dayRefuelGuide:'To allow a fuel stop, choose a map station and supply a verified flow rate.',
+      dayRefuelGuide:'Required station: only compatible vehicles can refuel here. Automatic mode is recommended.',
       navRouting:'Routing API',compareHint:'Select at least two vehicles. Energy type and national price are matched automatically.',
       selectAtLeastTwo:'Select at least two different vehicles for the comparison.',
       compareNeedCatalog:'To compare options, add at least two vehicles with configured energy types in Settings.',
@@ -822,6 +836,13 @@
     const root = $('comparison-results');
     const shared = comparison.shared;
     const headers = ['compareVehicle','compareEnergy','compareFeasibility','vehiclesUsed','compareCost','compareEmissions','comparePerPassenger','compareConsumption','comparePdf'];
+    // Cost-based indicative selection among the *feasible computed cases*.
+    // Neither this ranking nor the day heuristic proves a global optimum.
+    const feasible = comparison.entries.filter(e=>e.result.status==='feasible_not_proven'
+      && e.result.totals && Number.isFinite(Number(e.result.totals.eur_total)));
+    feasible.sort((a,b)=>Number(a.result.totals.eur_total)-Number(b.result.totals.eur_total)
+      || Number(a.result.totals.vehicles_used)-Number(b.result.totals.vehicles_used));
+    const cheapest = feasible.length ? feasible[0].run_id : null;
     root.innerHTML = `<div class="result-hero"><div><div class="eyebrow">${esc(t('compareResultsTitle'))}</div><h3>${esc(comparison.name)}</h3>
       <p>${esc(shared.route.origin)} → ${esc(shared.route.destination)} · ${esc(number(shared.route.distance_m/1000,1))} km · ${esc(shared.passengers)} ${esc(t('passengers'))}</p>
       <p class="small muted">${esc(t('compareSameInputs'))} SHA-256 ${esc(comparison.shared_sha256.slice(0,16))}…</p></div></div>
@@ -831,7 +852,7 @@
         const valid = !!total && result.status==='feasible_not_proven';
         const detail=valid?t('compareStatus'):t(`status_${result.status}`);
         const warn=!valid?`<small>${esc((result.constraints||[]).map(x=>translatedEngineMessage(x.message)).join(' · '))}</small>`:'';
-        return `<tr><td><strong>${esc(vehicle.label)}</strong><small>${esc(vehicle.seats)} ${esc(t('seatsShort'))}</small></td>
+        return `<tr><td><strong>${esc(vehicle.label)}</strong><small>${esc(vehicle.seats)} ${esc(t('seatsShort'))}</small>${cheapest===entry.run_id?`<small class="compare-good">${esc(t('bestIndicative'))}</small>`:''}</td>
           <td>${esc(energy.energy_code)}<small>${esc(energy.price_per_unit)} EUR/${esc(energy.unit)}</small></td>
           <td><span class="${valid?'compare-good':'compare-bad'}">${esc(detail)}</span>${warn}</td>
           <td>${valid?esc(total.vehicles_used):'—'}</td>
@@ -842,6 +863,12 @@
           <td><button type="button" class="button outline" data-compare-pdf="${esc(entry.run_id)}">PDF</button></td></tr>`;
       }).join('')}</tbody></table></div>
       <p class="small warning-text">${esc(t('compareReadOnly'))}</p>${scheduleTiles(comparison)}`;
+    if (shared.day_plan && shared.day_station_policy === 'automatic') {
+      const notes = (shared.day_station_search_warnings || []).filter(Boolean);
+      root.insertAdjacentHTML('beforeend', `<p class="small muted">${esc(t('stationAutoExplanation'))}</p>`+
+        (notes.length ? `<details class="small"><summary>${esc(t('stationSearchLimits'))}</summary><ul>`+
+          notes.map(n=>`<li>${esc(n)}</li>`).join('')+`</ul></details>` : ''));
+    }
     root.classList.remove('hidden'); $('result-detail').classList.add('hidden');
     root.querySelectorAll('[data-compare-pdf]').forEach(b=>b.addEventListener('click',()=>downloadPdf(b.dataset.comparePdf)));
     if (scroll) root.scrollIntoView({behavior:'smooth',block:'start'});
@@ -855,6 +882,10 @@
     const label = $('day-station-name');
     if (label) label.textContent = plannedStation ? plannedStation.name : t('noRefuelStation');
   }
+  function updateStationPolicy() {
+    $('day-station-manual').classList.toggle('hidden', $('station-policy').value !== 'imposed');
+  }
+  $('station-policy').addEventListener('change', updateStationPolicy);
   $('day-plan-enabled').addEventListener('change', () => {
     $('day-plan-details').classList.toggle('hidden', !$('day-plan-enabled').checked);
   });
@@ -862,7 +893,8 @@
     show('stations'); message(t('dayRefuelGuide'));
   });
   $('day-plan-remove-station').addEventListener('click', () => {
-    plannedStation = null; updatePlannedStation();
+    plannedStation = null; $('station-policy').value='automatic';
+    updatePlannedStation(); updateStationPolicy();
   });
   function timelineRows(entry) {
     const result = entry.result;
@@ -908,15 +940,17 @@
             <div><small>${esc(t('dayTimeTotal'))}</small><strong>${esc(routeTime(Number(total.duration_elapsed_s??simpleElapsed)))}</strong></div>
             <div><small>${esc(t('dayVehicleTime'))}</small><strong>${esc(routeTime(Number(total.duration_vehicle_s??simpleVehicleTime)))}</strong></div>
             <div><small>${esc(t('dayFuelStops'))}</small><strong>${esc(total.refuel_count||0)}</strong></div>
+            <div><small>${esc(t('dayRotations'))}</small><strong>${esc(total.trips||0)}</strong></div>
             <div><small>${esc(t('compareCost'))}</small><strong>${esc(number(total.eur_total,2))} €</strong></div>
             <div><small>${esc(t('compareEmissions'))}</small><strong>${total.kgco2e_total===null?'—':esc(number(total.kgco2e_total,2))+' kg'}</strong></div>
           </div>
-          ${buses.map((bus,i)=>`<details class="day-bus" ${i===0?'open':''}><summary>${esc(t('dayVehicleNumber'))} ${esc(bus.vehicle_instance)} · ${esc(routeTime(Number(bus.active_duration_s)))}</summary>
+          ${buses.map((bus,i)=>`<details class="day-bus" ${i===0?'open':''}><summary>${esc(t('dayVehicleNumber'))} ${esc(bus.vehicle_instance)} · ${esc(routeTime(Number(bus.active_duration_s)))} · ${esc((bus.events||[]).filter(e=>e.kind==='service').length)} ${esc(t('dayRotations').toLowerCase())}</summary>
            <ol class="day-events">${(bus.events||[]).map(e=>`<li>
              <span class="day-event-time">${esc(localTime(e.start_utc))} – ${esc(localTime(e.end_utc))}</span>
              <div><strong>${esc(eventLabel(e.kind))}</strong><small>${esc(routeTime(Number(e.duration_s)))}`+
                 `${Number(e.distance_m)?' · '+esc(number(Number(e.distance_m)/1000,1))+' km':''}`+
-                `${e.kind==='refuel'?' · +'+esc(number(e.energy_added,2))+' '+esc(vehicle.unit):''}</small></div>
+                `${e.kind==='refuel'?' · +'+esc(number(e.energy_added,2))+' '+esc(vehicle.unit):''}`+
+                `${e.station_name?' · '+esc(e.station_name):''}</small></div>
              </li>`).join('')}</ol></details>`).join('')}
           ${isPlan?`<p class="small muted">${esc(t('dayWaiting'))}: <strong>0 min</strong></p>`:''}`
           :`<p class="warning-text">${esc(t('dayNoSchedule'))} ${esc((result.constraints||[]).map(c=>translatedEngineMessage(c.message)).join(' · '))}</p>`}
@@ -938,6 +972,12 @@
     if (!currentQuote) {
       compareProblem(t('compareNeedRoute'));
       return false;
+    }
+    if ($('day-plan-enabled').checked && $('station-policy').value==='imposed') {
+      if (!plannedStation) { compareProblem(t('stationRequired')); return false; }
+      const fuels=new Set(plannedStation.energy_codes);
+      const chosen=selectedComparableIds().map(id=>vehicles.find(v=>v.id===id)?.payload.energy_code);
+      if (!chosen.some(x=>fuels.has(x))) { compareProblem(t('stationIncompatible')); return false; }
     }
     const form=$('scenario-form');
     const invalid=form.querySelector(':invalid');
@@ -970,7 +1010,8 @@
       tco_scope:d.tco_scope,emission_scope:d.emission_scope,infrastructure_daily_eur:d.infrastructure_daily_eur,
       day_plan:$('day-plan-enabled').checked};
     if(body.day_plan) {
-      body.refuel_station=plannedStation;
+      body.station_policy=$('station-policy').value;
+      body.refuel_station=body.station_policy==='imposed' ? plannedStation : null;
       body.diesel_flow_l_per_min=String(d.diesel_flow_l_per_min||'0').replace(',','.');
       body.hydrogen_flow_kg_per_min=String(d.hydrogen_flow_kg_per_min||'0').replace(',','.');
       body.handling_minutes=String(d.handling_minutes||'0').replace(',','.');
@@ -1173,6 +1214,7 @@
     $('use-station-day-plan').addEventListener('click', () => {
       plannedStation=selectedStationData(s); updatePlannedStation();
       $('day-plan-enabled').checked=true; $('day-plan-details').classList.remove('hidden');
+      $('station-policy').value='imposed'; updateStationPolicy();
       show('scenarios'); message(t('stationChosen'));
     });
     const marker=stationMarkers.get(id);

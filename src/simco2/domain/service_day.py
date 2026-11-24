@@ -92,12 +92,20 @@ def _schedule_day(snapshot: dict) -> SolveResult:
     reverse = snapshot.get("day_legs", {}).get("reverse")
     station = snapshot.get("day_station")
     detour = snapshot.get("day_legs", {}).get("via_station")
+    policy = snapshot.get("day_station_policy", "imposed" if station else "none")
+    options = list((snapshot.get("day_station_options") or {}).get(vehicle["energy_code"], []))
+    # Compatibility with snapshots created before station auto-selection.
+    if station and detour and policy == "imposed":
+        options = [{"station": station, "to_station": detour.get("to_station"),
+                    "from_station": detour.get("from_station")}]
+    if policy == "none":
+        options = []
     flow_rates = snapshot.get("day_refuel_rates_per_min") or {}
     rate = dec(flow_rates.get(vehicle["energy_code"], "0"))
     handling_minutes = dec(snapshot.get("day_handling_minutes", "0"))
     if handling_minutes < 0 or rate < 0:
         raise DomainError("invalid_station_rate", "Debit ou manipulation negatif")
-    if vehicle["energy_code"] == "ELECTRIC" and station:
+    if vehicle["energy_code"] == "ELECTRIC":
         # Charging is not a constant-flow fuel operation.
         rate = ZERO
     if trips_needed > 1:
@@ -143,52 +151,62 @@ def _schedule_day(snapshot: dict) -> SolveResult:
 
     for trip_num in range(trips_needed):
         pax = min(remaining, seats)
-        # Reuse existing coaches when feasible. This does not prove minimum fleet.
+        # Reuse existing coaches when feasible. Search a bounded shortlist of
+        # routed, energy-compatible stations when the direct return cannot work.
         candidates = []
         for bus in buses:
             before, fuel = bus["available_at"], bus["energy"]
             ret_energy = power(reverse)
-            route_chain = [("deadhead_return", reverse)]
-            filling = False
-            if fuel < ret_energy + route_energy + reserve:
-                if (not station or not detour or vehicle["energy_code"] not in station.get("energy_codes", [])
-                        or rate <= 0):
-                    continue
-                to_station = _leg(detour.get("to_station"), "vers station")
-                from_station = _leg(detour.get("from_station"), "retour depuis station")
-                if fuel < power(to_station) + reserve or capacity < power(from_station) + route_energy + reserve:
-                    continue
-                filling = True
-                route_chain = [("station_detour", to_station), ("refuel", None),
-                               ("deadhead_return", from_station)]
-            journey_s = sum((dec(leg["duration_s"]) for _, leg in route_chain if leg), ZERO)
-            if filling:
-                to_station = detour["to_station"]
-                quantity = capacity - (fuel - power(to_station))
-                journey_s += quantity / rate * Decimal(60) + handling_minutes * Decimal(60)
-            arrival = before + timedelta(seconds=float(journey_s + dec(route["duration_s"])))
-            if arrival <= stop:
-                candidates.append((before, bus["id"], bus, route_chain, filling))
+            if fuel >= ret_energy + route_energy + reserve:
+                arrival = before + timedelta(seconds=float(dec(reverse["duration_s"]) + dec(route["duration_s"])))
+                if arrival <= stop:
+                    candidates.append((arrival, bus["id"], bus, [("deadhead_return", reverse)], None))
+            if fuel < ret_energy + route_energy + reserve and rate > 0:
+                for option in options:
+                    selected = option.get("station") or {}
+                    if vehicle["energy_code"] not in selected.get("energy_codes", []):
+                        continue
+                    to_station = _leg(option.get("to_station"), "vers station")
+                    from_station = _leg(option.get("from_station"), "retour depuis station")
+                    e_to, e_back = power(to_station), power(from_station)
+                    if fuel < e_to + reserve or capacity < e_back + route_energy + reserve:
+                        continue
+                    quantity = capacity - (fuel - e_to)
+                    if quantity < 0:
+                        continue
+                    extra = (dec(to_station["duration_s"]) + dec(from_station["duration_s"])
+                             + quantity / rate * Decimal(60) + handling_minutes * Decimal(60))
+                    arrival = before + timedelta(seconds=float(extra + dec(route["duration_s"])))
+                    if arrival <= stop:
+                        candidates.append((arrival, bus["id"], bus,
+                            [("station_detour", to_station), ("deadhead_return", from_station)],
+                            selected))
+        # Earliest completed next passenger run. This is a bounded greedy
+        # decision, never a claim of a mathematically proven optimum.
         chosen = min(candidates, key=lambda t: (t[0], t[1])) if candidates else None
         if chosen is not None:
-            _, _, bus, chain, filling = chosen
+            _, _, bus, chain, station_chosen = chosen
             for kind, leg in chain:
-                if kind == "refuel":
+                if kind == "deadhead_return" and station_chosen:
                     quantity = capacity - bus["energy"]
                     seconds = quantity / rate * Decimal(60)
                     event(bus, "refuel", bus["available_at"], duration=seconds, amount=quantity,
-                          notes="sans attente / no queue")
+                          notes=station_chosen["name"] + " · sans attente / no queue")
+                    bus["events"][-1]["station_id"] = station_chosen["id"]
+                    bus["events"][-1]["station_name"] = station_chosen["name"]
                     bus["energy"] = capacity
                     refuel_count += 1
                     if handling_minutes:
                         event(bus, "handling", bus["available_at"],
                               duration=handling_minutes * Decimal(60))
-                else:
-                    event(bus, kind, bus["available_at"], leg=leg)
+                event(bus, kind, bus["available_at"], leg=leg)
         else:
             if len(buses) >= fleet_limit:
-                return _not_solved("Aucune solution trouvee dans la plage et le parc autorises; "
-                                   "cela ne prouve pas l'impossibilite", unserved=remaining)
+                reason = ("Aucune rotation supplémentaire trouvée avec le parc et les horaires. "
+                          "Vérifier le trajet retour, l'autonomie, les stations compatibles "
+                          "et les débits de plein (0 interdit le plein). "
+                          "Le modèle ne prouve pas l'impossibilité.")
+                return _not_solved(reason, unserved=remaining)
             if start + timedelta(seconds=float(dec(route["duration_s"]))) > stop:
                 return _not_solved("La course ne tient pas dans la plage de service", unserved=remaining)
             bus = {"id": f"V{len(buses)+1:03d}", "energy": capacity,
@@ -226,6 +244,11 @@ def _schedule_day(snapshot: dict) -> SolveResult:
         "Aucune pause chauffeur/reglementation, depot, congestion ni recharge electrique modele.",
         "Stations indicatives : disponibilite et acces a confirmer avant exploitation.",
     ]
+    if policy == "automatic":
+        warnings.append("Sélection automatique sur un échantillon de stations : optimum global non prouvé.")
+        warnings.extend(snapshot.get("day_station_search_warnings") or [])
+        if not rate and trips_needed > 1:
+            warnings.append("Débit de remplissage nul : aucun plein possible; seuls les véhicules autonomes ou supplémentaires sont utilisés.")
     result = {
         "status": SolveStatus.FEASIBLE_NOT_PROVEN.value, "engine": "single-line-day-v0.1",
         "objective": scenario.get("objective", "cost"), "objective_proven_optimal": False,
@@ -243,6 +266,8 @@ def _schedule_day(snapshot: dict) -> SolveResult:
                 (dec(e["duration_s"]) for b in buses for e in b["events"] if e["kind"] == "handling"), ZERO),
             "duration_elapsed_s": dec(str(elapsed_s)), "duration_vehicle_s": active_seconds,
             "refuel_count": refuel_count, "energy_consumed": total_energy,
+            "rotations_per_vehicle": {b["id"]: sum(e["kind"] == "service" for e in b["events"])
+                                      for b in buses},
             "energy_unit": vehicle["unit"], "eur_total": costs["total_eur"],
             "eur_per_vehicle": safe_ratio(costs["total_eur"], dec(len(buses))),
             "eur_per_km": safe_ratio(costs["total_eur"], (service_dist + deadhead_dist)/Decimal(1000)),
@@ -258,6 +283,8 @@ def _schedule_day(snapshot: dict) -> SolveResult:
         "warnings": warnings,
         "provenance": {"route": {"provider": route.get("provider"), "source": route.get("source")},
                        "day_legs": snapshot.get("day_legs"), "station": station,
+                       "station_policy": policy,
+                       "station_options": snapshot.get("day_station_options"),
                        "vehicle_version_id": snapshot["vehicle_version"]["id"],
                        "energy_version_id": snapshot["energy_version"]["id"],
                        "energy_source": energy["source"],

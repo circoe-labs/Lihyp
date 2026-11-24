@@ -90,3 +90,26 @@ def test_route_details_have_to_be_sourced_not_mirrored():
     data=fixture()
     data['day_legs'].pop('reverse')
     assert schedule_day(data).result['status']=='invalid_input'
+
+
+def test_automatic_station_choice_uses_routed_duration_and_no_wait():
+    data=fixture(station=False)
+    data['day_station_policy']='automatic'
+    data['day_legs'].pop('via_station')
+    data['day_station_options']={'DIESEL':[
+        {'station':{'id':'slow','name':'Slow valid fuel station', 'energy_codes':['DIESEL']},
+         'to_station':{'distance_m':'10000','duration_s':'1100'},
+         'from_station':{'distance_m':'90000','duration_s':'7200'}},
+        {'station':{'id':'fast','name':'Fast valid fuel station', 'energy_codes':['DIESEL']},
+         'to_station':{'distance_m':'10000','duration_s':'600'},
+         'from_station':{'distance_m':'90000','duration_s':'6500'}}]}
+    result=schedule_day(data).result
+    assert result['status']=='feasible_not_proven'
+    assert result['totals']['refuel_count']==1
+    assert result['totals']['duration_wait_s']=='0'
+    events=result['vehicles'][0]['events']
+    fuel=[e for e in events if e['kind']=='refuel']
+    assert len(fuel)==1
+    assert fuel[0]['station_id']=='fast'
+    assert fuel[0]['station_name']=='Fast valid fuel station'
+    assert result['totals']['rotations_per_vehicle']=={'V001':2}

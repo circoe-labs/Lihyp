@@ -20,6 +20,7 @@ from simco2.api.schemas import (
     RoutingConfigInput, RoutingKeyInput)
 from simco2.domain.engine import BaselineEngine
 from simco2.domain.service_day import schedule_day
+from simco2.adapters.station_optimization import route_candidates
 from simco2.domain.errors import DomainError, MissingReference, RoutingFailure
 from simco2.reporting import render_pdf
 
@@ -87,10 +88,10 @@ def create_app(db_path: str | Path | None = None, *, geocoder=None, routing_prov
         return {
             "ready_for_production": False,
             "implemented": ["user_login", "audit", "versioned_energy", "versioned_vehicle",
-                            "manual_stations", "single_line_snapshot", "limited_day_planner", "baseline_fixed_consumption",
+                            "manual_stations", "single_line_snapshot", "limited_day_planner", "bounded_auto_refuel_search", "baseline_fixed_consumption",
                             "baseline_tco", "direct_and_wtw_co2e", "simple_report_pdf"],
             "not_implemented": ["multi_day", "network_optimizer", "mixed_fleet", "repositioning",
-                                "automatic_refuel_station_selection", "charge", "regulatory_rules", "lifecycle_acv",
+                                "globally_optimal_refuel_selection", "charge", "regulatory_rules", "lifecycle_acv",
                                 "jobs", "live_data_import", "map_dashboard"],
             "notice": "Les sources nationales/stations ne sont pas vérifiées, Q24 ouvert.",
         }
@@ -258,11 +259,27 @@ def create_app(db_path: str | Path | None = None, *, geocoder=None, routing_prov
         # Supplemental legs are routed once and frozen in all comparison snapshots.
         # A mirrored distance is not a credible reverse itinerary.
         day_legs = {}
+        # Older clients only had an optional station object. Preserve their
+        # imposed-station semantics; new clients state a policy explicitly.
+        # When an old client supplied a station, that meant "imposed". An
+        # explicit new station_policy=automatic MUST take precedence.
+        legacy_station = (data.refuel_station is not None and
+                          "station_policy" not in data.model_fields_set)
+        day_station_policy = "imposed" if legacy_station else data.station_policy
         day_station = (data.refuel_station.model_dump(mode="json")
-                       if data.day_plan and data.refuel_station else None)
+                       if data.day_plan and day_station_policy == "imposed" and data.refuel_station else None)
+        if data.day_plan and day_station_policy == "imposed" and not day_station:
+            raise DomainError("station_required", "Choisissez une station pour le mode imposé")
         if day_station:
             day_station["quality"] = "user_selected_unverified"
             day_station["station_operational_and_bus_access_verified"] = False
+            selected_energy_codes = {db.get_vehicle(v)["payload"]["energy_code"]
+                                     for v in data.vehicle_version_ids}
+            if not selected_energy_codes.intersection(day_station["energy_codes"]):
+                raise DomainError("station_energy_incompatible",
+                                  "La station imposée ne distribue aucune des énergies sélectionnées")
+        station_options = {}
+        station_search_warnings = []
         if data.day_plan:
             origins = quote.get("origin_coordinates"), quote.get("destination_coordinates")
             if not all(origins):
@@ -292,6 +309,38 @@ def create_app(db_path: str | Path | None = None, *, geocoder=None, routing_prov
                     day_legs["via_station"] = {
                         "to_station": frozen_leg(end_coordinates, station_point, "detour station"),
                         "from_station": frozen_leg(station_point, start_coordinates, "station vers origine")}
+                if day_station_policy == "automatic":
+                    needed = set()
+                    for vehicle_id in data.vehicle_version_ids:
+                        v = db.get_vehicle(vehicle_id)["payload"]
+                        code = v["energy_code"]
+                        flow = {"DIESEL": data.diesel_flow_l_per_min,
+                                "H2": data.hydrogen_flow_kg_per_min}.get(code, "0")
+                        if data.passengers > v["seats"] and float(flow) > 0:
+                            needed.add(code)
+                    if needed:
+                        # The official fuel directory is paginated. Do not
+                        # silently pretend that this bounded sample is complete.
+                        catalog = list(NORMANDY_H2)
+                        if "DIESEL" in needed:
+                            for offset in (0, 100, 200):
+                                page = app.state.fuel_directory.page(offset, 100, area="normandy")
+                                if page.get("unavailable"):
+                                    station_search_warnings.append(
+                                        "Répertoire DGCCRF indisponible : aucun arrêt gazole automatique vérifié.")
+                                    break
+                                catalog.extend(page.get("stations") or [])
+                                if not page.get("has_more"):
+                                    break
+                                if offset == 200:
+                                    station_search_warnings.append(
+                                        "Répertoire DGCCRF partiel (300 premières stations) : optimum non prouvé.")
+                        station_options, routing_warnings = route_candidates(
+                            provider, quote, catalog, needed, max_per_energy=4)
+                        station_search_warnings.extend(routing_warnings)
+                    else:
+                        station_search_warnings.append(
+                            "Aucun débit de plein renseigné ou aucun second trajet : recherche de stations inutile.")
         entries = []
         for version_id in data.vehicle_version_ids:
             vehicle = db.get_vehicle(version_id)
@@ -315,7 +364,8 @@ def create_app(db_path: str | Path | None = None, *, geocoder=None, routing_prov
             scenario_doc["route"] = quote
             if data.day_plan:
                 scenario_doc["schedule_mode"] = "single_line_day_greedy"
-                scenario_doc["refuel_mode"] = "imposed" if day_station else "no_refuel"
+                scenario_doc["refuel_mode"] = ("optimized" if day_station_policy == "automatic"
+                                               else day_station_policy)
             revision_id = rid()
             snapshot = {
                 "scenario_revision_id": revision_id, "scenario_revision_number": 1,
@@ -323,6 +373,9 @@ def create_app(db_path: str | Path | None = None, *, geocoder=None, routing_prov
                 "energy_version": energy, "routing_snapshot": quote,
                 "day_legs": day_legs if data.day_plan else None,
                 "day_station": day_station,
+                "day_station_policy": day_station_policy if data.day_plan else None,
+                "day_station_options": station_options if data.day_plan else None,
+                "day_station_search_warnings": station_search_warnings if data.day_plan else None,
                 "day_refuel_rates_per_min": {
                     "DIESEL": data.diesel_flow_l_per_min,
                     "H2": data.hydrogen_flow_kg_per_min,
@@ -351,6 +404,9 @@ def create_app(db_path: str | Path | None = None, *, geocoder=None, routing_prov
             "day_plan": data.day_plan,
             "day_legs": day_legs if data.day_plan else None,
             "day_station": day_station,
+            "day_station_policy": day_station_policy if data.day_plan else None,
+            "day_station_options": station_options if data.day_plan else None,
+            "day_station_search_warnings": station_search_warnings if data.day_plan else None,
             "day_refuel_rates_per_min": {
                 "DIESEL": data.diesel_flow_l_per_min,
                 "H2": data.hydrogen_flow_kg_per_min,

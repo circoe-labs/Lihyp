@@ -75,7 +75,7 @@
 /* A map must never overlay the vehicle form, adjacent card, or site navigation. */
 .route-map-container { isolation: isolate; }
 /* Show the vehicle catalogue as usable solution cards, including the opt-in demo. */
-#vehicle-table.solution-list { display: grid; gap: 14px; overflow: visible; }
+#vehicle-table.solution-list { display: grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap: 14px; overflow: visible; }
 .solution-card { border: 1px solid #dbe7eb; border-radius: 12px; background: #fff; padding: 20px; }
 .solution-demo { border-style: dashed; border-color: #91b9be; background: #f5fafb; }
 .solution-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
@@ -100,6 +100,23 @@
   .solution-specs > div + div { border-left: 0; border-top: 1px solid #e2edf0; }
 }
 
+/* A compact full-width catalogue, not a long single column in the sidebar. */
+.vehicle-management { display:flex; flex-direction:column; gap:12px; }
+.vehicle-catalog-panel { width:100%; order:-1; }
+#vehicle-table .solution-card { min-width:0; display:flex; flex-direction:column; padding:15px; }
+#vehicle-table .solution-header { flex-wrap:wrap; }
+#vehicle-table .solution-header h4 { font-size:15px; margin-top:6px; }
+#vehicle-table .solution-source { overflow-wrap:anywhere; font-size:11px; }
+#vehicle-table .solution-actions { margin-top:auto; }
+.admin-toolbar { display:flex; justify-content:flex-end; margin-bottom:12px; }
+#view-routing #login { min-height:0; display:flex; justify-content:flex-start; padding:0; background:none; }
+#view-routing #login.hidden { display:none!important; }
+#view-routing #login .login-card { box-shadow:none; border:1px solid var(--line); width:min(560px,100%); padding:28px; }
+#view-routing #login .brand-icon { display:none; }
+#energy-form-error { color:#a13b28; font-weight:700; margin:0; padding:10px; border:1px solid #e8b09a; border-radius:8px; background:#fff4ef; }
+#energy-status { min-height:1em; color:#087261; }
+@media(max-width:1250px){#vehicle-table.solution-list { grid-template-columns:repeat(2,minmax(0,1fr)); }}
+@media(max-width:750px){#vehicle-table.solution-list { grid-template-columns:1fr; }}
 /* Comparison-first workspace: maps remain in their own painting context. */
 .simulator-layout{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:18px}
 .simulator-layout>.panel,.simulator-side{min-width:0}

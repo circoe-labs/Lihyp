@@ -56,11 +56,11 @@ def test_biognv_unit_is_kg():
 
 def test_reference_asset_visible_without_automatic_creation(tmp_path):
     app=create_app(tmp_path/'catalogue.sqlite')
-    app.state.db.create_user('analyste','this-is-an-adequately-long-secret')
+    app.state.db.create_user('admin','this-is-an-adequately-long-secret')
     client=TestClient(app)
     r=client.get('/assets/vehicle-reference-catalog.json')
     assert r.status_code==200 and len(r.json()['entries'])==9
-    token=client.post('/auth/login',json={'username':'analyste','password':'this-is-an-adequately-long-secret'}).json()['access_token']
+    token=client.post('/auth/login',json={'username':'admin','password':'this-is-an-adequately-long-secret'}).json()['access_token']
     client.headers.update({'Authorization':f'Bearer {token}'})
     assert client.get('/vehicles').json()==[]
     item=r.json()['entries'][0]

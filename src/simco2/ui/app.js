@@ -7,7 +7,7 @@
   const text = (value) => String(value ?? '');
   const dictionary = {
     fr: {
-      loginKicker:'SIMULATEUR DE TRANSPORT · PROTOTYPE', loginIntro:"Estimez le coût et les émissions d'une ligne de transport avec un itinéraire calculé.",
+      loginKicker:'ACCÈS ADMINISTRATEUR', loginIntro:"Connectez-vous pour gérer les clés de routage, les énergies, les véhicules et les stations.",
       username:'Identifiant',password:'Mot de passe',signIn:'Se connecter',loginHelp:"Compte créé par l'administrateur du service. En local : python -m simco2.cli create-user.",
       brandSubtitle:'Transport & climat',navTitle:'SIMULER ET EXPLORER',navSimulations:'Simulations',navStations:'Stations en Normandie',
       settings:'PARAMÈTRES',navVehicles:'Véhicules',navEnergy:'Énergies par pays',prototypeNotice:'Prototype : une ligne et une journée. Planning avec détours et pleins facultatif, sans optimisation garantie.',
@@ -306,13 +306,48 @@
   let language = 'fr';
   try { if (localStorage.getItem('simco2_language') === 'en') language = 'en'; } catch (_) {}
   const t = (key) => dictionary[language][key] ?? dictionary.fr[key] ?? key;
-  let token = '', actor = null, currentQuote = null, currentRoute = null, currentRun = null;
+  let token = '', actor = null, operator = false, currentQuote = null, currentRoute = null, currentRun = null;
   let comparisons = [], currentComparison = null, selectedVehicleIds = new Set(), routingConfig = null;
   let comparisonSelectionInitialized = false;
   let plannedStation = null;
   let energies = [], vehicles = [], customStations = [], h2Stations = [], fuelStations = [], scenarios = [], runs = [];
   let fuelPage = null, stationLoading = false, editingVehicleKey = null, energyHistoryCode = null;
   let routeMap = null, stationsMap = null, routeDrawings = [], stationDrawings = [];
+  // Mount the only sign-in portal inside API de routage. Public pages never
+  // require a password and admin credentials stay in memory (not in a cookie).
+  const routeView = $('view-routing');
+  const loginPortal = $('login');
+  routeView.insertBefore(loginPortal, routeView.firstChild);
+  const routeProtected = document.createElement('div');
+  routeProtected.id = 'routing-protected';
+  routeProtected.className = 'hidden';
+  while (loginPortal.nextSibling) routeProtected.appendChild(loginPortal.nextSibling);
+  routeView.appendChild(routeProtected);
+  const lockButton = $('logout-button');
+  const lockBar = document.createElement('div');
+  lockBar.className = 'admin-toolbar';
+  routeProtected.prepend(lockBar);
+  lockBar.appendChild(lockButton);
+  document.querySelector('.user-row')?.remove();
+  const readOnlyNotices = ['view-energy','view-vehicles','view-stations'].map(view => {
+    const notice=document.createElement('p');
+    notice.className='form-note public-settings-notice';
+    $(view).insertBefore(notice,$(view).children[1]);
+    return notice;
+  });
+  const updateOperatorUI = () => {
+    loginPortal.classList.toggle('hidden', operator);
+    routeProtected.classList.toggle('hidden', !operator);
+    document.querySelectorAll('.admin-only').forEach(el => el.classList.toggle('hidden', !operator));
+    readOnlyNotices.forEach(el => {
+      el.classList.toggle('hidden', operator);
+      el.innerHTML=language==='fr'
+        ? 'Consultation publique. Pour modifier ces paramètres, <button type="button" class="table-action" data-goto="routing">ouvrez l’accès administrateur dans API de routage</button>.'
+        : 'Public read-only view. To edit, <button type="button" class="table-action" data-goto="routing">sign in under Routing API</button>.';
+    });
+    lockButton.textContent = operator ? (language === 'fr' ? 'Verrouiller les paramètres' : 'Lock settings') : '';
+    renderEnergies(); renderVehicles(); renderReferenceLibrary();
+  };
   const field = (form, key) => form.elements.namedItem(key).value;
   const dataOf = (form) => Object.fromEntries(new FormData(form).entries());
   const routeTime = (seconds) => `${Math.floor(seconds / 3600) ? `${Math.floor(seconds / 3600)} h ` : ''}${Math.ceil(seconds % 3600 / 60)} min`;
@@ -369,7 +404,8 @@
     if (currentRoute) renderRouteSummary(currentRoute);
     if (currentRun) showResult(currentRun, false);
     if (currentComparison) showComparison(currentComparison, false);
-    renderRoutingConfig();
+    if (operator) renderRoutingConfig();
+    updateOperatorUI();
   }
   $('language-toggle').addEventListener('click', () => {
     language = language === 'fr' ? 'en' : 'fr';
@@ -386,7 +422,7 @@
     if (view === 'vehicles') { loadVehicles(); if(!referenceEntries.length) loadReferenceLibrary(); }
     if (view === 'stations') loadStations();
     if (view === 'scenarios') { loadScenarios(); loadRuns(); loadComparisons(); }
-    if (view === 'routing') loadRoutingConfig();
+    if (view === 'routing' && operator) loadRoutingConfig();
     // Leaflet ne sait pas mesurer une carte initialisée dans une section masquée.
     requestAnimationFrame(() => {
       if (view === 'stations') stationsMap?.invalidateSize({pan:false});
@@ -409,24 +445,33 @@
     event.preventDefault(); $('login-message').textContent = '';
     try {
       const response = await api('/auth/login', {method:'POST', body:JSON.stringify(dataOf(event.currentTarget))});
-      token = response.access_token; actor = response.user;
-      $('user-label').textContent = actor.username;
-      $('login').classList.add('hidden'); $('shell').classList.remove('hidden');
+      token = response.access_token; actor = response.user; operator = true;
+      $('login-form').elements.namedItem('password').value = '';
+      updateOperatorUI(); await loadRoutingConfig(); await loadEnergies();
+      show('routing'); applyLanguage();
+    } catch (error) {
+      token = ''; actor = null; operator = false;
+      $('login-message').textContent = error.message;
+      updateOperatorUI();
+    }
+  });
+  $('logout-button').addEventListener('click', async () => {
+    try { await api('/auth/logout', {method:'POST'}); } catch (_) {}
+    token = ''; actor = null; operator = false;
+    $('login-form').elements.namedItem('password').value = '';
+    updateOperatorUI(); show('routing');
+  });
+  async function loadPublicWorkspace() {
+    try {
+      await api('/public/session', {method:'POST'});
       const [e,v,s,r,custom] = await Promise.all([
         api('/energies'),api('/vehicles'),api('/scenarios'),api('/runs'),api('/stations')]);
       [energies,vehicles,scenarios,runs,customStations] = [e,v,s,r,custom];
       fillScenarioSelects(); show('scenarios'); applyLanguage();
     } catch (error) {
-      $('login-message').textContent = error.message;
-      token = ''; $('shell').classList.add('hidden'); $('login').classList.remove('hidden');
+      message((language === 'fr' ? 'Chargement public impossible : ' : 'Unable to load public view: ')+error.message,true);
     }
-  });
-  $('logout-button').addEventListener('click', async () => {
-    try { await api('/auth/logout', {method:'POST'}); } catch (_) {}
-    token = ''; actor = null; currentQuote = null; currentRoute = null;
-    $('shell').classList.add('hidden'); $('login').classList.remove('hidden');
-    $('login-form').elements.namedItem('password').value = '';
-  });
+  }
 
   async function loadEnergies() {
     try { energies = await api('/energies'); renderEnergies(); fillScenarioSelects(); }
@@ -443,7 +488,9 @@
     $('energy-code').disabled = false;
   }
   function openEnergyEditor(version=null) {
+    if (!operator) { show('routing'); return; }
     const form=$('energy-form'); form.reset();
+    $('energy-form-error').textContent='';$('energy-form-error').classList.add('hidden');
     energyEditingCode=version?.payload.energy_code || null;
     const today = new Date().toISOString().slice(0,10);
     form.elements.namedItem('source_date').value=today;
@@ -478,9 +525,9 @@
         <td><strong>${esc(number(Number(p.price_per_unit),2))}</strong> EUR/${unit}</td>
         <td>${esc(p.factors.direct??'—')}</td><td>${esc(p.factors.well_to_wheel??'—')}</td>
         <td>${source}<small>${esc(p.source_date)}</small></td>
-        <td><div class="energy-action-row"><button type="button" class="table-action" data-energy-edit="${esc(code)}">✎ ${esc(t('revise'))}</button>
+        <td>${operator ? `<div class="energy-action-row"><button type="button" class="table-action" data-energy-edit="${esc(code)}">✎ ${esc(t('revise'))}</button>
         <button type="button" class="table-action" data-energy-remove="${esc(code)}">× ${esc(t('removeEnergy'))}</button>
-        <button type="button" class="table-action" data-energy-history="${esc(code)}">${esc(t('history'))}</button></div></td></tr>`;
+        <button type="button" class="table-action" data-energy-history="${esc(code)}">${esc(t('history'))}</button></div>` : '<span class="small muted">Lecture seule</span>'}</td></tr>`;
     });
     table($('energy-table'),[t('energy'),t('energyPrice'),t('directFactor'),t('wtwFactor'),t('source'),t('actions')],rows);
     document.querySelectorAll('[data-energy-history]').forEach(b=>b.addEventListener('click',()=>loadEnergyHistory(b.dataset.energyHistory)));
@@ -506,18 +553,34 @@
         `<li>v${v.revision} · ${esc(v.payload.price_per_unit)} EUR/${esc(v.payload.unit)} · ${esc(v.payload.source)} · ${esc(v.created_at)}</li>`).join('')}</ul>`;
     } catch (error) { message(error.message, true); }
   }
+  function energyFormProblem(text) {
+    const node=$('energy-form-error');node.textContent=text;
+    node.classList.remove('hidden');node.scrollIntoView({block:'nearest'});
+  }
+  $('energy-form').addEventListener('invalid', event => {
+    energyFormProblem((language === 'fr' ? 'Vérifier le champ : ' : 'Check the field: ')+
+      (event.target.closest('label')?.querySelector('span')?.textContent || event.target.name));
+  }, true);
   $('energy-form').addEventListener('submit', async event => {
-    event.preventDefault(); const d=dataOf(event.currentTarget), factors = {};
-    if (d.direct.trim()) factors.direct = d.direct.trim();
-    if (d.well_to_wheel.trim()) factors.well_to_wheel = d.well_to_wheel.trim();
+    event.preventDefault();
+    if (!operator) { show('routing'); return; }
+    const d=dataOf(event.currentTarget), factors = {};
+    const decimalText = value => String(value || '').trim().replace(',', '.');
+    if (d.direct.trim()) factors.direct = decimalText(d.direct);
+    if (d.well_to_wheel.trim()) factors.well_to_wheel = decimalText(d.well_to_wheel);
     d.energy_code = energyEditingCode || d.energy_code;
     const unit = {DIESEL:'L',ELECTRIC:'kWh',H2:'kg',BIOGNV:'kg'}[d.energy_code];
+    const button=event.currentTarget.querySelector('button[type=submit]');
+    button.disabled=true;
+    $('energy-form-error').classList.add('hidden');
     try {
       await api('/energies', {method:'POST', body:JSON.stringify({country_iso:d.country_iso,
-        energy_code:d.energy_code,unit,price_per_unit:d.price_per_unit, factors, source:d.source,
-        source_date:d.source_date,license:d.license,quality:'unverified'})});
-      closeEnergyEditor(); await loadEnergies(); message(t('createdVersion'));
-    } catch(error) { message(error.message, true); }
+        energy_code:d.energy_code,unit,price_per_unit:decimalText(d.price_per_unit),
+        factors, source:d.source,source_date:d.source_date,license:d.license,quality:'unverified'})});
+      closeEnergyEditor(); await loadEnergies();
+      $('energy-status').textContent=t('createdVersion');
+    } catch(error) { energyFormProblem(error.message); }
+    finally {button.disabled=false;}
   });
   $('reload-energy').addEventListener('click', loadEnergies);
 
@@ -565,6 +628,7 @@
     };
   }
   async function addReference(e) {
+    if (!operator) {show('routing');return false;}
     if (referenceExists(e)) return false;
     await api('/vehicles',{method:'POST',body:JSON.stringify(referenceVehiclePayload(e))});
     await loadVehicles();
@@ -588,10 +652,10 @@
       </dl>
       <p class="small muted">${esc(t('referenceSpecSource'))} : ${esc(e.technical_source)} · ${esc(e.capacity_details)}</p>
       ${e.purchase_scope==='retrofit_kit_installation'?`<p class="small warning-text">${esc(t('referenceRetrofit'))}</p>`:''}
-      <div class="reference-actions">
+      ${operator ? `<div class="reference-actions">
         <button type="button" class="button primary" data-add-reference="${esc(e.id)}" ${referenceExists(e)?'disabled':''}>${esc(t(referenceExists(e)?'referenceAdded':'referenceAdd'))}</button>
         <button type="button" class="button outline" data-prefill-reference="${esc(e.id)}">${esc(t('referenceUse'))}</button>
-      </div>
+      </div>` : ''}
     </article>`).join('');
     const costRows=referenceEntries.map(e=>{
       const low=e.energy_cost_100km_eur_ht[0]+100*e.maintenance_eur_per_km_ht[0];
@@ -655,9 +719,9 @@
       [t('tankSize'), `${esc(p.usable_capacity)} ${esc(p.unit)}`],
     ];
     const actions = isDemo
-      ? `<button type="button" class="button primary" id="add-demo-vehicle">${esc(t('addDemo'))}</button>`
+      ? (operator ? `<button type="button" class="button primary" id="add-demo-vehicle">${esc(t('addDemo'))}</button>` : '')
       : `<button type="button" class="button primary" data-vehicle-simulate="${key}">${esc(t('selectForScenario'))}</button>
-         <button type="button" class="button outline" data-vehicle-edit="${key}">${esc(t('revise'))}</button>
+         ${operator ? `<button type="button" class="button outline" data-vehicle-edit="${key}">${esc(t('revise'))}</button>` : ''}
          <button type="button" class="table-action" data-vehicle-history="${esc(vehicle.vehicle_key)}">${esc(t('history'))}</button>`;
     return `<article class="solution-card${isDemo ? ' solution-demo' : ''}">
        <header class="solution-header"><div><span class="solution-badge">${esc(badge)}</span>
@@ -1418,6 +1482,7 @@
   }
   $('routing-provider').addEventListener('change',routingProfileOptions);
   async function loadRoutingConfig() {
+    if (!operator) return;
     try { routingConfig = await api('/routing/config'); renderRoutingConfig(); }
     catch(error) {message(error.message,true);}
   }
@@ -1475,4 +1540,6 @@
   $('energy-form').elements.namedItem('source_date').value=localDate;
   $('station-form').elements.namedItem('observed_at').value=localDate;
   applyLanguage();
+  updateOperatorUI();
+  loadPublicWorkspace();
 })();

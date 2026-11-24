@@ -35,12 +35,12 @@ class DayRouter:
 
 def login_client(tmp_path):
     app = create_app(tmp_path/'day.sqlite', geocoder=FakeGeocoder(), routing_provider=DayRouter())
-    app.state.db.create_user('alice', 'secure-passphrase-for-tests')
+    app.state.db.create_user('admin', 'secure-passphrase-for-tests')
     app.state.db.create_user('bob', 'another-secure-passphrase')
     c=TestClient(app)
     def token(username,password):
         return c.post('/auth/login',json={'username':username,'password':password}).json()['access_token']
-    c.headers['Authorization']='Bearer '+token('alice','secure-passphrase-for-tests')
+    c.headers['Authorization']='Bearer '+token('admin','secure-passphrase-for-tests')
     return c, token
 
 
@@ -81,7 +81,8 @@ def test_real_day_schedule_and_snapshot_are_saved(tmp_path):
     # Changing a national price does not alter saved comparison snapshots.
     c.post('/energies',json={**energy(),'price_per_unit':'45'})
     assert c.get('/comparisons/'+group['id']).json()['entries']==entries
-    c.headers['Authorization']='Bearer '+token('bob','another-secure-passphrase')
+    c.headers.pop('Authorization')
+    assert c.post('/public/session').status_code == 200
     assert c.get('/comparisons/'+group['id']).status_code==404
 
 

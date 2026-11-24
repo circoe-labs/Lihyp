@@ -44,17 +44,18 @@ def create_app(db_path: str | Path | None = None, *, geocoder=None, routing_prov
         return app.state.routing_provider or app.state.routing_settings.provider()
 
     def is_local_operator(actor: dict, request: Request) -> bool:
-        # Infrastructure administration is not an external-user permission.
-        # Password-protected, loopback-only controls; no remote admin endpoint.
+        # Admin requests must carry an explicit bearer token. HTTPS is required
+        # over a network; loopback remains available for local development.
+        secure_transport = (request.url.scheme == "https" or
+                            request.client is not None and
+                            request.client.host in ("127.0.0.1", "::1", "testclient") and
+                            request.url.hostname in ("127.0.0.1", "localhost", "::1", "testserver"))
         return (actor.get("username") == os.getenv("SIMCO2_OPERATOR_USERNAME", "admin")
-                and request.client is not None
-                and request.client.host in ("127.0.0.1", "::1", "testclient")
-                and request.url.hostname in ("127.0.0.1", "localhost", "::1", "testserver")
-                and not request.headers.get("x-forwarded-for"))
+                and secure_transport)
 
     def assert_local_operator(actor: dict, request: Request):
         if not is_local_operator(actor, request):
-            raise HTTPException(status_code=403, detail="Réservé à l'exploitant connecté en local")
+            raise HTTPException(status_code=403, detail="Connexion administrateur requise (HTTPS hors du poste local)")
 
     @app.exception_handler(DomainError)
     async def handle_domain_error(request, exc: DomainError):
@@ -67,13 +68,18 @@ def create_app(db_path: str | Path | None = None, *, geocoder=None, routing_prov
     def database():
         return app.state.db
 
-    def require_actor(authorization: Annotated[str | None, Header()] = None,
+    def require_actor(request: Request, authorization: Annotated[str | None, Header()] = None,
                       db: Database = Depends(database)) -> dict:
-        token = (authorization[7:] if authorization and authorization.startswith("Bearer ")
-                 else None)
-        user = db.actor_for_token(token or "")
-        if not user:
-            raise HTTPException(status_code=401, detail="Authentification requise")
+        # The admin credential is only ever sent in the Authorization header.
+        # Public visitors receive a separate HttpOnly cookie, never an admin session.
+        bearer = (authorization[7:] if authorization and authorization.startswith("Bearer ")
+                  else None)
+        if authorization and not bearer:
+            raise HTTPException(status_code=401, detail="Jeton d'accès invalide")
+        token = bearer if bearer is not None else request.cookies.get("simco2_guest", "")
+        user = db.actor_for_token(token)
+        if not user or (bearer is None and not user["username"].startswith("guest_")):
+            raise HTTPException(status_code=401, detail="Session expirée : actualisez la page")
         return user
 
     Actor = Annotated[dict, Depends(require_actor)]
@@ -96,8 +102,28 @@ def create_app(db_path: str | Path | None = None, *, geocoder=None, routing_prov
             "notice": "Les sources nationales/stations ne sont pas vérifiées, Q24 ouvert.",
         }
 
+    @app.post("/public/session")
+    def public_session(request: Request, response: Response, db: Db):
+        # Refreshing the page must not send visitors back to a login portal.
+        existing = db.actor_for_token(request.cookies.get("simco2_guest", ""))
+        if existing and existing["username"].startswith("guest_"):
+            return {"mode": "public"}
+        client_key = request.client.host if request.client else "unknown"
+        db.consume_public_quota(client_key, "new_session", 25)
+        _, token = db.create_guest()
+        response.set_cookie("simco2_guest", token, httponly=True, samesite="lax",
+                            secure=request.url.scheme == "https", max_age=8 * 3600,
+                            path="/")
+        return {"mode": "public"}
+
     @app.post("/auth/login")
     def login(data: LoginInput, db: Db, request: Request):
+        if data.username != os.getenv("SIMCO2_OPERATOR_USERNAME", "admin"):
+            raise HTTPException(status_code=401, detail="Compte administrateur requis")
+        if request.url.scheme != "https" and not (request.client and
+                request.client.host in ("127.0.0.1", "::1", "testclient") and
+                request.url.hostname in ("127.0.0.1", "localhost", "::1", "testserver")):
+            raise HTTPException(status_code=403, detail="HTTPS requis pour la connexion administrateur")
         client_key = request.client.host if request.client else "unknown"
         user_id, token = db.authenticate(data.username, data.password, client_key)
         return {"access_token": token, "token_type": "bearer", "expires_in_seconds": 8*3600,
@@ -113,7 +139,8 @@ def create_app(db_path: str | Path | None = None, *, geocoder=None, routing_prov
         return actor
 
     @app.get("/audit")
-    def audit(actor: Actor, db: Db):
+    def audit(actor: Actor, db: Db, request: Request):
+        assert_local_operator(actor, request)
         return db.audit_for(actor["id"])
 
     @app.get("/energies/catalog")
@@ -133,11 +160,13 @@ def create_app(db_path: str | Path | None = None, *, geocoder=None, routing_prov
         return db.energy_history(country, code)
 
     @app.post("/energies", status_code=201)
-    def add_energy(data: EnergyInput, actor: Actor, db: Db):
+    def add_energy(data: EnergyInput, actor: Actor, db: Db, request: Request):
+        assert_local_operator(actor, request)
         return db.append_energy(data.model_dump(mode="json"), actor["id"])
 
     @app.post("/energies/{country}/{code}/archive", status_code=204)
-    def archive_energy(country: str, code: str, actor: Actor, db: Db):
+    def archive_energy(country: str, code: str, actor: Actor, db: Db, request: Request):
+        assert_local_operator(actor, request)
         db.archive_energy(country, code, actor["id"])
         return Response(status_code=204)
 
@@ -146,11 +175,13 @@ def create_app(db_path: str | Path | None = None, *, geocoder=None, routing_prov
         return db.list_vehicles()
 
     @app.post("/vehicles", status_code=201)
-    def add_vehicle(data: VehicleInput, actor: Actor, db: Db):
+    def add_vehicle(data: VehicleInput, actor: Actor, db: Db, request: Request):
+        assert_local_operator(actor, request)
         return db.append_vehicle(data.model_dump(mode="json"), actor["id"])
 
     @app.post("/vehicles/{vehicle_key}/versions", status_code=201)
-    def add_vehicle_version(vehicle_key: str, data: VehicleInput, actor: Actor, db: Db):
+    def add_vehicle_version(vehicle_key: str, data: VehicleInput, actor: Actor, db: Db, request: Request):
+        assert_local_operator(actor, request)
         return db.append_vehicle(data.model_dump(mode="json"), actor["id"], vehicle_key)
 
     @app.get("/vehicles/{vehicle_key}/versions")
@@ -166,11 +197,13 @@ def create_app(db_path: str | Path | None = None, *, geocoder=None, routing_prov
         return db.list_stations()
 
     @app.post("/stations", status_code=201)
-    def add_station(data: StationInput, actor: Actor, db: Db):
+    def add_station(data: StationInput, actor: Actor, db: Db, request: Request):
+        assert_local_operator(actor, request)
         return db.append_station(data.model_dump(mode="json"), actor["id"])
 
     @app.post("/stations/{station_key}/versions", status_code=201)
-    def revise_station(station_key: str, data: StationInput, actor: Actor, db: Db):
+    def revise_station(station_key: str, data: StationInput, actor: Actor, db: Db, request: Request):
+        assert_local_operator(actor, request)
         return db.append_station(data.model_dump(mode="json"), actor["id"], station_key)
 
     def check_references(data: ScenarioInput, db: Database):
@@ -251,8 +284,11 @@ def create_app(db_path: str | Path | None = None, *, geocoder=None, routing_prov
                         headers={"Content-Disposition": f'attachment; filename="simulation-{run_id}.pdf"'})
 
     @app.post("/comparisons", status_code=201)
-    def compare_vehicles(data: ComparisonInput, actor: Actor, db: Db):
+    def compare_vehicles(data: ComparisonInput, actor: Actor, db: Db, request: Request):
         """Comparer des cas séparés sur un itinéraire, une demande et un périmètre identiques."""
+        if actor["username"].startswith("guest_"):
+            db.consume_public_quota(request.client.host if request.client else "unknown",
+                                    "comparison", 20)
         from simco2.api.schemas import ScenarioInput
         quote = db.get_route_quote(data.route_quote_id, actor["id"])
         energies = {e["energy_code"]: e for e in db.list_energies(data.country_iso)}
@@ -450,7 +486,8 @@ def create_app(db_path: str | Path | None = None, *, geocoder=None, routing_prov
 
     @app.get("/routing/config")
     def routing_config(actor: Actor, request: Request):
-        return app.state.routing_settings.status(operator=is_local_operator(actor, request))
+        assert_local_operator(actor, request)
+        return app.state.routing_settings.status(operator=True)
 
     @app.post("/routing/config")
     def save_routing_config(data: RoutingConfigInput, actor: Actor, request: Request):
@@ -480,7 +517,8 @@ def create_app(db_path: str | Path | None = None, *, geocoder=None, routing_prov
         return app.state.routing_settings.status(operator=True)
 
     @app.post("/routing/test")
-    def test_routing(data: RoutePreviewInput, actor: Actor):
+    def test_routing(data: RoutePreviewInput, actor: Actor, request: Request):
+        assert_local_operator(actor, request)
         router = active_router()
         if router is None:
             raise RoutingFailure("provider_unconfigured", "Configurer un fournisseur de routage")
@@ -494,7 +532,10 @@ def create_app(db_path: str | Path | None = None, *, geocoder=None, routing_prov
                 "restrictions": list(result.restrictions), "valid_at": result.valid_at}
 
     @app.post("/routing/resolve")
-    def resolve_route(data: RouteResolveInput, actor: Actor, db: Db):
+    def resolve_route(data: RouteResolveInput, actor: Actor, db: Db, request: Request):
+        if actor["username"].startswith("guest_"):
+            db.consume_public_quota(request.client.host if request.client else "unknown",
+                                    "route", 40)
         provider = active_router()
         if provider is None:
             raise RoutingFailure("provider_unconfigured", "Routage non configuré sur le serveur")
@@ -522,7 +563,8 @@ def create_app(db_path: str | Path | None = None, *, geocoder=None, routing_prov
         return {"quote_id": quote_id, "route": payload, "expires_in_seconds": 1800}
 
     @app.post("/routing/preview")
-    def route_preview(data: RoutePreviewInput, actor: Actor):
+    def route_preview(data: RoutePreviewInput, actor: Actor, request: Request):
+        assert_local_operator(actor, request)
         # Ancienne API conservée pour les outils experts.
         key = app.state.routing_settings.key_for("ors")
         router = ORSRoutingProvider(key) if key else None

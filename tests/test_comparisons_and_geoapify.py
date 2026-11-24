@@ -63,7 +63,8 @@ def test_comparison_same_inputs_two_versions_and_immutability(tmp_path):
 
     client.post('/energies', json={**energy(), 'price_per_unit': '42'})
     assert client.get(f'/comparisons/{comparison["id"]}').json()['entries'] == comparison['entries']
-    client.headers['Authorization'] = 'Bearer ' + login('bob', 'test-bob-password-12345')
+    client.headers.pop('Authorization')
+    assert client.post('/public/session').status_code == 200
     assert client.get(f'/comparisons/{comparison["id"]}').status_code == 404
     assert client.get('/comparisons').json() == []
     assert client.post('/comparisons', json=fields).status_code == 404
@@ -153,8 +154,9 @@ def test_local_operator_can_configure_api_but_other_users_cannot(tmp_path,monkey
     assert changed.json()['provider']=='geoapify'
     assert changed.json()['profile']=='bus'
     assert client.get('/routing/status').json()['provider']=='fixture' # injected router for tests
-    client.headers['Authorization']='Bearer '+login('bob','test-bob-password-12345')
-    assert client.get('/routing/config').json()['operator'] is False
+    client.headers.pop('Authorization')
+    assert client.post('/public/session').status_code == 200
+    assert client.get('/routing/config').status_code == 403
     assert client.post('/routing/keys',json={'provider':'ors','key':'bob-malicious-key'}).status_code==403
     assert client.delete('/routing/keys/geoapify').status_code==403
     assert 'local-geoapify-secret-key' not in client.get('/routing/config').text

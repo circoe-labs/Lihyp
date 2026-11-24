@@ -6,10 +6,10 @@ from simco2.domain.engine import BaselineEngine
 def setup_client(tmp_path):
     app = create_app(tmp_path / "api.sqlite")
     db = app.state.db
-    db.create_user("alice", "very-long-passphrase-01")
+    db.create_user("admin", "very-long-passphrase-01")
     db.create_user("bob", "very-long-passphrase-02")
     client = TestClient(app)
-    token = client.post("/auth/login", json={"username": "alice", "password": "very-long-passphrase-01"}).json()["access_token"]
+    token = client.post("/auth/login", json={"username": "admin", "password": "very-long-passphrase-01"}).json()["access_token"]
     client.headers.update({"Authorization": "Bearer " + token})
     return client, db
 
@@ -63,8 +63,8 @@ def test_api_end_to_end_snapshot_immutability_audit_and_auth(tmp_path):
     assert c.get("/audit").json()
     c.headers.pop("Authorization")
     assert c.get("/vehicles").status_code == 401
-    c.headers.update({"Authorization": "Bearer " + c.post("/auth/login", json={
-        "username": "bob", "password": "very-long-passphrase-02"}).json()["access_token"]})
+    # A separate public visitor can read shared catalogues, but never another run.
+    assert c.post('/public/session').status_code == 200
     assert c.get("/vehicles").status_code == 200  # catalogues partages
     assert c.get(f'/scenarios/{s.json()["id"]}').status_code == 404  # Q24 provisoire
     assert c.get(f'/runs/{r.json()["id"]}').status_code == 404

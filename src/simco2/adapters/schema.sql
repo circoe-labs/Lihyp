@@ -11,6 +11,13 @@ CREATE TABLE IF NOT EXISTS session_tokens (
   user_id TEXT NOT NULL REFERENCES users(id),
   expires_at TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS public_quotas (
+  id TEXT PRIMARY KEY,
+  client_key TEXT NOT NULL,
+  kind TEXT NOT NULL,
+  created_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS ix_public_quotas ON public_quotas(client_key,kind,created_at);
 CREATE TABLE IF NOT EXISTS auth_failures (
   id TEXT PRIMARY KEY,
   username TEXT NOT NULL,

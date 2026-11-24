@@ -17,7 +17,7 @@
 <body>
   <button id="language-toggle" type="button" class="language-toggle" aria-label="Switch to English">EN</button>
 
-  <div id="login" class="login-screen">
+  <div id="login" class="login-screen hidden">
     <div class="login-card">
       <div class="brand-icon">S<span>²</span></div>
       <div class="eyebrow" data-i18n="loginKicker">SIMULATEUR DE TRANSPORT · PROTOTYPE</div>
@@ -33,7 +33,7 @@
     </div>
   </div>
 
-  <div id="shell" class="shell hidden">
+  <div id="shell" class="shell">
     <aside class="sidebar">
       <div class="brand"><span class="brand-icon small">S<span>²</span></span><span>SimCO₂<small data-i18n="brandSubtitle">Transport & climat</small></span></div>
       <div class="sidebar-label" data-i18n="navTitle">SIMULER ET EXPLORER</div>
@@ -46,7 +46,6 @@
         <button class="nav-item" data-view="routing"><span>⌁</span> <span data-i18n="navRouting">API de routage</span></button>
       </nav>
       <div class="sidebar-bottom">
-        <div class="prototype-note" data-i18n="prototypeNotice">Prototype : 1 ligne, 1 jour, sans trajets retour ni ravitaillement. Les résultats ne sont pas un optimum prouvé.</div>
         <div class="user-row"><span id="user-label"></span><button id="logout-button" class="text-button" data-i18n="logout">Déconnexion</button></div>
       </div>
     </aside>
@@ -54,7 +53,7 @@
     <main class="main">
       <header class="topbar">
         <div><span class="topbar-kicker" data-i18n="topKicker">SIMULATION DE TRANSPORT</span><h1 id="page-title" data-i18n="navSimulations">Simulations</h1></div>
-        <div class="topbar-actions"><span class="status-dot"></span><span data-i18n="localPrototype">Prototype</span> <a href="/docs" target="_blank" rel="noopener" class="text-button">API ↗</a></div>
+        <div class="topbar-actions"><span class="status-dot"></span><span data-i18n="localPrototype">Prototype</span></div>
       </header>
       <div class="workspace">
         <div id="feedback" class="feedback hidden" role="status" aria-live="polite"></div>
@@ -165,7 +164,7 @@
             <button class="button outline hidden" id="more-stations" data-i18n="moreStations">Charger davantage de stations essence</button>
             <p class="small warning-text" data-i18n="stationCaution">Liste indicative : une station H₂ destinée aux véhicules légers n'est pas automatiquement compatible avec un autocar. Disponibilité et accès à confirmer auprès de l'exploitant.</p>
           </article>
-          <details class="panel" id="add-station-details"><summary data-i18n="addStation">Ajouter une station manuellement (avancé)</summary><form id="station-form" class="form-grid">
+          <details class="panel admin-only hidden" id="add-station-details"><summary data-i18n="addStation">Ajouter une station manuellement (avancé)</summary><form id="station-form" class="form-grid">
             <label class="wide"><span data-i18n="stationName">Nom de la station</span><input name="name" required /></label>
             <label><span data-i18n="longitude">Longitude</span><input name="longitude" type="number" step="any" required /></label>
             <label><span data-i18n="latitude">Latitude</span><input name="latitude" type="number" step="any" required /></label>
@@ -182,7 +181,7 @@
         <section id="view-vehicles" class="view hidden">
           <div class="section-heading"><div><div class="eyebrow" data-i18n="settings">PARAMÈTRES</div><h2 data-i18n="navVehicles">Véhicules</h2><p data-i18n="vehicleIntro">Créer un modèle de véhicule utilisé par les simulations. Les valeurs doivent être justifiées par une source.</p></div><button class="button outline" id="reload-vehicles" data-i18n="refresh">Actualiser</button></div>
           <article class="panel reference-library"><div class="reference-library-head"><div><h3 data-i18n="referenceLibraryTitle">Bibliothèque indicative — 9 références</h3><p class="small muted" data-i18n="referenceLibraryHelp">Neuf autocars : coûts et données techniques fournis par l’utilisateur, non vérifiés. Ajoutez-les au catalogue puis configurez les énergies pour les comparer.</p></div><span class="subtle-tag" data-i18n="referenceLibraryBadge">À vérifier</span></div><div id="reference-library" class="reference-grid" aria-live="polite"></div></article>
-          <div class="two-column"><article class="panel"><h3 data-i18n="vehicleFormTitle">Fiche véhicule</h3><p class="small muted" id="vehicle-edit-label" data-i18n="vehicleUnverified">Données constructeur non préchargées : valeurs à vérifier.</p><p class="small warning-text hidden" id="reference-form-note" role="status"></p><form id="vehicle-form" class="form-grid">
+          <div class="vehicle-management"><article class="panel admin-only hidden" id="vehicle-editor-panel"><h3 data-i18n="vehicleFormTitle">Fiche véhicule</h3><p class="small muted" id="vehicle-edit-label" data-i18n="vehicleUnverified">Données constructeur non préchargées : valeurs à vérifier.</p><p class="small warning-text hidden" id="reference-form-note" role="status"></p><form id="vehicle-form" class="form-grid">
             <label class="wide"><span data-i18n="modelName">Nom de variante</span><input name="label" required data-i18n-placeholder="modelExample" placeholder="Autocar diesel A" /></label>
             <label><span data-i18n="manufacturer">Constructeur</span><input name="manufacturer" required /></label><label><span data-i18n="model">Modèle</span><input name="model" required /></label>
             <label><span data-i18n="seats">Places utiles</span><input type="number" name="seats" min="1" max="150" value="50" required /></label>
@@ -194,7 +193,7 @@
             </div></details>
             <label class="wide"><span data-i18n="source">Source / méthode</span><input name="source" required value="Hypothèse utilisateur non vérifiée" /></label>
             <div class="wide actions"><button class="button primary" type="submit" id="vehicle-submit" data-i18n="saveVehicle">Enregistrer le véhicule</button><button class="button outline hidden" type="button" id="vehicle-cancel" data-i18n="cancel">Annuler</button></div>
-          </form></article><article class="panel"><h3 data-i18n="vehicleCatalog">Catalogue de véhicules</h3><div id="vehicle-table" class="table-wrap"></div><div id="vehicle-history" class="history"></div></article></div>
+          </form></article><article class="panel vehicle-catalog-panel"><h3 data-i18n="vehicleCatalog">Catalogue de véhicules</h3><div id="vehicle-table" class="table-wrap"></div><div id="vehicle-history" class="history"></div></article></div>
         </section>
 
         <section id="view-routing" class="view hidden">
@@ -235,9 +234,10 @@
           <article class="panel energy-manager">
             <div class="energy-toolbar">
               <label class="energy-country"><span data-i18n="country">Pays</span><select id="energy-country-filter"><option value="FR" data-i18n="france">France (FR)</option></select></label>
-              <button type="button" class="button primary" id="add-energy" aria-expanded="false" aria-controls="energy-editor"><span aria-hidden="true">＋ </span><span data-i18n="addEnergy">Ajouter une énergie</span></button>
+              <button type="button" class="button primary admin-only hidden" id="add-energy" aria-expanded="false" aria-controls="energy-editor"><span aria-hidden="true">＋ </span><span data-i18n="addEnergy">Ajouter une énergie</span></button>
             </div>
             <div class="table-wrap energy-table" id="energy-table"></div>
+            <p id="energy-status" class="small muted" role="status" aria-live="polite"></p>
             <div id="energy-history" class="history"></div>
             <p class="small muted"><a target="_blank" rel="noopener" href="https://data.economie.gouv.fr/explore/dataset/prix-des-carburants-en-france-flux-instantane-v2/" data-i18n="fuelSourceLink">Source officielle des prix à la pompe (DGCCRF)</a></p>
           </article>
@@ -254,6 +254,7 @@
               <label class="wide"><span data-i18n="source">Source / méthode</span><input name="source" required minlength="5" data-i18n-placeholder="sourceHint" placeholder="Document ou relevé" /></label>
               <label class="wide"><span data-i18n="license">Licence / droit de réutilisation</span><input name="license" value="À vérifier" required /></label>
               <div class="wide actions"><button class="button primary" type="submit" data-i18n="saveEnergy">Enregistrer</button></div>
+              <p id="energy-form-error" class="wide form-message hidden" role="alert" aria-live="assertive"></p>
             </form>
           </section>
         </section>

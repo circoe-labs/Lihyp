@@ -40,12 +40,12 @@ class FakeFuelDirectory:
 def auth_client(tmp_path):
     app = create_app(tmp_path / 'routing.db', geocoder=FakeGeocoder(),
                      routing_provider=FakeRouter(), fuel_directory=FakeFuelDirectory())
-    app.state.db.create_user('alice', 'test-passphrase-at-least-12')
+    app.state.db.create_user('admin', 'test-passphrase-at-least-12')
     app.state.db.create_user('bob', 'test-passphrase-at-least-13')
     client=TestClient(app)
     def login(name, password):
         return client.post('/auth/login',json={'username':name,'password':password}).json()['access_token']
-    client.headers.update({'Authorization':'Bearer '+login('alice','test-passphrase-at-least-12')})
+    client.headers.update({'Authorization':'Bearer '+login('admin','test-passphrase-at-least-12')})
     return client, login
 
 
@@ -80,11 +80,11 @@ def test_route_quote_reproducibility_and_cross_user_isolation(tmp_path):
         'provider':'openrouteservice','source':'fake external route'})
     assert client.post('/scenarios',json=forged).status_code==422
     assert client.post('/scenarios',json=dict(fields,route_quote_id='made-up')).status_code==404
-    bob_token = login('bob','test-passphrase-at-least-13')
-    client.headers.update({'Authorization':'Bearer '+bob_token})
-    assert client.post('/scenarios',json=fields).status_code==404
     client.headers.pop('Authorization')
-    assert client.post('/routing/resolve',json={'origin':'Caen','destination':'Rouen'}).status_code==401
+    assert client.post('/public/session').status_code == 200
+    assert client.post('/scenarios',json=fields).status_code==404
+    # Public geocoding works in its own isolated workspace.
+    assert client.post('/routing/resolve',json={'origin':'Caen','destination':'Rouen'}).status_code==200
 
 
 def test_normandy_station_sources_and_station_price_is_never_exposed(tmp_path):

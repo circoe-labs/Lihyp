@@ -103,6 +103,43 @@ class Database:
                         {"login": username, "client_key": client_key})
             return row["id"], token
 
+    def create_guest(self) -> tuple[str, str]:
+        """Create an isolated, expiring public workspace without a password prompt."""
+        uid, username = rid(), "guest_" + rid().replace("-", "")
+        token = secrets.token_urlsafe(32)
+        expiry = (datetime.now(timezone.utc) + timedelta(hours=8)).isoformat()
+        with self.session() as con:
+            con.execute("INSERT INTO users VALUES (?, ?, ?, 1, ?)",
+                        (uid, username, self.hasher.hash(secrets.token_urlsafe(40)), utc_now()))
+            con.execute("INSERT INTO session_tokens VALUES (?, ?, ?)",
+                        (hashlib.sha256(token.encode()).hexdigest(), uid, expiry))
+        return uid, token
+
+    def consume_public_quota(self, client: str, kind: str, limit: int) -> None:
+        """Hourly per-origin budget for an unauthenticated deployment."""
+        identity = hashlib.sha256(client.encode()).hexdigest()
+        cutoff = (datetime.now(timezone.utc) - timedelta(hours=1)).isoformat()
+        with self.session() as con:
+            con.execute("BEGIN IMMEDIATE")
+            con.execute("DELETE FROM public_quotas WHERE created_at < ?", (cutoff,))
+            count = con.execute("SELECT COUNT(*) FROM public_quotas WHERE client_key=? AND kind=?",
+                                (identity, kind)).fetchone()[0]
+            if count >= limit:
+                raise DomainError("too_many_attempts", "Limite horaire atteinte : réessayer plus tard")
+            con.execute("INSERT INTO public_quotas VALUES (?, ?, ?, ?)",
+                        (rid(), identity, kind, utc_now()))
+
+    def update_password(self, username: str, password: str) -> None:
+        if len(password) < 12:
+            raise DomainError("weak_credentials", "Mot de passe : 12 caractères minimum")
+        with self.session() as con:
+            user = con.execute("SELECT id FROM users WHERE username=?", (username,)).fetchone()
+            if not user or username.startswith("guest_"):
+                raise DomainError("unknown_user", "Compte administrateur introuvable")
+            con.execute("UPDATE users SET password_hash=? WHERE id=?",
+                        (self.hasher.hash(password), user["id"]))
+            con.execute("DELETE FROM session_tokens WHERE user_id=?", (user["id"],))
+
     def actor_for_token(self, token: str) -> dict | None:
         if not token:
             return None

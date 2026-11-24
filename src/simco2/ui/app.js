@@ -32,9 +32,9 @@
       access:'Accès',publicDeclared:'Public (déclaré)',private:'Privé',restricted:'Restreint',pump:'Pompe / connecteur',ports:'Nombre de points',
       source:'Source / méthode',sourceHint:'Document ou relevé',sourceDate:'Date de source',saveStation:'Enregistrer la station non vérifiée',
       vehicleIntro:'Créer un modèle de véhicule utilisé par les simulations. Les valeurs doivent être justifiées par une source.',
-      referenceLibraryTitle:'Bibliothèque indicative — 9 références',referenceLibraryHelp:'Fourchettes HT communiquées par l’utilisateur, sans vérification constructeur. Complétez les caractéristiques nécessaires au calcul avant d’enregistrer une fiche.',referenceLibraryBadge:'À vérifier',
-      referencePrice:'Acquisition / opération HT',referenceEnergyPrice:'Énergie HT',referenceEnergy100:'Coût énergie / 100 km HT',referenceMaintenance:'Maintenance préventive HT / km',referenceUse:'Compléter cette fiche',
-      referenceSource:'Source : tableau utilisateur non vérifié (24/11/2026)',referenceComplete:'Renseignez places, consommation par km et capacité utile. Les médianes des fourchettes de coût sont de simples hypothèses modifiables. Aucun prix d’énergie national n’est ajouté.',referenceRetrofit:'Kit et pose seulement, pas prix du véhicule complet.',referenceCompareTitle:'Comparaison indicative des coûts sur 100 km',referencePartialCost:'Énergie + maintenance / 100 km HT',referencePartialWarning:'Comparatif partiel hors salaires, amortissement, assurance, autres coûts et CO₂e. Ce ne sont pas des résultats de simulation.',referenceMissingEnergy:'Avant de comparer, configurez cette énergie et son facteur CO₂e dans Énergies par pays.',
+      referenceLibraryTitle:'Bibliothèque indicative — 9 références',referenceLibraryHelp:'Neuf autocars : coûts et données techniques fournis par l’utilisateur, non vérifiés. Ajoutez-les au catalogue puis configurez les énergies pour les comparer.',referenceLibraryBadge:'À vérifier',
+      referencePrice:'Acquisition / opération HT',referenceEnergyPrice:'Énergie HT',referenceEnergy100:'Coût énergie / 100 km HT',referenceMaintenance:'Maintenance préventive HT / km',referenceUse:'Vérifier / modifier',referenceAdd:'Ajouter au catalogue',referenceAdded:'Déjà enregistré',referenceAddedMessage:'Autocar ajouté au catalogue (données utilisateur non vérifiées).',referenceSpecSeats:'Places utiles',referenceSpecConsumption:'Consommation',referenceSpecCapacity:'Capacité utile',referenceSpecReserve:'Réserve',referenceSpecSource:'Source déclarée',
+      referenceSource:'Source : tableau utilisateur non vérifié (24/11/2026)',referenceComplete:'Places, consommation, capacité et réserve préremplies selon tes données, non vérifiées. Les médianes des coûts restent modifiables ; aucun tarif national ni facteur CO₂e ajouté.',referenceRetrofit:'Kit et pose seulement, pas prix du véhicule complet.',referenceCompareTitle:'Comparaison indicative des coûts sur 100 km',referencePartialCost:'Énergie + maintenance / 100 km HT',referencePartialWarning:'Comparatif partiel hors salaires, amortissement, assurance, autres coûts et CO₂e. Ce ne sont pas des résultats de simulation.',referenceMissingEnergy:'Avant de comparer, configurez cette énergie et son facteur CO₂e dans Énergies par pays.',
       vehicleFormTitle:'Fiche véhicule',vehicleUnverified:'Données constructeur non préchargées : valeurs à vérifier.',
       modelName:'Nom de variante',modelExample:'Autocar diesel A',manufacturer:'Constructeur',model:'Modèle',seats:'Places utiles',
       diesel:'Gazole (L)',electric:'Électricité (kWh)',hydrogen:'Hydrogène (kg)',biognv:'BioGNV (kg)',consumptionKm:'Consommation / km',
@@ -180,9 +180,9 @@
       access:'Access',publicDeclared:'Public (declared)',private:'Private',restricted:'Restricted',pump:'Pump / connector',ports:'Number of outlets',
       source:'Source / methodology',sourceHint:'Document or observation',sourceDate:'Source date',saveStation:'Save as unverified station',
       vehicleIntro:'Create a vehicle model for use in simulations. Values should be backed by a source.',
-      referenceLibraryTitle:'Indicative library — 9 references',referenceLibraryHelp:'User-supplied VAT-excluded ranges, unverified by manufacturers. Complete the required technical values before saving.',referenceLibraryBadge:'Unverified',
-      referencePrice:'Purchase / operation (excl. VAT)',referenceEnergyPrice:'Energy price (excl. VAT)',referenceEnergy100:'Energy cost / 100 km (excl. VAT)',referenceMaintenance:'Preventive maintenance / km (excl. VAT)',referenceUse:'Complete this vehicle',
-      referenceSource:'Source: unverified user table (24 Nov 2026)',referenceComplete:'Enter seats, consumption per km and usable capacity. Midpoints of cost ranges are editable assumptions. No national energy price is added.',referenceRetrofit:'Conversion kit and installation only, not a complete vehicle price.',referenceCompareTitle:'Indicative comparison of costs over 100 km',referencePartialCost:'Energy + maintenance / 100 km, excl. VAT',referencePartialWarning:'Partial comparison excluding staff, depreciation, insurance, other costs and CO₂e. Not simulated results.',referenceMissingEnergy:'Configure this energy type and its CO₂e factor in Energy by country before comparing.',
+      referenceLibraryTitle:'Indicative library — 9 references',referenceLibraryHelp:'Nine coaches with user-provided costs and technical specifications (not verified). Add them to the catalogue and configure energies to compare.',referenceLibraryBadge:'Unverified',
+      referencePrice:'Purchase / operation (excl. VAT)',referenceEnergyPrice:'Energy price (excl. VAT)',referenceEnergy100:'Energy cost / 100 km (excl. VAT)',referenceMaintenance:'Preventive maintenance / km (excl. VAT)',referenceUse:'Review / edit',referenceAdd:'Add to catalogue',referenceAdded:'Already saved',referenceAddedMessage:'Coach added to catalogue (unverified user-supplied data).',referenceSpecSeats:'Usable seats',referenceSpecConsumption:'Consumption',referenceSpecCapacity:'Usable capacity',referenceSpecReserve:'Reserve',referenceSpecSource:'Declared source',
+      referenceSource:'Source: unverified user table (24 Nov 2026)',referenceComplete:'Seats, consumption, capacity and reserve filled from user-supplied unverified figures. Cost midpoints are editable; no national energy price or CO₂e factor is added.',referenceRetrofit:'Conversion kit and installation only, not a complete vehicle price.',referenceCompareTitle:'Indicative comparison of costs over 100 km',referencePartialCost:'Energy + maintenance / 100 km, excl. VAT',referencePartialWarning:'Partial comparison excluding staff, depreciation, insurance, other costs and CO₂e. Not simulated results.',referenceMissingEnergy:'Configure this energy type and its CO₂e factor in Energy by country before comparing.',
       vehicleFormTitle:'Vehicle details',vehicleUnverified:'No manufacturer data preloaded: values require validation.',
       modelName:'Variant name',modelExample:'Diesel coach A',manufacturer:'Manufacturer',model:'Model',seats:'Usable seats',
       diesel:'Diesel (L)',electric:'Electricity (kWh)',hydrogen:'Hydrogen (kg)',biognv:'Bio-CNG (kg)',consumptionKm:'Consumption / km',
@@ -522,7 +522,7 @@
   $('reload-energy').addEventListener('click', loadEnergies);
 
   async function loadVehicles() {
-    try { vehicles = await api('/vehicles'); renderVehicles(); fillScenarioSelects(); }
+    try { vehicles = await api('/vehicles'); renderVehicles(); renderReferenceLibrary(); fillScenarioSelects(); }
     catch(error) { message(error.message, true); }
   }
   // Clearly labelled synthetic example. It is a preview, not a manufacturer specification
@@ -544,20 +544,54 @@
   function referenceRange(values, suffix='') {
     return `${number(values[0],2)} – ${number(values[1],2)}${suffix}`;
   }
+  // References are user-supplied assumptions, not verified manufacturer specifications.
+  function referenceExists(e) {
+    return vehicles.some(v => (v.payload?.source || '').includes(`[LIHYP-REF:${e.id}]`));
+  }
+  function referenceVehiclePayload(e) {
+    const midpoint = r => String((r[0] + r[1]) / 2);
+    return {
+      label:e.label,manufacturer:e.manufacturer,model:e.model,kind:'bus',
+      seats:e.seats,energy_code:e.energy_code,unit:e.unit,
+      consumption_per_km:String(e.consumption_per_km),
+      consumption_per_hour:String(e.consumption_per_hour),
+      usable_capacity:String(e.usable_capacity),reserve:String(e.reserve),
+      maintenance_eur_per_km:midpoint(e.maintenance_eur_per_km_ht),
+      // Conversion-kit cost is NOT the price of a complete coach.
+      purchase_eur:e.purchase_scope==='vehicle'?midpoint(e.purchase_eur_ht):'0',
+      residual_eur:'0',labor_eur_per_h:'0',life_years:10,insurance_eur_year:'0',
+      connectors:[],source:`${e.technical_source} · Données utilisateur non vérifiées (24/11/2026) · [LIHYP-REF:${e.id}]`,
+      quality:'unverified',
+    };
+  }
+  async function addReference(e) {
+    if (referenceExists(e)) return false;
+    await api('/vehicles',{method:'POST',body:JSON.stringify(referenceVehiclePayload(e))});
+    await loadVehicles();
+    return true;
+  }
   function renderReferenceLibrary() {
-    const node=$('reference-library'); if(!node || !referenceEntries.length) return;
+    const node=$('reference-library'); if(!node) return;
     node.innerHTML=referenceEntries.map(e=>`<article class="reference-card">
       <div class="reference-card-top"><span class="solution-badge">${esc(t('referenceLibraryBadge'))}</span>
       <span class="solution-energy">${esc(energyName(e.energy_code))}</span></div>
-      <h4>${esc(e.label)}</h4><p class="small muted">${esc(e.model)}</p>
+      <h4>${esc(e.label)}</h4><p class="small muted">${esc(e.manufacturer)} · ${esc(e.model)}</p>
       <dl class="reference-facts">
+        <div><dt>${esc(t('referenceSpecSeats'))}</dt><dd>${esc(e.seats)}</dd></div>
+        <div><dt>${esc(t('referenceSpecConsumption'))}</dt><dd>${esc(e.consumption_per_km)} ${esc(e.unit)}/km</dd></div>
+        <div><dt>${esc(t('referenceSpecCapacity'))}</dt><dd>${esc(e.usable_capacity)} ${esc(e.unit)}</dd></div>
+        <div><dt>${esc(t('referenceSpecReserve'))}</dt><dd>${esc(e.reserve)} ${esc(e.unit)}</dd></div>
         <div><dt>${esc(t('referencePrice'))}</dt><dd>${esc(referenceRange(e.purchase_eur_ht,' €'))}</dd></div>
         <div><dt>${esc(t('referenceEnergyPrice'))}</dt><dd>${esc(referenceRange(e.price_per_energy_eur_ht,' €'))}/${esc(e.unit)}</dd></div>
         <div><dt>${esc(t('referenceEnergy100'))}</dt><dd>${esc(referenceRange(e.energy_cost_100km_eur_ht,' €'))}</dd></div>
         <div><dt>${esc(t('referenceMaintenance'))}</dt><dd>${esc(referenceRange(e.maintenance_eur_per_km_ht,' €'))}</dd></div>
       </dl>
+      <p class="small muted">${esc(t('referenceSpecSource'))} : ${esc(e.technical_source)} · ${esc(e.capacity_details)}</p>
       ${e.purchase_scope==='retrofit_kit_installation'?`<p class="small warning-text">${esc(t('referenceRetrofit'))}</p>`:''}
-      <button type="button" class="button outline" data-prefill-reference="${esc(e.id)}">${esc(t('referenceUse'))}</button>
+      <div class="reference-actions">
+        <button type="button" class="button primary" data-add-reference="${esc(e.id)}" ${referenceExists(e)?'disabled':''}>${esc(t(referenceExists(e)?'referenceAdded':'referenceAdd'))}</button>
+        <button type="button" class="button outline" data-prefill-reference="${esc(e.id)}">${esc(t('referenceUse'))}</button>
+      </div>
     </article>`).join('');
     const costRows=referenceEntries.map(e=>{
       const low=e.energy_cost_100km_eur_ht[0]+100*e.maintenance_eur_per_km_ht[0];
@@ -573,18 +607,25 @@
     node.querySelectorAll('[data-prefill-reference]').forEach(b=>b.addEventListener('click',()=>{
       const e=referenceEntries.find(e=>e.id===b.dataset.prefillReference);if(e)prefillReference(e);
     }));
+    node.querySelectorAll('[data-add-reference]').forEach(b=>b.addEventListener('click',async()=>{
+      const e=referenceEntries.find(e=>e.id===b.dataset.addReference);if(!e)return;
+      b.disabled=true;
+      try {await addReference(e);message(t('referenceAddedMessage'));}
+      catch(error){message(error.message,true);b.disabled=false;}
+    }));
   }
   function prefillReference(e) {
     resetVehicle();
     const form=$('vehicle-form');
-    // Empty values deliberately prevent fabricated manufacturer specifications.
     const values={label:e.label,manufacturer:e.manufacturer,model:e.model,energy_code:e.energy_code,
-      seats:'',consumption_per_km:'',consumption_per_hour:'0',usable_capacity:'',reserve:'0',
+      seats:String(e.seats),consumption_per_km:String(e.consumption_per_km),
+      consumption_per_hour:String(e.consumption_per_hour),
+      usable_capacity:String(e.usable_capacity),reserve:String(e.reserve),
       maintenance_eur_per_km:String((e.maintenance_eur_per_km_ht[0]+e.maintenance_eur_per_km_ht[1])/2),
       purchase_eur:e.purchase_scope==='vehicle'?String((e.purchase_eur_ht[0]+e.purchase_eur_ht[1])/2):'',
-      source:t('referenceSource')+' — '+e.model+'; '+e.id+'; prix/maintenance : hypothèses médianes à vérifier.'};
+      source:referenceVehiclePayload(e).source};
     for(const [key,value] of Object.entries(values)){
-      const input=form.elements.namedItem(key); if(input)input.value=value;
+      const input=form.elements.namedItem(key);if(input)input.value=value;
     }
     form.querySelector('details.advanced-settings').open=true;
     const note=$('reference-form-note');note.classList.remove('hidden');

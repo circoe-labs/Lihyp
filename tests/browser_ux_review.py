@@ -88,7 +88,8 @@ async def main():
             await page.evaluate('window.scrollTo(0,0)')
             await page.screenshot(path=str(OUT/'simulation-before.png'),full_page=True)
             for checkbox in await page.locator('#vehicle-compare-options input:not(:disabled)').all():
-                if not await checkbox.is_checked(): await checkbox.check()
+                if not await checkbox.is_checked():
+                    await checkbox.check()
             await page.locator('#scenario-submit').click()
             await page.wait_for_function("document.querySelectorAll('#comparison-results .ux-comparison-table tbody tr').length===4")
             assert await page.locator('#ux-timeline-content').is_visible()

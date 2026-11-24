@@ -6,6 +6,7 @@ Run: python tests/browser_ux_review.py  (optional Playwright + Chromium install)
 import asyncio
 import base64
 import re
+import shutil
 import tempfile
 from pathlib import Path
 from fastapi.testclient import TestClient
@@ -52,7 +53,7 @@ async def main():
         html=html.replace('<link rel="stylesheet" href="/assets/style.css" />','')
         html=html.replace('<script defer src="/assets/app.js"></script>','')
         async with async_playwright() as p:
-            browser=await p.chromium.launch(executable_path='/usr/bin/chromium',headless=True,args=['--no-sandbox'])
+            browser=await p.chromium.launch(**({'executable_path':shutil.which('chromium')} if shutil.which('chromium') else {}),headless=True,args=['--no-sandbox'])
             page=await browser.new_page(viewport={'width':1550,'height':1000},accept_downloads=True)
             page.set_default_timeout(8000)
             errors=[]

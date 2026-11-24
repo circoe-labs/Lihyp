@@ -408,6 +408,9 @@
 .ux-preview-list dt{color:#718793;font-size:10px}
 .ux-preview-list dd{font-size:12px;font-weight:750;margin:2px 0 0;overflow-wrap:anywhere}
 .ux-vehicle-benchmarks{margin-top:16px}
+.ux-vehicle-benchmarks>summary{cursor:pointer;font-weight:800;font-size:15px;color:var(--ink);padding:2px 0;list-style:revert}
+.ux-vehicle-benchmarks[open]>summary{margin-bottom:14px}
+.ux-vehicle-benchmarks>summary:focus-visible{outline:2px solid #087e8b;outline-offset:5px;border-radius:4px}
 .ux-vehicle-benchmarks .table-wrap{max-height:270px;overflow:auto}
 .ux-vehicle-benchmarks table{min-width:580px}
 .ux-vehicle-benchmarks table td{padding:8px 10px}

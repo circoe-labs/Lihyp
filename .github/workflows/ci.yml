@@ -20,3 +20,25 @@ jobs:
         run: python -m pytest -q
       - name: OpenAPI contract
         run: python -c 'from simco2.api.app import app; assert len(app.openapi()["paths"]) >= 20'
+  browser:
+    name: Interface Chromium - livraison et mise a jour
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install application and Playwright
+        run: |
+          python -m pip install -e '.[dev]'
+          python -m pip install 'playwright>=1.55,<2'
+          python -m playwright install --with-deps chromium
+      - name: Test deployed HTML/CSS/JS and stale browser assets
+        env:
+          PYTHONPATH: src:tests
+        run: python tests/browser_delivery.py
+      - name: Validate simulations and vehicles in Chromium
+        env:
+          PYTHONPATH: src:tests
+        run: python tests/browser_ux_review.py

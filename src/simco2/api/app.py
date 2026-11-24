@@ -1,5 +1,6 @@
 """FastAPI prototype; aucun endpoint n'accepte prix par station."""
 
+import hashlib
 import os
 from pathlib import Path
 from typing import Annotated
@@ -39,6 +40,18 @@ def create_app(db_path: str | Path | None = None, *, geocoder=None, routing_prov
     # Injected provider is reserved for deterministic tests; production resolves
     # settings at request time so a locally saved key takes effect immediately.
     app.state.routing_provider = routing_provider
+
+    # HTML and frontend assets form one indivisible build. In particular, a new
+    # index.html must never run with an old cached app.js or style.css. This is
+    # essential when an existing Windows installation is upgraded via git pull.
+    @app.middleware("http")
+    async def no_stale_frontend_assets(request: Request, call_next):
+        response = await call_next(request)
+        if request.url.path == "/" or request.url.path.startswith("/assets/"):
+            response.headers["Cache-Control"] = "no-store, max-age=0"
+            response.headers["Pragma"] = "no-cache"
+            response.headers["Expires"] = "0"
+        return response
 
     def active_router():
         return app.state.routing_provider or app.state.routing_settings.provider()
@@ -581,7 +594,17 @@ def create_app(db_path: str | Path | None = None, *, geocoder=None, routing_prov
 
     @app.get("/", response_class=HTMLResponse)
     def index():
-        return (ui_dir / "index.html").read_text(encoding="utf-8")
+        markup = (ui_dir / "index.html").read_text(encoding="utf-8")
+        # Each page load gets content-addressed URLs. No build step, duplicate
+        # JS, overlay or manual cache purge is needed. Hash the actual source
+        # files served by this installation, not a hand-written release number.
+        for asset in ("app.js", "style.css"):
+            digest = hashlib.sha256((ui_dir / asset).read_bytes()).hexdigest()[:16]
+            url = f"/assets/{asset}"
+            if url not in markup:
+                raise RuntimeError(f"UI asset missing in HTML: {asset}")
+            markup = markup.replace(url + '"', f'{url}?v={digest}"')
+        return HTMLResponse(content=markup)
 
     return app
 

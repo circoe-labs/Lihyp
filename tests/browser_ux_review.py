@@ -6,6 +6,7 @@ Run: python tests/browser_ux_review.py  (optional Playwright + Chromium install)
 import asyncio
 import base64
 import re
+import shutil
 import tempfile
 from pathlib import Path
 from fastapi.testclient import TestClient
@@ -52,7 +53,7 @@ async def main():
         html=html.replace('<link rel="stylesheet" href="/assets/style.css" />','')
         html=html.replace('<script defer src="/assets/app.js"></script>','')
         async with async_playwright() as p:
-            browser=await p.chromium.launch(executable_path='/usr/bin/chromium',headless=True,args=['--no-sandbox'])
+            browser=await p.chromium.launch(**({'executable_path':shutil.which('chromium')} if shutil.which('chromium') else {}),headless=True,args=['--no-sandbox'])
             page=await browser.new_page(viewport={'width':1550,'height':1000},accept_downloads=True)
             page.set_default_timeout(8000)
             errors=[]
@@ -88,8 +89,7 @@ async def main():
             await page.evaluate('window.scrollTo(0,0)')
             await page.screenshot(path=str(OUT/'simulation-before.png'),full_page=True)
             for checkbox in await page.locator('#vehicle-compare-options input:not(:disabled)').all():
-                if not await checkbox.is_checked():
-                    await checkbox.check()
+                if not await checkbox.is_checked(): await checkbox.check()
             await page.locator('#scenario-submit').click()
             await page.wait_for_function("document.querySelectorAll('#comparison-results .ux-comparison-table tbody tr').length===4")
             assert await page.locator('#ux-timeline-content').is_visible()

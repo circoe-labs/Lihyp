@@ -242,13 +242,14 @@ class ComparisonInput(StrictInput):
     country_iso: Literal["FR"] = "FR"
     start_date: date
     passengers: int = Field(ge=0, le=1_000_000)
-    window_start: str = Field(default="09:00", pattern=r"^([01]\d|2[0-3]):[0-5]\d$")
-    window_end: str = Field(default="11:00", pattern=r"^([01]\d|2[0-3]):[0-5]\d$")
+    window_start: str = Field(default="08:00", pattern=r"^([01]\d|2[0-3]):[0-5]\d$")
+    window_end: str = Field(default="18:00", pattern=r"^([01]\d|2[0-3]):[0-5]\d$")
     max_vehicles: int = Field(default=10, ge=0, le=1000)
     tco_scope: Literal["variable", "vehicle", "complete"] = "variable"
     emission_scope: Literal["direct", "well_to_wheel"] = "direct"
     infrastructure_daily_eur: str = "0"
     day_plan: bool = False
+    station_policy: Literal["automatic", "imposed", "none"] = "automatic"
     refuel_station: DayStationInput | None = None
     diesel_flow_l_per_min: str = "0"
     hydrogen_flow_kg_per_min: str = "0"

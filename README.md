@@ -58,3 +58,14 @@ La possibilité d'effectuer un plein pendant la journée puis de reprendre les r
 ## Comparaison avec chronologie journalière (prototype PR #4)
 
 La comparaison dispose de **tuiles par véhicule** avec les heures de courses et, sur option, le retour à vide et le plein dans la journée (**attente station = 0**). Les distances/durées de détour sont demandées au serveur de routage ; l’utilisateur doit choisir une station et saisir un débit de remplissage, sans valeur inventée. Le calcul est heuristique et limité à une ligne et une journée ; la tâche 22 reste ouverte pour l’optimisation, les contraintes réelles et les modes multi-stations. Lire `docs/rotations-pleins-tuiles-journalieres.md`.
+
+## Stations automatiques et rotations (lot de comparaison 24/11/2026)
+
+Le calcul journalier peut proposer un ravitaillement compatible de manière
+**automatique**, sans exiger de station choisie sur la carte. Les tuiles affichent
+les rotations et les pleins par véhicule ; une station H₂ ne peut pas servir un
+véhicule gazole. Une valeur illustrative de 30 L/min est proposée pour le gazole
+(et reste à vérifier), aucun temps d'attente en station n'est ajouté. Cette
+présélection est bornée et **ne prouve pas un optimum global**. Consulter
+`docs/optimisation-stations-rotations-comparaison.md` pour les critères, limites
+et recette. Le logiciel demeure un prototype local, non prêt pour un service public.

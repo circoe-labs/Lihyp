@@ -197,7 +197,9 @@ async def main():
             assert len(set(await page.locator('#comparison-results tbody tr td:nth-child(5)').all_inner_texts())) == 2
             assert await page.locator('#comparison-results .comparison-table [data-compare-pdf]').count() == 2
             assert await page.locator('#comparison-results .day-solution-card').count() == 2
-            assert await page.locator('#comparison-results .day-bus').count() == 4
+            assert await page.locator('#comparison-results .day-bus').count() == 2
+            assert await page.locator('#day-plan-enabled').is_checked()
+            assert await page.locator('#station-policy').input_value() == 'automatic'
             assert 'Course avec voyageurs' in await page.locator('#comparison-results').inner_text()
             await page.screenshot(path='reports/new_results_inline.png',full_page=True)
             await page.locator('[data-view=routing]').click()
@@ -236,6 +238,9 @@ async def main():
             assert await page.locator('#day-plan-enabled').is_checked()
             assert await page.locator('#day-plan-details').is_visible()
             assert 'Rouen' in await page.locator('#day-station-name').inner_text()
+            assert await page.locator('#station-policy').input_value() == 'imposed'
+            await page.locator('#scenario-submit').click()
+            assert 'ne distribue pas' in await page.locator('#compare-inline-notice').inner_text()
             await page.locator('[data-view=stations]').click()
             # Use the test fuel station to exercise real day events, not the H2 listing.
             await page.locator('#station-list .station-card').last.click()

@@ -249,7 +249,7 @@
 .comparison-inline-notice.success{background:#e6f5f0;border-color:#b3d9cb;color:#1f6753}
 @media(max-width:600px){.route-map-sketch{height:260px}}
 
-/* User-supplied vehicle reference library: visual guidance, not saved specifications. */
+/* Unverified reference library. No reference is saved until fully completed. */
 .reference-library{margin-bottom:20px}
 .reference-library-head{display:flex;justify-content:space-between;align-items:start;gap:15px}
 .reference-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
@@ -262,15 +262,161 @@
 .reference-facts dt{color:var(--muted);font-size:11px}
 .reference-facts dd{margin:2px 0 0;font-weight:700;font-size:12px;overflow-wrap:anywhere}
 .reference-card .button{margin-top:auto;align-self:flex-start}
+@media(max-width:1100px){.reference-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){.reference-grid{grid-template-columns:1fr}.reference-library-head{flex-direction:column}}
+
 .reference-comparison{margin-top:24px;padding-top:16px;border-top:1px solid #dae9ed}
 .reference-comparison h4{font-size:15px;margin:0 0 6px}
 .reference-comparison table{width:100%;border-collapse:collapse;min-width:600px}
 .reference-comparison th,.reference-comparison td{padding:9px 13px;border-bottom:1px solid #e1ebef;text-align:left}
 .reference-comparison th{font-size:11px;color:#627987;background:#f4f8fa}
 .reference-comparison td small{display:block;font-size:11px;color:var(--muted)}
-@media(max-width:1100px){.reference-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:650px){.reference-grid{grid-template-columns:1fr}.reference-library-head{flex-direction:column}}
 
 .reference-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:auto}
 .reference-actions .button{margin-top:0}
 .reference-actions .button:disabled{opacity:.6;cursor:not-allowed}
+
+/* SimCO2 approved UX - genuine two-pane simulation and one vehicle explorer.
+   All maps, popups, forms and details are in normal flow; no floating copy of an
+   existing component is used to simulate the validated design. */
+#view-scenarios .section-heading{margin-bottom:16px}
+.ux-simulation-layout{display:grid;grid-template-columns:minmax(345px,.88fr) minmax(0,1.52fr);gap:16px;align-items:start}
+.scenario-composer,.ux-sim-side{display:flex;flex-direction:column;gap:14px;min-width:0}
+.ux-sim-card,.ux-sim-side>.panel{margin:0;padding:18px;border-radius:12px}
+.ux-sim-card .form-grid{margin:0;gap:11px 13px}
+.ux-sim-card .form-section-title{margin:0;padding:0 0 8px;border:0;gap:10px}
+.ux-sim-card .form-section-title h3{font-size:17px}
+.ux-sim-card .step-number{width:30px;height:30px}
+.ux-sim-card label{font-size:11.5px;gap:4px}
+.ux-sim-card input,.ux-sim-card select{padding:9px 10px}
+.ux-route-input .route-compute-row{gap:9px}
+.ux-route-input .route-summary{padding:10px 12px;font-size:12px}
+.ux-route-input .route-summary p{margin:4px 0 0}
+.ux-vehicle-input .compare-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.ux-vehicle-input .compare-option{align-items:flex-start;gap:7px;min-height:84px;padding:11px 9px;border-radius:9px}
+.ux-vehicle-input .compare-option input{width:17px;height:17px;min-width:17px;margin:2px 0 0}
+.ux-vehicle-input .compare-option strong{font-size:12px;line-height:1.25}
+.ux-vehicle-input .compare-option small{font-size:10.5px;line-height:1.4}
+.ux-vehicle-pick-link{display:flex;justify-content:flex-end}
+.ux-vehicle-pick-link .button{font-size:11px;padding:7px 11px}
+.ux-plan-input .day-planner-settings{padding:11px;background:#f8fcfc;border:1px solid #d8e9ec;border-radius:9px}
+.ux-plan-input .day-planner-settings .day-plan-toggle{font-size:12px}
+.ux-plan-input .day-planner-settings>p{margin:8px 0}
+.ux-plan-input .day-plan-details{margin:10px 0 0}
+.ux-plan-input .day-plan-details .form-grid{margin:10px 0 0;gap:9px}
+.ux-plan-input .day-plan-details .form-grid label{min-width:0}
+.ux-plan-input .day-plan-details .form-grid input{width:100%}
+.ux-plan-input .day-plan-details p{font-size:11px}
+.ux-plan-input .advanced-settings{padding:11px 13px}
+.ux-map-overview{isolation:isolate;min-width:0}
+.ux-map-overview .panel-head{margin:0 0 11px;align-items:start}
+.ux-map-overview .panel-head h3{font-size:17px;margin:0}
+.ux-map-overview .panel-head .subtle-tag{max-width:190px;white-space:normal;text-align:right;line-height:1.3}
+.ux-map-metrics{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(188px,.88fr);gap:12px;align-items:stretch}
+.ux-map-surface{min-width:0;position:relative;isolation:isolate;overflow:hidden;border-radius:9px}
+#route-map-container .ux-map-surface .map-canvas{height:290px;min-height:290px;position:relative;width:100%;max-width:100%;isolation:isolate;contain:layout paint;overflow:hidden!important}
+.ux-route-indicators{display:flex;flex-direction:column;gap:7px;min-width:0;margin:0}
+.ux-route-indicators div{display:flex;flex-direction:column;justify-content:center;gap:3px;background:#f7fafb;border:1px solid #e0e8ed;border-radius:8px;padding:8px 10px;min-width:0;flex:1}
+.ux-route-indicators dt{font-size:10.5px;color:#637d8b;font-weight:700}
+.ux-route-indicators dd{margin:0;font-size:13px;font-weight:800;line-height:1.24;overflow-wrap:anywhere}
+.ux-route-indicators div:nth-child(3) dd,.ux-route-indicators div:nth-child(5) dd{font-size:11.5px}
+.ux-map-overview .map-attribution{margin:7px 0 0}
+.ux-compare-action{display:grid;gap:8px}
+.ux-compare-action #scenario-submit{width:100%;font-size:15px;min-height:46px;border-radius:9px}
+.ux-card-head{display:flex;justify-content:space-between;align-items:start;gap:10px;margin-bottom:12px}
+.ux-card-head h3{margin:0 0 4px;font-size:17px}
+.ux-card-head p{margin:0}
+.ux-sim-side>.ux-comparison-results,.ux-sim-side>.ux-timeline-panel{padding:16px 17px}
+.ux-results-empty{border:1px dashed #cbdde3;border-radius:9px;padding:18px;color:#6a828e;font-size:12px;background:#f8fafb;margin:0}
+.ux-comparison-table{margin-top:0;max-width:100%}
+.ux-comparison-table table{min-width:675px;width:100%;font-size:11px}
+.ux-comparison-table th{font-size:10px;letter-spacing:0;line-height:1.25;text-transform:none;background:#f0f6f8;color:#446474;padding:9px 6px}
+.ux-comparison-table td{padding:10px 6px;font-size:11px}
+.ux-comparison-table td:first-child{min-width:120px}
+.ux-comparison-table td strong{font-size:11px}
+.ux-comparison-table td small{margin:3px 0 0;font-size:10px;line-height:1.3}
+.ux-status{display:inline-flex;align-items:center;border-radius:8px;font-size:10px;font-weight:800;padding:4px 7px}
+.ux-status-good{color:#08765c;background:#e1f5e9}
+.ux-status-caution{color:#9b591e;background:#fff2e0}
+.ux-table-actions{display:flex;gap:3px;flex-wrap:wrap}
+.ux-table-actions .table-action{padding:3px 2px}
+.ux-comparison-results>.warning-text{margin:10px 0 0;font-size:11px}
+.ux-warnings{font-size:11px;margin:8px 0 0}
+.ux-timeline-selectors{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:14px;align-items:end}
+.ux-timeline-selectors label{display:grid;gap:4px;font-size:11px;font-weight:750;min-width:0;flex:1}
+.ux-timeline-selectors select{padding:9px;border:1px solid #cbd7df;border-radius:7px;min-width:0;width:100%;color:var(--ink);background:#fff}
+.ux-day-timeline{display:flex;overflow-x:auto;overscroll-behavior-inline:contain;gap:10px;padding:13px 1px 16px;scrollbar-width:thin}
+.ux-timeline-step{position:relative;border:1px solid #d6e5e9;border-radius:9px;min-width:125px;flex:1 0 125px;padding:20px 10px 10px;background:#f8fbfb;display:flex;flex-direction:column;gap:4px;text-align:center}
+.ux-timeline-step:not(:last-child):after{content:'→';position:absolute;right:-12px;top:45%;color:#068390;font-size:20px;font-weight:900;z-index:1}
+.ux-timeline-node{position:absolute;left:50%;transform:translateX(-50%);top:-11px;width:28px;height:28px;border-radius:50%;background:#078894;color:#fff;display:flex;align-items:center;justify-content:center;border:3px solid #fff}
+.ux-timeline-step strong{font-size:11px;line-height:1.3;margin-top:4px}
+.ux-timeline-step small{font-size:10px;color:#5e7784;overflow-wrap:anywhere}
+.ux-timeline-step b{font-size:13px}
+.ux-previous-data{margin-top:18px;padding:14px 18px}
+.ux-previous-data>summary{cursor:pointer;font-weight:750;color:#0b7885}
+.ux-previous-data h3{margin-top:18px}
+
+/* One library, one saved-vehicle tab, one detail editor: eliminate duplicated tiles. */
+#view-vehicles .section-heading{margin-bottom:14px}
+.ux-vehicle-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:15px}
+.ux-stat{display:grid;grid-template-columns:44px 1fr;grid-template-rows:auto auto;column-gap:12px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:11px;padding:13px 15px;min-width:0}
+.ux-stat-symbol{grid-row:1/3;width:40px;height:40px;border-radius:50%;background:#e9f6f5;color:#00858c;display:grid;place-items:center;font-size:20px;font-weight:900}
+.ux-stat strong{font-size:23px;line-height:1.1;letter-spacing:-.025em}
+.ux-stat small{font-size:10px;color:var(--muted);line-height:1.3}
+.ux-vehicle-workspace{display:grid;grid-template-columns:minmax(178px,.62fr) minmax(380px,2.2fr) minmax(270px,.98fr);gap:13px;align-items:start}
+.ux-vehicle-workspace>.panel{margin:0;padding:16px;min-width:0;border-radius:11px}
+.ux-vehicle-filters{display:flex;flex-direction:column;gap:17px}
+.ux-vehicle-filters h3{margin:0}
+.ux-library-tabs{display:grid;grid-template-columns:1fr 1fr;background:#edf4f6;padding:3px;border-radius:8px;gap:3px}
+.ux-tab{font-size:10.5px;font-weight:800;min-width:0;border:0;background:transparent;padding:9px 5px;border-radius:6px;color:#52707c}
+.ux-tab.active{background:#087e8b;color:#fff}
+.ux-filter-label{display:grid;gap:5px;font-size:11.5px;font-weight:800}
+.ux-filter-label input,.ux-filter-label select{width:100%;min-width:0;padding:9px;border:1px solid #cfdee3;border-radius:7px;background:#fff;color:var(--ink);font-size:12px}
+.ux-energy-filter{border:0;padding:0;margin:0;display:grid;gap:9px}
+.ux-energy-filter legend{font-size:12px;font-weight:800;margin-bottom:10px}
+.ux-energy-filter label{display:flex;align-items:center;gap:7px;font-size:11.5px;cursor:pointer}
+.ux-energy-filter input{accent-color:#078894;width:17px;height:17px;margin:0;flex-shrink:0}
+.ux-vehicle-filters #ux-reset-filters{white-space:normal;font-size:11px}
+.ux-vehicle-browser .ux-card-head{align-items:center;margin-bottom:12px}
+.ux-vehicle-browser .ux-card-head h3{font-size:17px}
+.ux-vehicle-browser .ux-card-head p{font-size:11px;max-width:500px}
+.ux-vehicle-browser .reference-grid,.ux-vehicle-browser #vehicle-table.solution-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:0}
+.ux-vehicle-browser .reference-card{padding:13px;gap:8px;border-radius:11px;background:#fbfcfd;box-shadow:none}
+.ux-vehicle-browser .reference-card h4{font-size:12px;line-height:1.34;margin:1px 0 0;min-height:32px}
+.ux-card-model{font-size:10.5px!important;line-height:1.3;min-height:27px}
+.ux-vehicle-browser .reference-card .solution-badge{font-size:9px}
+.ux-vehicle-browser .reference-card .solution-energy{font-size:9px;padding:3px 6px;white-space:normal;text-align:right}
+.ux-reference-specs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px 9px;margin:1px 0 5px;flex:1}
+.ux-reference-specs>div{min-width:0}
+.ux-reference-specs dt{font-size:9.5px;color:#6e8390;line-height:1.15}
+.ux-reference-specs dd{font-size:11px;font-weight:800;margin:2px 0;overflow-wrap:anywhere}
+.ux-reference-actions{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.ux-vehicle-browser .reference-card .button{margin:0;padding:7px 8px;font-size:10px;white-space:normal;min-height:33px}
+.ux-reference-secondary{display:flex;justify-content:flex-end;gap:8px}
+.ux-vehicle-browser .ux-no-vehicles{grid-column:1/-1;color:var(--muted);padding:24px 8px;font-size:12px}
+.ux-vehicle-details .ux-card-head{margin-bottom:9px}
+.ux-vehicle-details #vehicle-editor-panel h3{display:none}
+.ux-vehicle-details #vehicle-editor-panel p{font-size:10.5px;margin-bottom:4px}
+.ux-vehicle-details #vehicle-editor-panel .form-grid{margin-top:9px;gap:10px 8px}
+.ux-vehicle-details #vehicle-editor-panel .form-grid label{font-size:10.5px}
+.ux-vehicle-details #vehicle-editor-panel .form-grid input,.ux-vehicle-details #vehicle-editor-panel .form-grid select{padding:8px 7px;font-size:12px}
+.ux-vehicle-details .actions{flex-wrap:wrap}
+.ux-vehicle-details .actions .button{white-space:normal}
+.ux-vehicle-preview h4{font-size:15px;line-height:1.3;margin:0 0 6px}
+.ux-preview-list{display:grid;gap:8px;margin:16px 0}
+.ux-preview-list div{border-bottom:1px solid #e2ebef;padding:0 0 7px}
+.ux-preview-list dt{color:#718793;font-size:10px}
+.ux-preview-list dd{font-size:12px;font-weight:750;margin:2px 0 0;overflow-wrap:anywhere}
+.ux-vehicle-benchmarks{margin-top:16px}
+.ux-vehicle-benchmarks .table-wrap{max-height:270px;overflow:auto}
+.ux-vehicle-benchmarks table{min-width:580px}
+.ux-vehicle-benchmarks table td{padding:8px 10px}
+.ux-vehicle-benchmarks small{display:block;font-size:10px;color:var(--muted)}
+
+@media(min-width:1650px){.workspace{max-width:1660px}.ux-vehicle-browser .reference-grid,.ux-vehicle-browser #vehicle-table.solution-list{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:1390px){.ux-vehicle-workspace{grid-template-columns:minmax(170px,205px) minmax(0,1fr)}.ux-vehicle-details{grid-column:2;grid-row:2}.ux-map-metrics{grid-template-columns:minmax(0,1fr)}.ux-route-indicators{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:1160px){.ux-simulation-layout{grid-template-columns:1fr}.ux-sim-side{display:flex;flex-direction:column}.ux-map-metrics{grid-template-columns:minmax(0,1.5fr) minmax(185px,.8fr)}.ux-route-indicators{display:flex}.ux-vehicle-workspace{grid-template-columns:minmax(155px,195px) minmax(0,1fr)}.ux-vehicle-stats{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:760px){.ux-map-metrics{grid-template-columns:1fr}.ux-route-indicators{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.ux-vehicle-workspace{grid-template-columns:1fr}.ux-vehicle-details{grid-column:1;grid-row:auto}.ux-vehicle-filters{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.ux-vehicle-filters h3,.ux-energy-filter,.ux-vehicle-filters #ux-reset-filters{grid-column:1/-1}.ux-vehicle-browser .reference-grid,.ux-vehicle-browser #vehicle-table.solution-list{grid-template-columns:repeat(2,minmax(0,1fr))}.ux-vehicle-input .compare-options{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:530px){.ux-vehicle-browser .reference-grid,.ux-vehicle-browser #vehicle-table.solution-list{grid-template-columns:1fr}.ux-vehicle-input .compare-options{grid-template-columns:1fr}.ux-vehicle-stats{gap:8px}.ux-stat{padding:10px;grid-template-columns:30px 1fr;column-gap:5px}.ux-stat-symbol{width:28px;height:28px;font-size:14px}.ux-stat strong{font-size:20px}.ux-route-indicators{grid-template-columns:1fr}.ux-timeline-selectors{flex-direction:column;align-items:stretch}.ux-map-overview .panel-head .subtle-tag{display:none}}
+/* At desktop widths keep the reference-library cards in three columns, as in the reviewed mockup. */
+@media(min-width:1450px){.ux-vehicle-browser .reference-grid,.ux-vehicle-browser #vehicle-table.solution-list{grid-template-columns:repeat(3,minmax(0,1fr))}}

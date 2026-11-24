@@ -1,0 +1,231 @@
+{
+  "schema_version": 1,
+  "origin": "Tableau communiqué par l’utilisateur (2026-11-24), données indicatives non vérifiées, prix HT",
+  "entries": [
+    {
+      "id": "diesel-12",
+      "label": "Autocar Diesel Standard (12m)",
+      "manufacturer": "Iveco Bus",
+      "model": "Iveco Bus Crossway Line 12m",
+      "energy_code": "DIESEL",
+      "unit": "L",
+      "purchase_eur_ht": [
+        230000,
+        250000
+      ],
+      "price_per_energy_eur_ht": [
+        1.5,
+        1.85
+      ],
+      "energy_cost_100km_eur_ht": [
+        39,
+        48
+      ],
+      "maintenance_eur_per_km_ht": [
+        0.25,
+        0.28
+      ],
+      "purchase_scope": "vehicle"
+    },
+    {
+      "id": "diesel-13",
+      "label": "Autocar Diesel Grande Capacité (13m)",
+      "manufacturer": "Mercedes-Benz",
+      "model": "Mercedes-Benz Intouro M 13m",
+      "energy_code": "DIESEL",
+      "unit": "L",
+      "purchase_eur_ht": [
+        255000,
+        275000
+      ],
+      "price_per_energy_eur_ht": [
+        1.5,
+        1.85
+      ],
+      "energy_cost_100km_eur_ht": [
+        42,
+        52
+      ],
+      "maintenance_eur_per_km_ht": [
+        0.27,
+        0.3
+      ],
+      "purchase_scope": "vehicle"
+    },
+    {
+      "id": "biognv-12",
+      "label": "Autocar BioGNV Standard (12m)",
+      "manufacturer": "Iveco Bus",
+      "model": "Iveco Bus Crossway NP 12m",
+      "energy_code": "BIOGNV",
+      "unit": "kg",
+      "purchase_eur_ht": [
+        270000,
+        295000
+      ],
+      "price_per_energy_eur_ht": [
+        1.35,
+        1.95
+      ],
+      "energy_cost_100km_eur_ht": [
+        40,
+        58
+      ],
+      "maintenance_eur_per_km_ht": [
+        0.3,
+        0.33
+      ],
+      "purchase_scope": "vehicle"
+    },
+    {
+      "id": "biognv-13",
+      "label": "Autocar BioGNV Grande Capacité (13m)",
+      "manufacturer": "Irizar / Scania",
+      "model": "Irizar / Scania i4 GNV 13m",
+      "energy_code": "BIOGNV",
+      "unit": "kg",
+      "purchase_eur_ht": [
+        300000,
+        330000
+      ],
+      "price_per_energy_eur_ht": [
+        1.35,
+        1.95
+      ],
+      "energy_cost_100km_eur_ht": [
+        43,
+        62
+      ],
+      "maintenance_eur_per_km_ht": [
+        0.32,
+        0.35
+      ],
+      "purchase_scope": "vehicle"
+    },
+    {
+      "id": "electric-12-yutong",
+      "label": "Autocar Électrique Interurbain (12m)",
+      "manufacturer": "Yutong",
+      "model": "Yutong ICe 12 (350 kWh)",
+      "energy_code": "ELECTRIC",
+      "unit": "kWh",
+      "purchase_eur_ht": [
+        380000,
+        420000
+      ],
+      "price_per_energy_eur_ht": [
+        0.16,
+        0.25
+      ],
+      "energy_cost_100km_eur_ht": [
+        15,
+        24
+      ],
+      "maintenance_eur_per_km_ht": [
+        0.19,
+        0.22
+      ],
+      "purchase_scope": "vehicle"
+    },
+    {
+      "id": "electric-12-iveco",
+      "label": "Autocar Électrique Interurbain (12m)",
+      "manufacturer": "Iveco Bus",
+      "model": "Iveco Bus Crossway ELEC 12m",
+      "energy_code": "ELECTRIC",
+      "unit": "kWh",
+      "purchase_eur_ht": [
+        420000,
+        470000
+      ],
+      "price_per_energy_eur_ht": [
+        0.16,
+        0.25
+      ],
+      "energy_cost_100km_eur_ht": [
+        16,
+        25
+      ],
+      "maintenance_eur_per_km_ht": [
+        0.2,
+        0.22
+      ],
+      "purchase_scope": "vehicle"
+    },
+    {
+      "id": "electric-13",
+      "label": "Autocar Électrique Longue Autonomie (13m)",
+      "manufacturer": "Mercedes-Benz",
+      "model": "Mercedes-Benz eIntouro M 13m",
+      "energy_code": "ELECTRIC",
+      "unit": "kWh",
+      "purchase_eur_ht": [
+        480000,
+        540000
+      ],
+      "price_per_energy_eur_ht": [
+        0.16,
+        0.25
+      ],
+      "energy_cost_100km_eur_ht": [
+        17,
+        26
+      ],
+      "maintenance_eur_per_km_ht": [
+        0.21,
+        0.24
+      ],
+      "purchase_scope": "vehicle"
+    },
+    {
+      "id": "h2-retrofit-12",
+      "label": "Autocar Hydrogène Rétrofit (12m)",
+      "manufacturer": "GCK Mobility",
+      "model": "GCK Mobility / Crossway H2",
+      "energy_code": "H2",
+      "unit": "kg",
+      "purchase_eur_ht": [
+        380000,
+        430000
+      ],
+      "price_per_energy_eur_ht": [
+        10,
+        15
+      ],
+      "energy_cost_100km_eur_ht": [
+        70,
+        105
+      ],
+      "maintenance_eur_per_km_ht": [
+        0.32,
+        0.38
+      ],
+      "purchase_scope": "retrofit_kit_installation"
+    },
+    {
+      "id": "h2-13",
+      "label": "Autocar Hydrogène Longue Distance (13-15m)",
+      "manufacturer": "Irizar",
+      "model": "Irizar i6S Efficient Hydrogen",
+      "energy_code": "H2",
+      "unit": "kg",
+      "purchase_eur_ht": [
+        650000,
+        750000
+      ],
+      "price_per_energy_eur_ht": [
+        10,
+        15
+      ],
+      "energy_cost_100km_eur_ht": [
+        85,
+        128
+      ],
+      "maintenance_eur_per_km_ht": [
+        0.35,
+        0.42
+      ],
+      "purchase_scope": "vehicle"
+    }
+  ]
+}

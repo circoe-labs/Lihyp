@@ -197,3 +197,7 @@ Consulter `reports/implementation-review.md` pour l'ordre de délégation et les
 critères de sortie. Valider en priorité les sources de données, la politique Q24,
 les règles de rotation/dépôt et les périmètres TCO/CO2e avant la sophistication
 du solveur ou la connexion à des données réelles.
+
+## Bibliothèque de 9 autocars (24/11/2026)
+
+L'onglet **Véhicules** présente neuf références indicatives non vérifiées et leurs fourchettes de prix et de maintenance HT. Pour permettre la comparaison, compléter les sièges, la consommation et la capacité utile, renseigner l'énergie et ses facteurs CO₂e puis enregistrer. Le comparatif énergie + maintenance sur 100 km n'est pas un TCO. BioGNV (kg) est pris en charge mais le remplissage automatique ne l'est pas. La dépendance `tzdata` est installée automatiquement sur Windows. Voir `docs/catalogue-utilisateur-neuf-autocars.md`.

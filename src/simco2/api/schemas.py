@@ -24,7 +24,7 @@ def require_decimal(value: str, *, positive: bool = False) -> str:
 
 class EnergyInput(StrictInput):
     country_iso: Literal["FR"] = "FR"
-    energy_code: Literal["DIESEL", "ELECTRIC", "H2"]
+    energy_code: Literal["DIESEL", "ELECTRIC", "H2", "BIOGNV"]
     unit: Literal["L", "kWh", "kg"]
     price_per_unit: str
     factors: dict[str, str] = Field(default_factory=dict)
@@ -47,7 +47,7 @@ class EnergyInput(StrictInput):
 
     @model_validator(mode="after")
     def check_unit(self):
-        target = {"DIESEL": "L", "ELECTRIC": "kWh", "H2": "kg"}
+        target = {"DIESEL": "L", "ELECTRIC": "kWh", "H2": "kg", "BIOGNV": "kg"}
         if self.unit != target[self.energy_code]:
             raise ValueError("Unité incorrecte pour le type d'énergie")
         return self
@@ -59,7 +59,7 @@ class VehicleInput(StrictInput):
     model: str = Field(min_length=1, max_length=150)
     kind: Literal["bus", "van", "car"] = "bus"
     seats: int = Field(ge=1, le=150)
-    energy_code: Literal["DIESEL", "ELECTRIC", "H2"]
+    energy_code: Literal["DIESEL", "ELECTRIC", "H2", "BIOGNV"]
     unit: Literal["L", "kWh", "kg"]
     consumption_per_km: str
     consumption_per_hour: str = "0"
@@ -93,7 +93,7 @@ class VehicleInput(StrictInput):
 
     @model_validator(mode="after")
     def rules(self):
-        units = {"DIESEL": "L", "ELECTRIC": "kWh", "H2": "kg"}
+        units = {"DIESEL": "L", "ELECTRIC": "kWh", "H2": "kg", "BIOGNV": "kg"}
         if units[self.energy_code] != self.unit:
             raise ValueError("Unité énergie incompatible")
         if dec(self.reserve) > dec(self.usable_capacity):
@@ -104,7 +104,7 @@ class VehicleInput(StrictInput):
 
 
 class EquipmentInput(StrictInput):
-    energy_code: Literal["DIESEL", "ELECTRIC", "H2"]
+    energy_code: Literal["DIESEL", "ELECTRIC", "H2", "BIOGNV"]
     connector: str = Field(min_length=1, max_length=100)
     ports: int = Field(ge=1, le=100)
     max_power_kw: str | None = None
@@ -228,7 +228,7 @@ class DayStationInput(StrictInput):
     @field_validator("energy_codes")
     @classmethod
     def known_codes(cls, values):
-        if any(code not in {"DIESEL", "H2", "ELECTRIC", "SP95", "SP98", "E10", "Gazole"}
+        if any(code not in {"DIESEL", "H2", "ELECTRIC", "BIOGNV", "SP95", "SP98", "E10", "Gazole"}
                for code in values):
             raise ValueError("Code de station inconnu")
         return ["DIESEL" if x == "Gazole" else x for x in values]

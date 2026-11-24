@@ -81,7 +81,7 @@ def test_interface_allows_explicit_registration_and_review():
     js=(ROOT/'src/simco2/ui/app.js').read_text(encoding='utf-8')
     html=(ROOT/'src/simco2/ui/index.html').read_text(encoding='utf-8')
     assert 'id="reference-library"' in html
-    assert 'data-add-reference' in js and 'data-prefill-reference' in js
+    assert 'data-add-reference' in js and 'data-view-reference' in js
     assert 'seats:String(e.seats),consumption_per_km:String(e.consumption_per_km)' in js
     assert 'usable_capacity:String(e.usable_capacity),reserve:String(e.reserve)' in js
     assert "quality:'unverified'" in js

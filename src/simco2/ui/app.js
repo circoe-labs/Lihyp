@@ -7,6 +7,24 @@
   const text = (value) => String(value ?? '');
   const dictionary = {
     fr: {
+      uxPlanningTitle:"Hypothèses d'exploitation", uxManageVehicles:'Gérer les véhicules',
+      uxMapTitle:'Carte et itinéraire', uxDistance:'Distance', uxTravelTime:'Temps de route',
+      uxStation:'Station retenue', uxDetour:'Trajet via station', uxCourses:'Courses réalisées (solution étudiée)',
+      uxComparisonTitle:'Comparaison des véhicules', uxComparisonEmpty:"Calculez l'itinéraire et sélectionnez au moins deux véhicules pour voir les résultats.",
+      uxTimelineTitle:"Détail d'une solution", uxTimelineEmpty:'Les événements de service apparaîtront après la comparaison.',
+      uxHistoryTitle:'Historique des simulations et comparaisons', uxSelectDetail:'Voir le planning',
+      uxNoRefuel:'Aucun ravitaillement planifié', uxNoData:'Non disponible', uxChooseVehicle:'Véhicule', uxChooseBus:'Autocar',
+      uxCoursesDone:'Courses', uxFuelStops:'Pleins', uxTotalTime:'Temps du service',
+      uxVariantCount:'Références de la bibliothèque', uxEnergyCount:'Motorisations',
+      uxReadyCount:'Véhicules sélectionnables', uxSavedCount:'Véhicules enregistrés',
+      uxFilters:'Filtres', uxLibraryTab:'Bibliothèque', uxRegisteredTab:'Mes véhicules',
+      uxSearch:'Rechercher', uxSearchPlaceholder:'Nom ou constructeur', uxEngineFilter:'Énergies',
+      uxAllSeats:'Toutes capacités', uxAllMakes:'Tous les constructeurs', uxResetFilters:'Réinitialiser les filtres',
+      uxVehicleDetail:'Fiche véhicule', uxPickVehicle:'Sélectionnez une carte pour voir ses caractéristiques et ses sources.',
+      uxViewDetails:'Voir la fiche', uxNoVehicleMatches:'Aucun véhicule pour ces filtres.',
+      uxNoSavedVehicles:'Aucun véhicule enregistré. Ouvrez la bibliothèque pour en ajouter.',
+      uxRange:'Autonomie estimée', uxIndicative:'Données utilisateur non vérifiées',
+      uxNoChargeNotice:'Recharge électrique et ravitaillement BioGNV non planifiés automatiquement.',
       loginKicker:'ACCÈS ADMINISTRATEUR', loginIntro:"Connectez-vous pour gérer les clés de routage, les énergies, les véhicules et les stations.",
       username:'Identifiant',password:'Mot de passe',signIn:'Se connecter',loginHelp:"Compte créé par l'administrateur du service. En local : python -m simco2.cli create-user.",
       brandSubtitle:'Transport & climat',navTitle:'SIMULER ET EXPLORER',navSimulations:'Simulations',navStations:'Stations en Normandie',
@@ -33,7 +51,7 @@
       source:'Source / méthode',sourceHint:'Document ou relevé',sourceDate:'Date de source',saveStation:'Enregistrer la station non vérifiée',
       vehicleIntro:'Créer un modèle de véhicule utilisé par les simulations. Les valeurs doivent être justifiées par une source.',
       referenceLibraryTitle:'Bibliothèque indicative — 9 références',referenceLibraryHelp:'Neuf autocars : coûts et données techniques fournis par l’utilisateur, non vérifiés. Ajoutez-les au catalogue puis configurez les énergies pour les comparer.',referenceLibraryBadge:'À vérifier',
-      referencePrice:'Acquisition / opération HT',referenceEnergyPrice:'Énergie HT',referenceEnergy100:'Coût énergie / 100 km HT',referenceMaintenance:'Maintenance préventive HT / km',referenceUse:'Vérifier / modifier',referenceAdd:'Ajouter au catalogue',referenceAdded:'Déjà enregistré',referenceAddedMessage:'Autocar ajouté au catalogue (données utilisateur non vérifiées).',referenceSpecSeats:'Places utiles',referenceSpecConsumption:'Consommation',referenceSpecCapacity:'Capacité utile',referenceSpecReserve:'Réserve',referenceSpecSource:'Source déclarée',
+      referencePrice:'Acquisition / opération HT',referenceEnergyPrice:'Énergie HT',referenceEnergy100:'Coût énergie / 100 km HT',referenceMaintenance:'Maintenance préventive HT / km',referenceUse:'Vérifier / modifier',referenceAdd:'Ajouter au catalogue',referenceAdded:'Déjà enregistré',referenceAddedMessage:'Autocar ajouté au catalogue (données utilisateur non vérifiées).',referenceImportAll:'Ajouter les 9 au catalogue',referenceImportConfirm:'Ajouter les références non enregistrées ? Les données sont indicatives et les tarifs nationaux et facteurs CO₂e doivent être configurés séparément.',referenceImportDone:'Références ajoutées au catalogue',referenceSpecSeats:'Places utiles',referenceSpecConsumption:'Consommation',referenceSpecCapacity:'Capacité utile',referenceSpecReserve:'Réserve',referenceSpecSource:'Source déclarée',
       referenceSource:'Source : tableau utilisateur non vérifié (24/11/2026)',referenceComplete:'Places, consommation, capacité et réserve préremplies selon tes données, non vérifiées. Les médianes des coûts restent modifiables ; aucun tarif national ni facteur CO₂e ajouté.',referenceRetrofit:'Kit et pose seulement, pas prix du véhicule complet.',referenceCompareTitle:'Comparaison indicative des coûts sur 100 km',referencePartialCost:'Énergie + maintenance / 100 km HT',referencePartialWarning:'Comparatif partiel hors salaires, amortissement, assurance, autres coûts et CO₂e. Ce ne sont pas des résultats de simulation.',referenceMissingEnergy:'Avant de comparer, configurez cette énergie et son facteur CO₂e dans Énergies par pays.',
       vehicleFormTitle:'Fiche véhicule',vehicleUnverified:'Données constructeur non préchargées : valeurs à vérifier.',
       modelName:'Nom de variante',modelExample:'Autocar diesel A',manufacturer:'Constructeur',model:'Modèle',seats:'Places utiles',
@@ -155,6 +173,24 @@
       profileCar:'Voiture / démo',
     },
     en: {
+      uxPlanningTitle:'Operating assumptions', uxManageVehicles:'Manage vehicles',
+      uxMapTitle:'Map and route', uxDistance:'Distance', uxTravelTime:'Travel time',
+      uxStation:'Selected station', uxDetour:'Route via station', uxCourses:'Passenger trips (evaluated solution)',
+      uxComparisonTitle:'Vehicle comparison', uxComparisonEmpty:'Calculate a route and select at least two vehicles to see results.',
+      uxTimelineTitle:'Solution timeline', uxTimelineEmpty:'Service events will be shown after the comparison.',
+      uxHistoryTitle:'Simulation and comparison history', uxSelectDetail:'View timeline',
+      uxNoRefuel:'No refuel scheduled', uxNoData:'Unavailable', uxChooseVehicle:'Vehicle', uxChooseBus:'Bus',
+      uxCoursesDone:'Trips', uxFuelStops:'Refuels', uxTotalTime:'Service time',
+      uxVariantCount:'Library references', uxEnergyCount:'Energy types',
+      uxReadyCount:'Selectable vehicles', uxSavedCount:'Saved vehicles',
+      uxFilters:'Filters', uxLibraryTab:'Library', uxRegisteredTab:'My vehicles',
+      uxSearch:'Search', uxSearchPlaceholder:'Name or manufacturer', uxEngineFilter:'Energy types',
+      uxAllSeats:'All capacities', uxAllMakes:'All manufacturers', uxResetFilters:'Reset filters',
+      uxVehicleDetail:'Vehicle details', uxPickVehicle:'Select a card to inspect specifications and sources.',
+      uxViewDetails:'View details', uxNoVehicleMatches:'No matching vehicles.',
+      uxNoSavedVehicles:'No saved vehicles. Open the library to register some.',
+      uxRange:'Estimated range', uxIndicative:'Unverified user-provided data',
+      uxNoChargeNotice:'Electric charging and BioCNG refueling are not automatically scheduled.',
       loginKicker:'PASSENGER TRANSPORT SIMULATOR · PROTOTYPE',loginIntro:'Estimate costs and emissions for a passenger route using computed road distances.',
       username:'Username',password:'Password',signIn:'Sign in',loginHelp:'An account is created by the service administrator. Locally: python -m simco2.cli create-user.',
       brandSubtitle:'Transport & climate',navTitle:'SIMULATE AND EXPLORE',navSimulations:'Simulations',navStations:'Stations in Normandy',
@@ -181,7 +217,7 @@
       source:'Source / methodology',sourceHint:'Document or observation',sourceDate:'Source date',saveStation:'Save as unverified station',
       vehicleIntro:'Create a vehicle model for use in simulations. Values should be backed by a source.',
       referenceLibraryTitle:'Indicative library — 9 references',referenceLibraryHelp:'Nine coaches with user-provided costs and technical specifications (not verified). Add them to the catalogue and configure energies to compare.',referenceLibraryBadge:'Unverified',
-      referencePrice:'Purchase / operation (excl. VAT)',referenceEnergyPrice:'Energy price (excl. VAT)',referenceEnergy100:'Energy cost / 100 km (excl. VAT)',referenceMaintenance:'Preventive maintenance / km (excl. VAT)',referenceUse:'Review / edit',referenceAdd:'Add to catalogue',referenceAdded:'Already saved',referenceAddedMessage:'Coach added to catalogue (unverified user-supplied data).',referenceSpecSeats:'Usable seats',referenceSpecConsumption:'Consumption',referenceSpecCapacity:'Usable capacity',referenceSpecReserve:'Reserve',referenceSpecSource:'Declared source',
+      referencePrice:'Purchase / operation (excl. VAT)',referenceEnergyPrice:'Energy price (excl. VAT)',referenceEnergy100:'Energy cost / 100 km (excl. VAT)',referenceMaintenance:'Preventive maintenance / km (excl. VAT)',referenceUse:'Review / edit',referenceAdd:'Add to catalogue',referenceAdded:'Already saved',referenceAddedMessage:'Coach added to catalogue (unverified user-supplied data).',referenceImportAll:'Add all 9 to catalogue',referenceImportConfirm:'Add unsaved references? Figures are indicative; national energy prices and CO₂e factors must be configured separately.',referenceImportDone:'References added to catalogue',referenceSpecSeats:'Usable seats',referenceSpecConsumption:'Consumption',referenceSpecCapacity:'Usable capacity',referenceSpecReserve:'Reserve',referenceSpecSource:'Declared source',
       referenceSource:'Source: unverified user table (24 Nov 2026)',referenceComplete:'Seats, consumption, capacity and reserve filled from user-supplied unverified figures. Cost midpoints are editable; no national energy price or CO₂e factor is added.',referenceRetrofit:'Conversion kit and installation only, not a complete vehicle price.',referenceCompareTitle:'Indicative comparison of costs over 100 km',referencePartialCost:'Energy + maintenance / 100 km, excl. VAT',referencePartialWarning:'Partial comparison excluding staff, depreciation, insurance, other costs and CO₂e. Not simulated results.',referenceMissingEnergy:'Configure this energy type and its CO₂e factor in Energy by country before comparing.',
       vehicleFormTitle:'Vehicle details',vehicleUnverified:'No manufacturer data preloaded: values require validation.',
       modelName:'Variant name',modelExample:'Diesel coach A',manufacturer:'Manufacturer',model:'Model',seats:'Usable seats',
@@ -339,6 +375,7 @@
     loginPortal.classList.toggle('hidden', operator);
     routeProtected.classList.toggle('hidden', !operator);
     document.querySelectorAll('.admin-only').forEach(el => el.classList.toggle('hidden', !operator));
+    $('ux-vehicle-preview').classList.toggle('hidden', operator);
     readOnlyNotices.forEach(el => {
       el.classList.toggle('hidden', operator);
       el.innerHTML=language==='fr'
@@ -467,7 +504,7 @@
       const [e,v,s,r,custom] = await Promise.all([
         api('/energies'),api('/vehicles'),api('/scenarios'),api('/runs'),api('/stations')]);
       [energies,vehicles,scenarios,runs,customStations] = [e,v,s,r,custom];
-      fillScenarioSelects(); show('scenarios'); applyLanguage();
+      updateVehicleFilters(); fillScenarioSelects(); show('scenarios'); applyLanguage();
     } catch (error) {
       message((language === 'fr' ? 'Chargement public impossible : ' : 'Unable to load public view: ')+error.message,true);
     }
@@ -588,21 +625,8 @@
     try { vehicles = await api('/vehicles'); renderVehicles(); renderReferenceLibrary(); fillScenarioSelects(); }
     catch(error) { message(error.message, true); }
   }
-  // Clearly labelled synthetic example. It is a preview, not a manufacturer specification
-  // and is only stored after the user clicks the button (never on an implicit GET/login).
-  function demoCoach() {
-    return {
-      label:t('demoName'), manufacturer:t('demoMake'), model:t('demoModel'),
-      kind:'bus', seats:50, energy_code:'DIESEL', unit:'L',
-      consumption_per_km:'0.2', consumption_per_hour:'0', usable_capacity:'100', reserve:'5',
-      maintenance_eur_per_km:'0', labor_eur_per_h:'0', purchase_eur:'0', residual_eur:'0',
-      life_years:10, insurance_eur_year:'0', connectors:[],
-      source:t('demoSource'), quality:'unverified',
-    };
-  }
-
-  // Reference values are not complete vehicle specifications or national energy prices.
-  // Fetching these cards never inserts vehicles or changes energy prices in the database.
+  // The supplied ranges are reference information, not complete vehicle specs or
+  // verified national energy data. They never create records without explicit action.
   let referenceEntries = [];
   function referenceRange(values, suffix='') {
     return `${number(values[0],2)} – ${number(values[1],2)}${suffix}`;
@@ -634,47 +658,98 @@
     await loadVehicles();
     return true;
   }
-  function renderReferenceLibrary() {
-    const node=$('reference-library'); if(!node) return;
-    node.innerHTML=referenceEntries.map(e=>`<article class="reference-card">
-      <div class="reference-card-top"><span class="solution-badge">${esc(t('referenceLibraryBadge'))}</span>
-      <span class="solution-energy">${esc(energyName(e.energy_code))}</span></div>
-      <h4>${esc(e.label)}</h4><p class="small muted">${esc(e.manufacturer)} · ${esc(e.model)}</p>
-      <dl class="reference-facts">
-        <div><dt>${esc(t('referenceSpecSeats'))}</dt><dd>${esc(e.seats)}</dd></div>
-        <div><dt>${esc(t('referenceSpecConsumption'))}</dt><dd>${esc(e.consumption_per_km)} ${esc(e.unit)}/km</dd></div>
-        <div><dt>${esc(t('referenceSpecCapacity'))}</dt><dd>${esc(e.usable_capacity)} ${esc(e.unit)}</dd></div>
-        <div><dt>${esc(t('referenceSpecReserve'))}</dt><dd>${esc(e.reserve)} ${esc(e.unit)}</dd></div>
-        <div><dt>${esc(t('referencePrice'))}</dt><dd>${esc(referenceRange(e.purchase_eur_ht,' €'))}</dd></div>
-        <div><dt>${esc(t('referenceEnergyPrice'))}</dt><dd>${esc(referenceRange(e.price_per_energy_eur_ht,' €'))}/${esc(e.unit)}</dd></div>
-        <div><dt>${esc(t('referenceEnergy100'))}</dt><dd>${esc(referenceRange(e.energy_cost_100km_eur_ht,' €'))}</dd></div>
-        <div><dt>${esc(t('referenceMaintenance'))}</dt><dd>${esc(referenceRange(e.maintenance_eur_per_km_ht,' €'))}</dd></div>
-      </dl>
-      <p class="small muted">${esc(t('referenceSpecSource'))} : ${esc(e.technical_source)} · ${esc(e.capacity_details)}</p>
-      ${e.purchase_scope==='retrofit_kit_installation'?`<p class="small warning-text">${esc(t('referenceRetrofit'))}</p>`:''}
-      ${operator ? `<div class="reference-actions">
-        <button type="button" class="button primary" data-add-reference="${esc(e.id)}" ${referenceExists(e)?'disabled':''}>${esc(t(referenceExists(e)?'referenceAdded':'referenceAdd'))}</button>
-        <button type="button" class="button outline" data-prefill-reference="${esc(e.id)}">${esc(t('referenceUse'))}</button>
-      </div>` : ''}
-    </article>`).join('');
-    const costRows=referenceEntries.map(e=>{
-      const low=e.energy_cost_100km_eur_ht[0]+100*e.maintenance_eur_per_km_ht[0];
-      const high=e.energy_cost_100km_eur_ht[1]+100*e.maintenance_eur_per_km_ht[1];
-      return `<tr><td>${esc(e.label)}<small>${esc(e.model)}</small></td><td>${esc(energyName(e.energy_code))}</td><td><strong>${esc(referenceRange([low,high],' €'))}</strong></td></tr>`;
+  let uxVehicleMode='library';
+  function visibleVehicleOptions(rows) {
+    const query=($('ux-vehicle-search').value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+    const codes=new Set([...document.querySelectorAll('.ux-energy-filter input:checked')].map(i=>i.value));
+    const seats=Number($('ux-vehicle-seats').value||0), make=$('ux-vehicle-make').value;
+    return rows.filter(e=> {
+      const p=e.payload||e;
+      const name=`${p.label} ${p.manufacturer} ${p.model}`.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+      return codes.has(p.energy_code) && Number(p.seats)>=seats && (!make || p.manufacturer===make)
+        && (!query || name.includes(query));
     });
-    const table=document.createElement('section');table.className='reference-comparison';
-    table.innerHTML=`<h4>${esc(t('referenceCompareTitle'))}</h4><p class="small muted">${esc(t('referencePartialWarning'))}</p>
-      <div class="table-wrap"><table><thead><tr><th>${esc(t('modelLabel'))}</th><th>${esc(t('energy'))}</th><th>${esc(t('referencePartialCost'))}</th></tr></thead>
-      <tbody>${costRows.join('')}</tbody></table></div>`;
-    node.after(table);
-    document.querySelectorAll('.reference-comparison').forEach(el=>{if(el!==table)el.remove();});
-    node.querySelectorAll('[data-prefill-reference]').forEach(b=>b.addEventListener('click',()=>{
-      const e=referenceEntries.find(e=>e.id===b.dataset.prefillReference);if(e)prefillReference(e);
+  }
+  function updateVehicleStats() {
+    $('ux-stat-variants').textContent=String(referenceEntries.length);
+    $('ux-stat-energies').textContent=String(new Set(referenceEntries.map(e=>e.energy_code)).size);
+    $('ux-stat-saved').textContent=String(vehicles.length);
+    $('ux-stat-ready').textContent=String(vehicles.filter(v=>energies.some(e=>e.payload.energy_code===v.payload.energy_code)).length);
+  }
+  function updateVehicleFilters() {
+    const rows=uxVehicleMode==='library'?referenceEntries:vehicles.map(v=>v.payload);
+    const current=$('ux-vehicle-make').value;
+    const makes=[...new Set(rows.map(e=>e.manufacturer))].sort((a,b)=>a.localeCompare(b));
+    $('ux-vehicle-make').innerHTML=`<option value="">${esc(t('uxAllMakes'))}</option>`+
+      makes.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join('');
+    $('ux-vehicle-make').value=makes.includes(current)?current:'';
+  }
+  function updateVehicleView() {
+    const library=uxVehicleMode==='library';
+    $('reference-library').classList.toggle('hidden',!library);
+    $('vehicle-table').classList.toggle('hidden',library);
+    $('ux-tab-library').classList.toggle('active',library);
+    $('ux-tab-registered').classList.toggle('active',!library);
+    $('ux-tab-library').setAttribute('aria-pressed',String(library));
+    $('ux-tab-registered').setAttribute('aria-pressed',String(!library));
+    $('ux-catalog-title').textContent=library?t('referenceLibraryTitle'):t('vehicleCatalog');
+    $('ux-catalog-hint').textContent=library?t('referenceLibraryHelp'):t('uxSavedCount');
+  }
+  function selectVehiclePreview(p,reference=false) {
+    if(operator)return;
+    const range=(Number(p.usable_capacity)-Number(p.reserve))/Number(p.consumption_per_km);
+    const source=reference?p.technical_source:p.source;
+    const purchase=p.purchase_scope==='retrofit_kit_installation'?t('referenceRetrofit'):
+      (reference?referenceRange(p.purchase_eur_ht,' €'):number(p.purchase_eur||0,0)+' €');
+    const box=$('ux-vehicle-preview');
+    box.innerHTML=`<h4>${esc(p.label)}</h4><p class="small muted">${esc(p.manufacturer)} · ${esc(p.model)}</p>
+      <dl class="ux-preview-list">
+        <div><dt>${esc(t('seats'))}</dt><dd>${esc(p.seats)}</dd></div>
+        <div><dt>${esc(t('energy'))}</dt><dd>${esc(energyName(p.energy_code))}</dd></div>
+        <div><dt>${esc(t('consumptionKm'))}</dt><dd>${esc(p.consumption_per_km)} ${esc(p.unit)}/km</dd></div>
+        <div><dt>${esc(t('consumptionHour'))}</dt><dd>${esc(p.consumption_per_hour)} ${esc(p.unit)}/h</dd></div>
+        <div><dt>${esc(t('capacity'))}</dt><dd>${esc(p.usable_capacity)} ${esc(p.unit)}</dd></div>
+        <div><dt>${esc(t('reserve'))}</dt><dd>${esc(p.reserve)} ${esc(p.unit)}</dd></div>
+        <div><dt>${esc(t('uxRange'))}</dt><dd>${Number.isFinite(range) && range>0?esc(number(range,0))+' km':'—'}</dd></div>
+        <div><dt>${esc(t('referencePrice'))}</dt><dd>${esc(purchase)}</dd></div>
+      </dl><p class="small warning-text">${esc(t('uxIndicative'))}</p><p class="small muted">${esc(t('source'))}: ${esc(source)}</p>`;
+  }
+  function renderReferenceLibrary() {
+    const node=$('reference-library');if(!node)return;
+    const shown=visibleVehicleOptions(referenceEntries);
+    node.innerHTML=shown.length?shown.map(e=>{
+      const consumption100=Number(e.consumption_per_km)*100;
+      const range=(Number(e.usable_capacity)-Number(e.reserve))/Number(e.consumption_per_km);
+      return `<article class="reference-card" data-ref-card="${esc(e.id)}">
+        <div class="reference-card-top"><span class="solution-badge">${esc(t('referenceLibraryBadge'))}</span><span class="solution-energy">${esc(energyName(e.energy_code))}</span></div>
+        <h4>${esc(e.label)}</h4><p class="small muted ux-card-model">${esc(e.manufacturer)} · ${esc(e.model)}</p>
+        <dl class="ux-reference-specs"><div><dt>${esc(t('seats'))}</dt><dd>${esc(e.seats)}</dd></div>
+          <div><dt>${esc(t('consumption100'))}</dt><dd>${esc(number(consumption100,1))} ${esc(e.unit)}</dd></div>
+          <div><dt>${esc(t('capacity'))}</dt><dd>${esc(e.usable_capacity)} ${esc(e.unit)}</dd></div>
+          <div><dt>${esc(t('uxRange'))}</dt><dd>${Number.isFinite(range)&&range>0?esc(number(range,0))+' km':'—'}</dd></div></dl>
+        <div class="ux-reference-actions"><button type="button" class="button outline" data-view-reference="${esc(e.id)}">${esc(t('uxViewDetails'))}</button>
+        ${operator?`<button type="button" class="button primary" data-add-reference="${esc(e.id)}" ${referenceExists(e)?'disabled':''}>${esc(t(referenceExists(e)?'referenceAdded':'referenceAdd'))}</button>`:''}</div>
+      </article>`;
+    }).join(''):`<p class="ux-no-vehicles">${esc(t('uxNoVehicleMatches'))}</p>`;
+    const benchmark=$('ux-cost-benchmarks');
+    if(benchmark) {
+      benchmark.innerHTML=`<table><thead><tr><th>${esc(t('modelLabel'))}</th><th>${esc(t('energy'))}</th><th>${esc(t('referencePartialCost'))}</th></tr></thead>
+        <tbody>${referenceEntries.map(e=>{
+          const min=e.energy_cost_100km_eur_ht[0]+100*e.maintenance_eur_per_km_ht[0];
+          const max=e.energy_cost_100km_eur_ht[1]+100*e.maintenance_eur_per_km_ht[1];
+          return `<tr><td>${esc(e.label)}<small>${esc(e.model)}</small></td><td>${esc(energyName(e.energy_code))}</td><td>${esc(referenceRange([min,max],' €'))}</td></tr>`;
+        }).join('')}</tbody></table>`;
+    }
+    updateVehicleStats();updateVehicleView();
+    $('ux-visible-count').textContent=String(uxVehicleMode==='library'?shown.length:visibleVehicleOptions(vehicles).length);
+    node.querySelectorAll('[data-view-reference]').forEach(b=>b.addEventListener('click',()=>{
+      const e=referenceEntries.find(e=>e.id===b.dataset.viewReference);if(!e)return;
+      if(operator)prefillReference(e);else selectVehiclePreview(e,true);
     }));
     node.querySelectorAll('[data-add-reference]').forEach(b=>b.addEventListener('click',async()=>{
       const e=referenceEntries.find(e=>e.id===b.dataset.addReference);if(!e)return;
       b.disabled=true;
-      try {await addReference(e);message(t('referenceAddedMessage'));}
+      try{await addReference(e);message(t('referenceAddedMessage'));}
       catch(error){message(error.message,true);b.disabled=false;}
     }));
   }
@@ -698,71 +773,72 @@
     form.scrollIntoView({behavior:'smooth',block:'start'});
     form.elements.namedItem('seats').focus({preventScroll:true});
   }
-  async function loadReferenceLibrary(){
-    try{
+  async function loadReferenceLibrary() {
+    try {
       const response=await fetch('/assets/vehicle-reference-catalog.json');
-      if(!response.ok)throw new Error(String(response.status));
+      if(!response.ok) throw new Error(String(response.status));
       const data=await response.json();
       referenceEntries=Array.isArray(data.entries)?data.entries:[];
-      renderReferenceLibrary();
-    }catch(_){$('reference-library').textContent=t('loadError');}
+      updateVehicleFilters(); renderReferenceLibrary();
+    } catch(_) { $('reference-library').textContent=t('loadError'); }
   }
-  function solutionCard(p, vehicle=null) {
-    const isDemo = !vehicle;
-    const key = isDemo ? '' : esc(vehicle.id);
-    const energyName = t(({DIESEL:'diesel', ELECTRIC:'electric', H2:'hydrogen', BIOGNV:'biognv'})[p.energy_code] || 'energy');
-    const c100 = number(Number(p.consumption_per_km) * 100, 1);
-    const badge = isDemo ? t('demoBadge') : t('unverified');
-    const specs = [
-      [t('availableSeats'), `${esc(p.seats)}`],
-      [t('consumption100'), `${esc(c100)} ${esc(p.unit)}/100 km`],
-      [t('tankSize'), `${esc(p.usable_capacity)} ${esc(p.unit)}`],
-    ];
-    const actions = isDemo
-      ? (operator ? `<button type="button" class="button primary" id="add-demo-vehicle">${esc(t('addDemo'))}</button>` : '')
-      : `<button type="button" class="button primary" data-vehicle-simulate="${key}">${esc(t('selectForScenario'))}</button>
-         ${operator ? `<button type="button" class="button outline" data-vehicle-edit="${key}">${esc(t('revise'))}</button>` : ''}
-         <button type="button" class="table-action" data-vehicle-history="${esc(vehicle.vehicle_key)}">${esc(t('history'))}</button>`;
-    return `<article class="solution-card${isDemo ? ' solution-demo' : ''}">
-       <header class="solution-header"><div><span class="solution-badge">${esc(badge)}</span>
-         <h4>${esc(p.label)}</h4><p class="small muted">${esc(p.manufacturer)} · ${esc(p.model)}</p></div>
-         <span class="solution-energy">${esc(energyName)}</span></header>
-       ${isDemo ? `<p class="solution-description">${esc(t('demoDescription'))}</p>` : ''}
-       <div class="solution-specs">${specs.map(([label,value]) =>
-         `<div><small>${esc(label)}</small><strong>${value}</strong></div>`).join('')}</div>
-       <p class="solution-source"><strong>${esc(t('vehicleSource'))} :</strong> ${esc(p.source)}</p>
-       <div class="solution-actions">${actions}</div>
-     </article>`;
+  function solutionCard(p, vehicle) {
+    const c100=number(Number(p.consumption_per_km)*100,1);
+    const eligible=energies.some(e=>e.payload.energy_code===p.energy_code);
+    return `<article class="reference-card ux-registered-card">
+      <div class="reference-card-top"><span class="${eligible?'ux-status ux-status-good':'solution-badge'}">${esc(t(eligible?'compareStatus':'missingEnergyOption'))}</span><span class="solution-energy">${esc(energyName(p.energy_code))}</span></div>
+      <h4>${esc(p.label)}</h4><p class="small muted ux-card-model">${esc(p.manufacturer)} · ${esc(p.model)}</p>
+      <dl class="ux-reference-specs"><div><dt>${esc(t('seats'))}</dt><dd>${esc(p.seats)}</dd></div>
+        <div><dt>${esc(t('consumption100'))}</dt><dd>${esc(c100)} ${esc(p.unit)}</dd></div>
+        <div><dt>${esc(t('capacity'))}</dt><dd>${esc(p.usable_capacity)} ${esc(p.unit)}</dd></div>
+        <div><dt>${esc(t('reserve'))}</dt><dd>${esc(p.reserve)} ${esc(p.unit)}</dd></div></dl>
+      <div class="ux-reference-actions">
+        <button type="button" class="button outline" data-view-vehicle="${esc(vehicle.id)}">${esc(t('uxViewDetails'))}</button>
+        <button type="button" class="button primary" data-vehicle-simulate="${esc(vehicle.id)}" ${eligible?'':'disabled'}>${esc(t('selectForScenario'))}</button>
+      </div>
+      <div class="ux-reference-secondary">${operator?`<button type="button" class="table-action" data-vehicle-edit="${esc(vehicle.id)}">${esc(t('revise'))}</button>`:''}
+        <button type="button" class="table-action" data-vehicle-history="${esc(vehicle.vehicle_key)}">${esc(t('history'))}</button></div>
+    </article>`;
   }
   function renderVehicles() {
-    const node = $('vehicle-table');
-    node.classList.add('solution-list');
-    node.innerHTML = vehicles.length
-      ? vehicles.map(v => solutionCard(v.payload, v)).join('')
-      : solutionCard(demoCoach());
-    const addDemo = $('add-demo-vehicle');
-    if (addDemo) addDemo.addEventListener('click', async () => {
-      addDemo.disabled = true;
-      try {
-        await api('/vehicles', {method:'POST', body:JSON.stringify(demoCoach())});
-        await loadVehicles(); message(t('demoAdded'));
-      } catch (error) { message(error.message, true); addDemo.disabled = false; }
-    });
-    document.querySelectorAll('[data-vehicle-simulate]').forEach(b => b.addEventListener('click', () => {
-      selectedVehicleIds.add(b.dataset.vehicleSimulate);
-      show('scenarios'); fillScenarioSelects();
+    const node=$('vehicle-table');node.classList.add('solution-list');
+    const shown=visibleVehicleOptions(vehicles);
+    node.innerHTML=shown.length?shown.map(v=>solutionCard(v.payload,v)).join(''):
+      `<p class="ux-no-vehicles">${esc(t(vehicles.length?'uxNoVehicleMatches':'uxNoSavedVehicles'))}</p>`;
+    node.querySelectorAll('[data-vehicle-simulate]').forEach(b=>b.addEventListener('click',()=>{
+      selectedVehicleIds.add(b.dataset.vehicleSimulate);show('scenarios');fillScenarioSelects();
     }));
-    document.querySelectorAll('[data-vehicle-edit]').forEach(b =>
-      b.addEventListener('click', () => editVehicle(b.dataset.vehicleEdit)));
-    document.querySelectorAll('[data-vehicle-history]').forEach(b => b.addEventListener('click', async () => {
+    node.querySelectorAll('[data-view-vehicle]').forEach(b=>b.addEventListener('click',()=>{
+      const v=vehicles.find(v=>v.id===b.dataset.viewVehicle);if(!v)return;
+      if(operator)editVehicle(v.id);else selectVehiclePreview(v.payload,false);
+    }));
+    node.querySelectorAll('[data-vehicle-edit]').forEach(b=>b.addEventListener('click',()=>editVehicle(b.dataset.vehicleEdit)));
+    node.querySelectorAll('[data-vehicle-history]').forEach(b=>b.addEventListener('click',async()=>{
       try {
-        const vs = await api(`/vehicles/${encodeURIComponent(b.dataset.vehicleHistory)}/versions`);
-        $('vehicle-history').innerHTML = `<p>${esc(t('internalHistoryNote'))}</p><ul>${vs.map(v =>
+        const vs=await api(`/vehicles/${encodeURIComponent(b.dataset.vehicleHistory)}/versions`);
+        $('vehicle-history').innerHTML=`<p>${esc(t('internalHistoryNote'))}</p><ul>${vs.map(v=>
           `<li>v${v.revision} · ${esc(v.payload.label)} · ${esc(v.created_at)}</li>`).join('')}</ul>`;
-      } catch (error) { message(error.message, true); }
+      } catch(error){message(error.message,true);}
     }));
+    updateVehicleStats();updateVehicleView();
+    $('ux-visible-count').textContent=String(uxVehicleMode==='library'?visibleVehicleOptions(referenceEntries).length:shown.length);
   }
-
+  $('ux-tab-library').addEventListener('click',()=>{
+    uxVehicleMode='library';updateVehicleFilters();renderReferenceLibrary();renderVehicles();
+  });
+  $('ux-tab-registered').addEventListener('click',()=>{
+    uxVehicleMode='registered';updateVehicleFilters();renderVehicles();renderReferenceLibrary();
+  });
+  const redrawFilteredVehicles=()=>{renderVehicles();renderReferenceLibrary();};
+  $('ux-vehicle-search').addEventListener('input',redrawFilteredVehicles);
+  $('ux-vehicle-seats').addEventListener('change',redrawFilteredVehicles);
+  $('ux-vehicle-make').addEventListener('change',redrawFilteredVehicles);
+  document.querySelectorAll('.ux-energy-filter input').forEach(el=>el.addEventListener('change',redrawFilteredVehicles));
+  $('ux-reset-filters').addEventListener('click',()=>{
+    $('ux-vehicle-search').value='';$('ux-vehicle-seats').value='0';$('ux-vehicle-make').value='';
+    document.querySelectorAll('.ux-energy-filter input').forEach(el=>{el.checked=true;});
+    redrawFilteredVehicles();
+  });
   function editVehicle(id) {
     $('reference-form-note').classList.add('hidden');
     const v = vehicles.find(v => v.id === id); if (!v) return;
@@ -826,6 +902,7 @@
 
   function invalidateRoute() {
     currentQuote = null; currentRoute = null;
+    resetRouteIndicators();
     $('route-summary').classList.add('hidden');
     if (routeMap) { routeDrawings.forEach(layer => routeMap.removeLayer(layer)); routeDrawings = []; }
     $('route-map-sketch').replaceChildren();
@@ -835,7 +912,34 @@
   }
   $('route-origin').addEventListener('input', invalidateRoute);
   $('route-destination').addEventListener('input', invalidateRoute);
+  function resetRouteIndicators() {
+    for (const id of ['ux-route-distance','ux-route-time','ux-route-station','ux-route-detour','ux-route-trips']) {
+      const el=$(id); if(el)el.textContent='—';
+    }
+  }
+  function renderRouteIndicators(route) {
+    if(!route) {resetRouteIndicators();return;}
+    $('ux-route-distance').textContent=number(Number(route.distance_m)/1000,1)+' km';
+    $('ux-route-time').textContent=routeTime(Number(route.duration_s));
+    $('ux-route-station').textContent='—';$('ux-route-detour').textContent='—';
+    $('ux-route-trips').textContent='—';
+  }
+  function renderComparisonIndicators(comparison, entry) {
+    if(!comparison?.shared?.route) return;
+    renderRouteIndicators(comparison.shared.route);
+    if(!entry?.result?.totals) return;
+    const total=entry.result.totals;
+    $('ux-route-trips').textContent=String(total.trips ?? '—')+' · '+entry.vehicle_version.payload.label;
+    const events=timelineRows(entry).flatMap(bus=>bus.events||[]);
+    const stops=events.filter(e=>e.kind==='refuel' && e.station_name);
+    $('ux-route-station').textContent=stops.length ? [...new Set(stops.map(e=>e.station_name))].join(', '):t('uxNoRefuel');
+    const legs=events.filter(e=>e.kind==='station_detour');
+    $('ux-route-detour').textContent=legs.length
+      ? number(legs.reduce((a,e)=>a+Number(e.distance_m||0),0)/1000,1)+' km'
+      : t('uxNoRefuel');
+  }
   function renderRouteSummary(route) {
+    renderRouteIndicators(route);
     const node = $('route-summary');
     const km = number(route.distance_m / 1000, 1);
     node.innerHTML = `<strong>${esc(t('routeKilometers'))} : ${esc(km)} km</strong> · <strong>${esc(t('routeDuration'))} : ${esc(routeTime(route.duration_s))}</strong><p>${esc(route.origin)} → ${esc(route.destination)}</p><p class="small muted">${esc(t('routeSource'))}: ${esc(route.provider)} · ${esc(t('routeExternalNotice'))}</p>`;
@@ -1009,47 +1113,84 @@
       catch(err) { message(err.message,true); }
     }));
   }
+  let timelineSelectedRun = null, timelineSelectedBus = 0;
+  function comparisonTotals(comparison, entry) {
+    const total=entry.result.totals, buses=timelineRows(entry);
+    const events=buses.flatMap(bus=>bus.events||[]);
+    const begin=events.length?Math.min(...events.map(e=>Date.parse(e.start_utc))):0;
+    const finish=events.length?Math.max(...events.map(e=>Date.parse(e.end_utc))):0;
+    const duration=total?.duration_elapsed_s ?? (events.length?(finish-begin)/1000:null);
+    return {duration, total};
+  }
   function showComparison(comparison, scroll=true) {
-    currentComparison = comparison;
-    const root = $('comparison-results');
-    const shared = comparison.shared;
-    const headers = ['compareVehicle','compareEnergy','compareFeasibility','vehiclesUsed','compareCost','compareEmissions','comparePerPassenger','compareConsumption','comparePdf'];
-    // Cost-based indicative selection among the *feasible computed cases*.
-    // Neither this ranking nor the day heuristic proves a global optimum.
-    const feasible = comparison.entries.filter(e=>e.result.status==='feasible_not_proven'
+    currentComparison=comparison; const root=$('comparison-results');
+    const shared=comparison.shared;
+    const validEntries=comparison.entries.filter(e=>e.result.status==='feasible_not_proven'
       && e.result.totals && Number.isFinite(Number(e.result.totals.eur_total)));
-    feasible.sort((a,b)=>Number(a.result.totals.eur_total)-Number(b.result.totals.eur_total)
-      || Number(a.result.totals.vehicles_used)-Number(b.result.totals.vehicles_used));
-    const cheapest = feasible.length ? feasible[0].run_id : null;
-    root.innerHTML = `<div class="result-hero"><div><div class="eyebrow">${esc(t('compareResultsTitle'))}</div><h3>${esc(comparison.name)}</h3>
-      <p>${esc(shared.route.origin)} → ${esc(shared.route.destination)} · ${esc(number(shared.route.distance_m/1000,1))} km · ${esc(shared.passengers)} ${esc(t('passengers'))}</p>
-      <p class="small muted">${esc(t('compareSameInputs'))} SHA-256 ${esc(comparison.shared_sha256.slice(0,16))}…</p></div></div>
-      <div class="table-wrap comparison-table"><table><thead><tr>${headers.map(key=>`<th>${esc(t(key))}</th>`).join('')}</tr></thead><tbody>
-      ${comparison.entries.map(entry=>{
-        const result=entry.result, total=result.totals, vehicle=entry.vehicle_version.payload, energy=entry.energy_version.payload;
-        const valid = !!total && result.status==='feasible_not_proven';
-        const detail=valid?t('compareStatus'):t(`status_${result.status}`);
-        const warn=!valid?`<small>${esc((result.constraints||[]).map(x=>translatedEngineMessage(x.message)).join(' · '))}</small>`:'';
-        return `<tr><td><strong>${esc(vehicle.label)}</strong><small>${esc(vehicle.seats)} ${esc(t('seatsShort'))}</small>${cheapest===entry.run_id?`<small class="compare-good">${esc(t('bestIndicative'))}</small>`:''}</td>
-          <td>${esc(energy.energy_code)}<small>${esc(energy.price_per_unit)} EUR/${esc(energy.unit)}</small></td>
-          <td><span class="${valid?'compare-good':'compare-bad'}">${esc(detail)}</span>${warn}</td>
-          <td>${valid?esc(total.vehicles_used):'—'}</td>
-          <td>${valid?esc(number(total.eur_total,2))+' €':'—'}</td>
-          <td>${valid && total.kgco2e_total!==null?esc(number(total.kgco2e_total,2))+' kg':'—'}</td>
-          <td>${valid && total.kgco2e_per_passenger!==null?esc(number(total.kgco2e_per_passenger,3))+' kg':'—'}</td>
-          <td>${valid?esc(number(total.energy_consumed,2))+' '+esc(total.energy_unit):'—'}</td>
-          <td><button type="button" class="button outline" data-compare-pdf="${esc(entry.run_id)}">PDF</button></td></tr>`;
-      }).join('')}</tbody></table></div>
-      <p class="small warning-text">${esc(t('compareReadOnly'))}</p>${scheduleTiles(comparison)}`;
-    if (shared.day_plan && shared.day_station_policy === 'automatic') {
-      const notes = (shared.day_station_search_warnings || []).filter(Boolean);
-      root.insertAdjacentHTML('beforeend', `<p class="small muted">${esc(t('stationAutoExplanation'))}</p>`+
-        (notes.length ? `<details class="small"><summary>${esc(t('stationSearchLimits'))}</summary><ul>`+
-          notes.map(n=>`<li>${esc(n)}</li>`).join('')+`</ul></details>` : ''));
+    const cheapest=[...validEntries].sort((a,b)=>Number(a.result.totals.eur_total)-Number(b.result.totals.eur_total))[0]||null;
+    root.innerHTML=`<div class="ux-card-head"><div><h3>${esc(t('uxComparisonTitle'))}</h3>
+      <p class="small muted">${esc(comparison.name)} · ${esc(shared.route.origin)} → ${esc(shared.route.destination)} · ${esc(shared.passengers)} ${esc(t('passengers'))}</p></div></div>
+      <div class="table-wrap comparison-table ux-comparison-table"><table><thead><tr>
+        <th>${esc(t('vehicle'))}</th><th>${esc(t('compareFeasibility'))}</th>
+        <th>${esc(t('uxTotalTime'))}</th><th>${esc(t('uxCoursesDone'))}</th>
+        <th>${esc(t('compareCost'))}</th><th>${esc(t('compareEmissions'))}</th>
+        <th>${esc(t('uxFuelStops'))}</th><th>${esc(t('actions'))}</th>
+        </tr></thead><tbody>${comparison.entries.map(entry=>{
+          const {total,duration}=comparisonTotals(comparison,entry), valid=!!total && entry.result.status==='feasible_not_proven';
+          const label=entry.vehicle_version.payload.label;
+          const warnings=!valid?(entry.result.constraints||[]).map(x=>translatedEngineMessage(x.message)).join(' · '):'';
+          return `<tr><td><strong>${esc(label)}</strong><small>${esc(entry.vehicle_version.payload.seats)} ${esc(t('seatsShort'))} · ${esc(energyName(entry.vehicle_version.payload.energy_code))}</small>${cheapest?.run_id===entry.run_id?`<small class="compare-good">${esc(t('bestIndicative'))}</small>`:''}</td>
+            <td><span class="ux-status ${valid?'ux-status-good':'ux-status-caution'}">${esc(valid?t('compareStatus'):t('status_'+entry.result.status))}</span>${warnings?`<small>${esc(warnings)}</small>`:''}</td>
+            <td>${valid && duration!==null ? esc(routeTime(Number(duration))):'—'}</td>
+            <td>${valid?esc(total.trips ?? '—'):'—'}</td>
+            <td>${valid?esc(number(total.eur_total,2))+' €':'—'}</td>
+            <td>${valid && total.kgco2e_total!==null?esc(number(total.kgco2e_total,2))+' kg':'—'}</td>
+            <td>${valid?esc(total.refuel_count??0):'—'}</td>
+            <td><div class="ux-table-actions"><button type="button" class="table-action" data-view-timeline="${esc(entry.run_id)}">${esc(t('uxSelectDetail'))}</button><button type="button" class="table-action" data-compare-pdf="${esc(entry.run_id)}">PDF</button></div></td></tr>`;
+        }).join('')}</tbody></table></div>
+        <p class="small warning-text">${esc(t('compareReadOnly'))} · ${esc(t(shared.day_plan?'dayPlanUnverified':'dayBasicNotice'))}</p>`;
+    if(shared.day_plan && (shared.day_station_search_warnings||[]).length) {
+      root.insertAdjacentHTML('beforeend',`<details class="ux-warnings"><summary>${esc(t('stationSearchLimits'))}</summary><ul>${shared.day_station_search_warnings.map(v=>`<li>${esc(v)}</li>`).join('')}</ul></details>`);
     }
-    root.classList.remove('hidden'); $('result-detail').classList.add('hidden');
+    root.classList.remove('hidden');$('result-detail').classList.add('hidden');
     root.querySelectorAll('[data-compare-pdf]').forEach(b=>b.addEventListener('click',()=>downloadPdf(b.dataset.comparePdf)));
-    if (scroll) root.scrollIntoView({behavior:'smooth',block:'start'});
+    root.querySelectorAll('[data-view-timeline]').forEach(b=>b.addEventListener('click',()=>{
+      timelineSelectedRun=b.dataset.viewTimeline;timelineSelectedBus=0;renderComparisonTimeline();
+      $('comparison-timeline').scrollIntoView({block:'nearest',behavior:'smooth'});
+    }));
+    if(!comparison.entries.some(e=>e.run_id===timelineSelectedRun))timelineSelectedRun=(cheapest||comparison.entries[0])?.run_id;
+    renderComparisonTimeline();renderComparisonIndicators(comparison,cheapest||validEntries[0]);
+    if(scroll)root.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+  function renderComparisonTimeline() {
+    const box=$('ux-timeline-content'),empty=$('ux-timeline-empty');
+    const selected=currentComparison?.entries?.find(e=>e.run_id===timelineSelectedRun);
+    if(!selected){box.classList.add('hidden');empty.classList.remove('hidden');return;}
+    const buses=timelineRows(selected); const bus=buses[Math.min(timelineSelectedBus,Math.max(0,buses.length-1))];
+    timelineSelectedBus=Math.min(timelineSelectedBus,Math.max(0,buses.length-1));
+    empty.classList.add('hidden');box.classList.remove('hidden');
+    const selectors=`<div class="ux-timeline-selectors"><label>${esc(t('uxChooseVehicle'))} <select id="ux-timeline-vehicle">${currentComparison.entries.map(e=>`<option value="${esc(e.run_id)}" ${e.run_id===selected.run_id?'selected':''}>${esc(e.vehicle_version.payload.label)}</option>`).join('')}</select></label>
+       ${buses.length>1?`<label>${esc(t('uxChooseBus'))} <select id="ux-timeline-bus">${buses.map((b,i)=>`<option value="${i}" ${i===timelineSelectedBus?'selected':''}>${esc(b.vehicle_instance)}</option>`).join('')}</select></label>`:''}</div>`;
+    if(!bus||!(bus.events||[]).length) {
+      box.innerHTML=selectors+`<p class="ux-results-empty">${esc(t('dayNoSchedule'))} ${(selected.result.constraints||[]).map(c=>esc(translatedEngineMessage(c.message))).join(' · ')}</p>`;
+    } else {
+      const events=bus.events;
+      box.innerHTML=selectors+`<div class="ux-day-timeline" role="list">
+        ${events.map(e=>`<div class="ux-timeline-step" role="listitem"><span class="ux-timeline-node" aria-hidden="true">${e.kind==='service'?'▣':e.kind==='refuel'?'⛽':'↗'}</span>
+          <strong>${esc(eventLabel(e.kind))}</strong><small>${esc(localTime(e.start_utc))} – ${esc(localTime(e.end_utc))}</small>
+          <b>${esc(routeTime(Number(e.duration_s)))}</b>
+          ${e.station_name?`<small>${esc(e.station_name)}</small>`:''}
+          ${Number(e.distance_m)>0?`<small>${esc(number(Number(e.distance_m)/1000,1))} km</small>`:''}
+          ${e.kind==='refuel'?`<small>+${esc(number(e.energy_added,2))} ${esc(selected.vehicle_version.payload.unit)}</small>`:''}
+        </div>`).join('')}</div>
+        <p class="small muted">${esc(t('dayWaiting'))}: 0 min${['ELECTRIC','BIOGNV'].includes(selected.vehicle_version.payload.energy_code)?' · '+esc(t('uxNoChargeNotice')):''}</p>`;
+    }
+    $('ux-timeline-vehicle').addEventListener('change',e=>{
+      timelineSelectedRun=e.target.value;timelineSelectedBus=0;renderComparisonTimeline();
+    });
+    $('ux-timeline-bus')?.addEventListener('change',e=>{
+      timelineSelectedBus=Number(e.target.value);renderComparisonTimeline();
+    });
   }
   function selectedStationData(s) {
     return {id:String(s.id),name:String(s.name),longitude:Number(s.longitude),
@@ -1097,44 +1238,6 @@
     const date = new Date(iso);
     return Number.isNaN(date.getTime()) ? '—' : new Intl.DateTimeFormat(language==='fr'?'fr-FR':'en-GB',
       {hour:'2-digit',minute:'2-digit',timeZone:'Europe/Paris'}).format(date);
-  }
-  function scheduleTiles(comparison) {
-    const isPlan = !!comparison.shared.day_plan;
-    return `<div class="day-solution-section"><h3>${esc(t('dayTileTitle'))}</h3>
-      <p class="small warning-text">${esc(t(isPlan?'dayPlanUnverified':'dayBasicNotice'))}</p>
-      <div class="day-solutions">${comparison.entries.map(entry=>{
-        const result = entry.result, total=result.totals, vehicle=entry.vehicle_version.payload;
-        const buses=timelineRows(entry);
-        const allEvents=buses.flatMap(bus=>bus.events||[]);
-        const firstTime=Math.min(...allEvents.map(e=>Date.parse(e.start_utc)));
-        const lastTime=Math.max(...allEvents.map(e=>Date.parse(e.end_utc)));
-        const simpleElapsed=allEvents.length ? (lastTime-firstTime)/1000 : 0;
-        const simpleVehicleTime=allEvents.reduce((sum,e)=>sum+Number(e.duration_s||0),0);
-        return `<article class="day-solution-card">
-          <div class="day-solution-head"><div><h4>${esc(vehicle.label)}</h4>
-          <small>${esc(vehicle.seats)} ${esc(t('seatsShort'))} · ${esc(vehicle.energy_code)}</small></div>
-          <strong class="${total?'compare-good':'compare-bad'}">${esc(total?t('compareStatus'):(t('status_'+result.status)))}</strong></div>
-          ${total?`<div class="day-solution-metrics">
-            <div><small>${esc(t('dayTimeTotal'))}</small><strong>${esc(routeTime(Number(total.duration_elapsed_s??simpleElapsed)))}</strong></div>
-            <div><small>${esc(t('dayVehicleTime'))}</small><strong>${esc(routeTime(Number(total.duration_vehicle_s??simpleVehicleTime)))}</strong></div>
-            <div><small>${esc(t('dayFuelStops'))}</small><strong>${esc(total.refuel_count||0)}</strong></div>
-            <div><small>${esc(t('dayRotations'))}</small><strong>${esc(total.trips||0)}</strong></div>
-            <div><small>${esc(t('compareCost'))}</small><strong>${esc(number(total.eur_total,2))} €</strong></div>
-            <div><small>${esc(t('compareEmissions'))}</small><strong>${total.kgco2e_total===null?'—':esc(number(total.kgco2e_total,2))+' kg'}</strong></div>
-          </div>
-          ${buses.map((bus,i)=>`<details class="day-bus" ${i===0?'open':''}><summary>${esc(t('dayVehicleNumber'))} ${esc(bus.vehicle_instance)} · ${esc(routeTime(Number(bus.active_duration_s)))} · ${esc((bus.events||[]).filter(e=>e.kind==='service').length)} ${esc(t('dayRotations').toLowerCase())}</summary>
-           <ol class="day-events">${(bus.events||[]).map(e=>`<li>
-             <span class="day-event-time">${esc(localTime(e.start_utc))} – ${esc(localTime(e.end_utc))}</span>
-             <div><strong>${esc(eventLabel(e.kind))}</strong><small>${esc(routeTime(Number(e.duration_s)))}`+
-                `${Number(e.distance_m)?' · '+esc(number(Number(e.distance_m)/1000,1))+' km':''}`+
-                `${e.kind==='refuel'?' · +'+esc(number(e.energy_added,2))+' '+esc(vehicle.unit):''}`+
-                `${e.station_name?' · '+esc(e.station_name):''}</small></div>
-             </li>`).join('')}</ol></details>`).join('')}
-          ${isPlan?`<p class="small muted">${esc(t('dayWaiting'))}: <strong>0 min</strong></p>`:''}`
-          :`<p class="warning-text">${esc(t('dayNoSchedule'))} ${esc((result.constraints||[]).map(c=>translatedEngineMessage(c.message)).join(' · '))}</p>`}
-          <button type="button" class="button outline" data-compare-pdf="${esc(entry.run_id)}">${esc(t('downloadPDF'))}</button>
-        </article>`;
-      }).join('')}</div></div>`;
   }
   function selectedComparableIds() {
     return [...selectedVehicleIds].filter(id => {
@@ -1202,7 +1305,7 @@
       compareNotice(t('compareDone'),false);
       await loadComparisons(); await loadScenarios(); await loadRuns();
       message(t('runSaved'));
-    } catch(err) { compareProblem(t('compareFailed')+err.message); }
+    } catch(err) { compareProblem(t('compareFailed')+(err.message||String(err))); }
     finally { btn.disabled=false; }
   });
 

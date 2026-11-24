@@ -34,17 +34,18 @@ def test_save_labels_are_plain_language_but_db_keeps_revision_history():
     assert 'loadEnergyHistory' in js
 
 
-def test_bus_demo_is_not_silently_created_on_login(tmp_path):
+def test_public_catalogue_does_not_create_or_duplicate_a_demo_bus(tmp_path):
     app = create_app(tmp_path / "test-ui-demo.sqlite")
     db = app.state.db
     client = TestClient(app)
     assert client.post("/public/session").status_code == 200
     vehicles = client.get("/vehicles").json()
-    assert vehicles == []  # one-click opt-in creates it; logging in does not mutate data
+    assert vehicles == []  # public sessions are read-only; no implicit demo creation
     js = (UI / "app.js").read_text(encoding="utf-8")
-    assert 'solutionCard(demoCoach())' in js
-    assert 'add-demo-vehicle' in js
-    assert 'synthetic' in js.lower()
+    assert 'demoCoach()' not in js
+    assert 'add-demo-vehicle' not in js
+    assert 'visibleVehicleOptions(vehicles)' in js
+    assert 'uxNoSavedVehicles' in js
 
 
 def test_stations_and_energy_catalogue_layout_matches_reviewed_mockups():

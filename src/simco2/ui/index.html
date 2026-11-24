@@ -61,10 +61,11 @@
 
         <section id="view-scenarios" class="view">
           <div class="section-heading"><div><div class="eyebrow" data-i18n="scenarioKicker">NOUVELLE ÉTUDE</div><h2 data-i18n="scenarioTitle">Comparer plusieurs véhicules</h2><p data-i18n="scenarioIntro">Un même trajet et une même demande pour comparer coûts, émissions et faisabilité de plusieurs solutions.</p></div></div>
-          <div class="simulator-layout">
-            <article class="panel">
-              <form id="scenario-form" class="form-grid">
-                <div class="wide form-section-title"><span class="step-number">1</span> <h3 data-i18n="stepRoute">Itinéraire et voyageurs</h3></div>
+          <div class="simulator-layout ux-simulation-layout">
+            <div class="simulator-composer">
+              <form id="scenario-form" class="scenario-composer">
+                <section class="panel ux-sim-card ux-route-input"><div class="form-grid">
+<div class="wide form-section-title"><span class="step-number">1</span> <h3 data-i18n="stepRoute">Itinéraire et voyageurs</h3></div>
                 <label class="wide"><span data-i18n="scenarioName">Nom de la simulation</span><input name="name" value="Simulation Caen - Rouen" required /></label>
                 <label><span data-i18n="date">Date</span><input name="start_date" type="date" required /></label>
                 <label><span data-i18n="passengerCount">Nombre de voyageurs</span><input name="passengers" type="number" min="0" value="80" required /></label>
@@ -72,11 +73,17 @@
                 <label><span data-i18n="destination">Arrivée</span><input id="route-destination" name="destination" required value="Rouen" data-i18n-placeholder="destinationExample" placeholder="Ville ou adresse en France" /></label>
                 <div class="wide route-compute-row"><button class="button outline" type="button" id="calculate-route" data-i18n="calculateRoute">Calculer l'itinéraire</button><span id="route-status" class="small muted" role="status" aria-live="polite" data-i18n="routeNotReady">Distance et durée calculées automatiquement</span></div>
                 <div class="wide route-summary hidden" id="route-summary" aria-live="polite"></div>
-                <div class="wide form-section-title"><span class="step-number">2</span> <h3 data-i18n="stepVehicle">Solutions à comparer</h3></div>
+                                </div></section>
+                <section class="panel ux-sim-card ux-vehicle-input"><div class="form-grid">
+<div class="wide form-section-title"><span class="step-number">2</span> <h3 data-i18n="stepVehicle">Solutions à comparer</h3></div>
                 <p class="wide small muted" data-i18n="compareHint">Sélectionnez au moins deux modèles. Les prix et facteurs de chaque énergie proviennent du référentiel France.</p>
                 <div class="wide form-note hidden" id="catalogue-notice"></div>
                 <div class="wide compare-options" id="vehicle-compare-options" role="group" aria-label="Véhicules à comparer"></div>
-                <div class="wide day-planner-settings">
+                                  <div class="wide ux-vehicle-pick-link"><button type="button" class="button outline" data-goto="vehicles" data-i18n="uxManageVehicles">Gérer les véhicules</button></div>
+                </div></section>
+                <section class="panel ux-sim-card ux-plan-input"><div class="form-grid">
+                  <div class="wide form-section-title"><span class="step-number">3</span><h3 data-i18n="uxPlanningTitle">Hypothèses d'exploitation</h3></div>
+<div class="wide day-planner-settings">
                   <label class="day-plan-toggle"><input type="checkbox" name="day_plan" id="day-plan-enabled" checked /> <span data-i18n="dayPlanToggle">Planifier les rotations et les pleins de la journée (prototype)</span></label>
                   <p class="small muted" data-i18n="dayPlanNotice">Calcule les trajets retour à vide et les arrêts éventuels. Fin de plage = fin du dernier trajet. Aucune attente à la station.</p>
                   <div id="day-plan-details" class="day-plan-details">
@@ -108,27 +115,48 @@
                   <label><span data-i18n="co2Scope">Périmètre émissions</span><select name="emission_scope"><option value="direct" data-i18n="co2Direct">Direct</option><option value="well_to_wheel" data-i18n="co2Wtw">Puits à la roue</option></select></label>
                   <label><span data-i18n="infrastructureCost">Infrastructure EUR/jour</span><input name="infrastructure_daily_eur" value="0" inputmode="decimal" required /></label>
                 </div></details>
-                <div class="wide actions"><button class="button primary large" type="submit" id="scenario-submit" data-i18n="runSimulation">Comparer les véhicules</button></div>
-                <p id="compare-inline-notice" class="wide comparison-inline-notice hidden" role="alert" aria-live="assertive"></p>
-                <p class="wide small muted" data-i18n="oneWayWarning">Planning indicatif non optimal : retours à vide calculés ; accès aux stations et restrictions autocars à confirmer.</p>
+                                </div></section>
               </form>
-            </article>
-            <div class="simulator-side">
-              <article class="panel route-map-container" id="route-map-container">
-                <div class="panel-head"><h3 data-i18n="routeMapTitle">Carte de l'itinéraire</h3><span class="subtle-tag" data-i18n="routeMapHint">Caen → Rouen</span></div>
-                <div id="route-map" class="map-canvas" aria-label="Carte de l'itinéraire"></div>
-                <div id="route-map-sketch" class="map-canvas route-map-sketch hidden" role="img" aria-label="Schéma du tracé de l'itinéraire"></div>
-                <p class="map-fallback hidden" id="route-map-fallback" data-i18n="mapUnavailable">Carte indisponible hors ligne. Les lieux et distances restent affichés.</p>
+            </div>
+            <div class="simulator-side ux-sim-side">
+              <article class="panel route-map-container ux-map-overview" id="route-map-container">
+                <div class="panel-head"><h3 data-i18n="uxMapTitle">Carte et itinéraire</h3><span class="subtle-tag" data-i18n="routingMapNotice">Trajet estimatif, accès autocar non garanti</span></div>
+                <div class="ux-map-metrics">
+                  <div class="ux-map-surface">
+                    <div id="route-map" class="map-canvas" aria-label="Carte de l'itinéraire"></div>
+                    <div id="route-map-sketch" class="map-canvas route-map-sketch hidden" role="img" aria-label="Schéma du tracé de l'itinéraire"></div>
+                    <p class="map-fallback hidden" id="route-map-fallback" data-i18n="mapUnavailable">Carte indisponible hors ligne. Les lieux et distances restent affichés.</p>
+                  </div>
+                  <dl class="ux-route-indicators" aria-live="polite">
+                    <div><dt data-i18n="uxDistance">Distance</dt><dd id="ux-route-distance">—</dd></div>
+                    <div><dt data-i18n="uxTravelTime">Temps de route</dt><dd id="ux-route-time">—</dd></div>
+                    <div><dt data-i18n="uxStation">Station retenue</dt><dd id="ux-route-station">—</dd></div>
+                    <div><dt data-i18n="uxDetour">Détour de ravitaillement</dt><dd id="ux-route-detour">—</dd></div>
+                    <div><dt data-i18n="uxCourses">Courses réalisées</dt><dd id="ux-route-trips">—</dd></div>
+                  </dl>
+                </div>
                 <p class="map-attribution"><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a> · <span data-i18n="routingMapNotice">Trajet estimatif, accès autocar non garanti</span></p>
               </article>
-              <article class="panel"><h3 data-i18n="myComparisons">Comparaisons enregistrées</h3><div id="comparison-history" class="comparison-history"></div></article>
-              <details class="panel past-details"><summary data-i18n="previousRuns">Anciennes simulations individuelles</summary>
-                <h3 data-i18n="mySimulations">Mes simulations</h3><div id="scenario-table" class="table-wrap"></div>
-                <h3 data-i18n="myResults">Résultats précédents</h3><div id="runs-table" class="table-wrap"></div>
-              </details>
+              <div class="ux-compare-action">
+                <button class="button primary large" type="submit" form="scenario-form" id="scenario-submit" data-i18n="runSimulation">Comparer les véhicules</button>
+                <p id="compare-inline-notice" class="comparison-inline-notice hidden" role="alert" aria-live="assertive"></p>
+              </div>
+              <article id="comparison-results" class="panel result-panel ux-comparison-results" aria-live="polite">
+                <div class="ux-card-head"><h3 data-i18n="uxComparisonTitle">Comparaison des véhicules</h3></div>
+                <p class="ux-results-empty" data-i18n="uxComparisonEmpty">Calculez un itinéraire et choisissez au moins deux véhicules pour afficher les résultats ici.</p>
+              </article>
+              <article id="comparison-timeline" class="panel ux-timeline-panel">
+                <div class="ux-card-head"><h3 data-i18n="uxTimelineTitle">Détail d'une solution</h3></div>
+                <p class="ux-results-empty" id="ux-timeline-empty" data-i18n="uxTimelineEmpty">Le planning détaillé apparaîtra après la comparaison.</p>
+                <div id="ux-timeline-content" class="hidden"></div>
+              </article>
             </div>
           </div>
-          <article id="comparison-results" class="panel result-panel hidden" aria-live="polite"></article>
+          <details class="panel ux-previous-data"><summary data-i18n="uxHistoryTitle">Historique des simulations et comparaisons</summary>
+            <h3 data-i18n="myComparisons">Comparaisons enregistrées</h3><div id="comparison-history" class="comparison-history"></div>
+            <h3 data-i18n="mySimulations">Mes simulations</h3><div id="scenario-table" class="table-wrap"></div>
+            <h3 data-i18n="myResults">Résultats précédents</h3><div id="runs-table" class="table-wrap"></div>
+          </details>
           <div id="result-detail" class="panel result-panel hidden"></div>
         </section>
 
@@ -180,8 +208,43 @@
 
         <section id="view-vehicles" class="view hidden">
           <div class="section-heading"><div><div class="eyebrow" data-i18n="settings">PARAMÈTRES</div><h2 data-i18n="navVehicles">Véhicules</h2><p data-i18n="vehicleIntro">Créer un modèle de véhicule utilisé par les simulations. Les valeurs doivent être justifiées par une source.</p></div><button class="button outline" id="reload-vehicles" data-i18n="refresh">Actualiser</button></div>
-          <article class="panel reference-library"><div class="reference-library-head"><div><h3 data-i18n="referenceLibraryTitle">Bibliothèque indicative — 9 références</h3><p class="small muted" data-i18n="referenceLibraryHelp">Neuf autocars : coûts et données techniques fournis par l’utilisateur, non vérifiés. Ajoutez-les au catalogue puis configurez les énergies pour les comparer.</p></div><span class="subtle-tag" data-i18n="referenceLibraryBadge">À vérifier</span></div><div id="reference-library" class="reference-grid" aria-live="polite"></div></article>
-          <div class="vehicle-management"><article class="panel admin-only hidden" id="vehicle-editor-panel"><h3 data-i18n="vehicleFormTitle">Fiche véhicule</h3><p class="small muted" id="vehicle-edit-label" data-i18n="vehicleUnverified">Données constructeur non préchargées : valeurs à vérifier.</p><p class="small warning-text hidden" id="reference-form-note" role="status"></p><form id="vehicle-form" class="form-grid">
+          <div class="ux-vehicle-stats" aria-label="Statistiques du catalogue">
+            <div class="ux-stat"><span class="ux-stat-symbol">▣</span><strong id="ux-stat-variants">9</strong><small data-i18n="uxVariantCount">Références de la bibliothèque</small></div>
+            <div class="ux-stat"><span class="ux-stat-symbol">⚡</span><strong id="ux-stat-energies">4</strong><small data-i18n="uxEnergyCount">Motorisations</small></div>
+            <div class="ux-stat"><span class="ux-stat-symbol">✓</span><strong id="ux-stat-ready">0</strong><small data-i18n="uxReadyCount">Véhicules sélectionnables</small></div>
+            <div class="ux-stat"><span class="ux-stat-symbol">↻</span><strong id="ux-stat-saved">0</strong><small data-i18n="uxSavedCount">Véhicules enregistrés</small></div>
+          </div>
+          <div class="ux-vehicle-workspace">
+            <aside class="panel ux-vehicle-filters">
+              <h3 data-i18n="uxFilters">Filtres</h3>
+              <div class="ux-library-tabs" role="group" aria-label="Source des véhicules">
+                <button type="button" id="ux-tab-library" class="ux-tab active" aria-pressed="true" data-i18n="uxLibraryTab">Bibliothèque</button>
+                <button type="button" id="ux-tab-registered" class="ux-tab" aria-pressed="false" data-i18n="uxRegisteredTab">Mes véhicules</button>
+              </div>
+              <label class="ux-filter-label"><span data-i18n="uxSearch">Rechercher</span><input id="ux-vehicle-search" type="search" placeholder="Nom ou constructeur" data-i18n-placeholder="uxSearchPlaceholder" /></label>
+              <fieldset class="ux-energy-filter"><legend data-i18n="uxEngineFilter">Énergies</legend>
+                <label><input type="checkbox" value="DIESEL" checked /> <span data-i18n="diesel">Gazole (L)</span></label>
+                <label><input type="checkbox" value="BIOGNV" checked /> <span data-i18n="biognv">BioGNV (kg)</span></label>
+                <label><input type="checkbox" value="ELECTRIC" checked /> <span data-i18n="electric">Électricité (kWh)</span></label>
+                <label><input type="checkbox" value="H2" checked /> <span data-i18n="hydrogen">Hydrogène (kg)</span></label>
+              </fieldset>
+              <label class="ux-filter-label"><span data-i18n="seats">Places utiles</span><select id="ux-vehicle-seats"><option value="0" data-i18n="uxAllSeats">Toutes capacités</option><option value="55">55 places ou plus</option><option value="60">60 places ou plus</option></select></label>
+              <label class="ux-filter-label"><span data-i18n="manufacturer">Constructeur</span><select id="ux-vehicle-make"><option value="" data-i18n="uxAllMakes">Tous les constructeurs</option></select></label>
+              <button type="button" class="button outline" id="ux-reset-filters" data-i18n="uxResetFilters">Réinitialiser les filtres</button>
+            </aside>
+            <section class="panel ux-vehicle-browser">
+              <div class="ux-card-head"><div><h3 id="ux-catalog-title" data-i18n="referenceLibraryTitle">Bibliothèque indicative — 9 références</h3><p class="small muted" id="ux-catalog-hint" data-i18n="referenceLibraryHelp">Données utilisateur indicatives non vérifiées.</p></div><span class="subtle-tag" id="ux-visible-count">9</span></div>
+              <div id="reference-library" class="reference-grid" aria-live="polite"></div>
+              <div id="vehicle-table" class="solution-list hidden" aria-live="polite"></div>
+              <div id="vehicle-history" class="history"></div>
+            </section>
+            <aside class="panel ux-vehicle-details">
+              <div class="ux-card-head"><h3 data-i18n="uxVehicleDetail">Fiche véhicule</h3></div>
+              <div id="ux-vehicle-preview" class="ux-vehicle-preview" aria-live="polite"><p class="small muted" data-i18n="uxPickVehicle">Sélectionnez une carte pour consulter ses caractéristiques et ses sources.</p></div>
+              <div class="admin-only hidden" id="vehicle-editor-panel">
+                <h3 data-i18n="vehicleFormTitle">Fiche véhicule</h3><p class="small muted" id="vehicle-edit-label" data-i18n="vehicleUnverified">Données à vérifier.</p>
+                <p class="small warning-text hidden" id="reference-form-note" role="status"></p>
+<form id="vehicle-form" class="form-grid">
             <label class="wide"><span data-i18n="modelName">Nom de variante</span><input name="label" required data-i18n-placeholder="modelExample" placeholder="Autocar diesel A" /></label>
             <label><span data-i18n="manufacturer">Constructeur</span><input name="manufacturer" required /></label><label><span data-i18n="model">Modèle</span><input name="model" required /></label>
             <label><span data-i18n="seats">Places utiles</span><input type="number" name="seats" min="1" max="150" value="50" required /></label>
@@ -193,7 +256,14 @@
             </div></details>
             <label class="wide"><span data-i18n="source">Source / méthode</span><input name="source" required value="Hypothèse utilisateur non vérifiée" /></label>
             <div class="wide actions"><button class="button primary" type="submit" id="vehicle-submit" data-i18n="saveVehicle">Enregistrer le véhicule</button><button class="button outline hidden" type="button" id="vehicle-cancel" data-i18n="cancel">Annuler</button></div>
-          </form></article><article class="panel vehicle-catalog-panel"><h3 data-i18n="vehicleCatalog">Catalogue de véhicules</h3><div id="vehicle-table" class="table-wrap"></div><div id="vehicle-history" class="history"></div></article></div>
+          </form>
+              </div>
+            </aside>
+          </div>
+          <article class="panel ux-vehicle-benchmarks"><div class="ux-card-head"><h3 data-i18n="referenceCompareTitle">Comparaison indicative des coûts sur 100 km</h3></div>
+            <p class="small muted" data-i18n="referencePartialWarning">Comparaison partielle, hors salaires, amortissement et CO₂e.</p>
+            <div id="ux-cost-benchmarks" class="table-wrap"></div>
+          </article>
         </section>
 
         <section id="view-routing" class="view hidden">

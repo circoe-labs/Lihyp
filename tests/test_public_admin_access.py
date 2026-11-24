@@ -65,7 +65,8 @@ def test_admin_password_rotation_revokes_tokens(tmp_path):
 
 def test_public_throttle_is_enforced(tmp_path):
     db=create_app(tmp_path/'throttle.sqlite').state.db
-    for i in range(2):db.consume_public_quota('127.0.0.1','route',2)
+    for _ in range(2):
+        db.consume_public_quota('127.0.0.1', 'route', 2)
     from simco2.domain.errors import DomainError
     import pytest
     with pytest.raises(DomainError) as info:

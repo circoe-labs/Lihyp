@@ -7,7 +7,8 @@ UI=Path(__file__).resolve().parents[1]/'src/simco2/ui'
 class Structure(HTMLParser):
     def __init__(self):
         super().__init__()
-        self.ids=[];self.forms=[]
+        self.ids=[]
+        self.forms=[]
     def handle_starttag(self,tag,attrs):
         attrs=dict(attrs)
         if attrs.get('id'):
@@ -19,7 +20,8 @@ class Structure(HTMLParser):
 def test_comparison_is_one_right_pane_and_submits_the_left_form():
     html=(UI/'index.html').read_text(encoding='utf-8')
     js=(UI/'app.js').read_text(encoding='utf-8')
-    structure=Structure();structure.feed(html)
+    structure=Structure()
+    structure.feed(html)
     assert len(structure.ids)==len(set(structure.ids)), 'Duplicate IDs break event targeting'
     assert structure.forms==[('scenario-form','submit')]
     assert '<div class="simulator-side ux-sim-side">' in html

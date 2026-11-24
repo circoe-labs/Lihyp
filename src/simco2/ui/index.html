@@ -100,6 +100,7 @@
                   <label><span data-i18n="infrastructureCost">Infrastructure EUR/jour</span><input name="infrastructure_daily_eur" value="0" inputmode="decimal" required /></label>
                 </div></details>
                 <div class="wide actions"><button class="button primary large" type="submit" id="scenario-submit" data-i18n="runSimulation">Comparer les véhicules</button></div>
+                <p id="compare-inline-notice" class="wide comparison-inline-notice hidden" role="alert" aria-live="assertive"></p>
                 <p class="wide small muted" data-i18n="oneWayWarning">Calcul sur un trajet simple sans retour ni réemploi de véhicules. Le routage ne certifie pas les restrictions autocars.</p>
               </form>
             </article>
@@ -107,6 +108,7 @@
               <article class="panel route-map-container" id="route-map-container">
                 <div class="panel-head"><h3 data-i18n="routeMapTitle">Carte de l'itinéraire</h3><span class="subtle-tag" data-i18n="routeMapHint">Caen → Rouen</span></div>
                 <div id="route-map" class="map-canvas" aria-label="Carte de l'itinéraire"></div>
+                <div id="route-map-sketch" class="map-canvas route-map-sketch hidden" role="img" aria-label="Schéma du tracé de l'itinéraire"></div>
                 <p class="map-fallback hidden" id="route-map-fallback" data-i18n="mapUnavailable">Carte indisponible hors ligne. Les lieux et distances restent affichés.</p>
                 <p class="map-attribution"><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a> · <span data-i18n="routingMapNotice">Trajet estimatif, accès autocar non garanti</span></p>
               </article>

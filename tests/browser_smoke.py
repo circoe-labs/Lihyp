@@ -96,6 +96,9 @@ async def main():
             await page.locator('#route-summary').wait_for(state='visible')
             assert '132.5 km' in await page.locator('#route-summary').inner_text()
             assert await page.locator('#route-map-fallback').is_visible()
+            assert await page.locator('#route-map-sketch').is_visible()
+            assert await page.locator('#route-map-sketch svg path').count() == 2
+            assert await page.locator('#route-map-sketch svg circle').count() == 2
             # Reproduce the reported failure: Leaflet DOM present but its CDN CSS blocked.
             # A deliberately oversized tile must not cover the vehicle form below the map.
             async def check_clipping(map_id, outside_id):
@@ -160,6 +163,14 @@ async def main():
             await page.screenshot(path='reports/energy_table_fr.png',full_page=True)
 
 
+            # With only one eligible vehicle, submitting must explain why no
+            # comparison was run next to the button (not in the page header).
+            await page.locator('[data-view=scenarios]').click()
+            assert await page.locator('#vehicle-compare-options .compare-option').count() == 1
+            await page.locator('#scenario-submit').click()
+            assert await page.locator('#compare-inline-notice').is_visible()
+            assert 'deux véhicules' in await page.locator('#compare-inline-notice').inner_text()
+            assert await page.locator('#comparison-results').is_hidden()
             await page.locator('[data-view=vehicles]').click()
             await page.locator('#vehicle-form input[name=label]').fill('Bus diesel fictif')
             await page.locator('#vehicle-form input[name=manufacturer]').fill('Atelier test')
@@ -171,8 +182,16 @@ async def main():
             await page.locator('[data-view=scenarios]').click()
             assert await page.locator('#vehicle-compare-options .compare-option').count() == 2
             assert await page.locator('#vehicle-compare-options .compare-vehicle-checkbox:checked').count() == 2
+            # Hidden advanced required fields must not block submit silently.
+            await page.locator('#scenario-form input[name=max_vehicles]').evaluate('(el) => el.value = ""')
+            await page.locator('#scenario-submit').click()
+            assert await page.locator('#scenario-form .advanced-settings').evaluate('(el) => el.open')
+            assert 'Véhicules disponibles' in await page.locator('#compare-inline-notice').inner_text()
+            await page.locator('#scenario-form input[name=max_vehicles]').fill('2')
+            await page.locator('#scenario-form .advanced-settings summary').click()
             await page.locator('#scenario-submit').click()
             await page.locator('#comparison-results').wait_for(state='visible')
+            assert 'affichée ci-dessous' in await page.locator('#compare-inline-notice').inner_text()
             assert 'kg' in await page.locator('#comparison-results').inner_text()
             assert await page.locator('#comparison-results tbody tr').count() == 2
             assert len(set(await page.locator('#comparison-results tbody tr td:nth-child(5)').all_inner_texts())) == 2

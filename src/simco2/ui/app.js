@@ -625,18 +625,6 @@
     try { vehicles = await api('/vehicles'); renderVehicles(); renderReferenceLibrary(); fillScenarioSelects(); }
     catch(error) { message(error.message, true); }
   }
-  // Clearly labelled synthetic example. It is a preview, not a manufacturer specification
-  // and is only stored after the user clicks the button (never on an implicit GET/login).
-  function demoCoach() {
-    return {
-      label:t('demoName'), manufacturer:t('demoMake'), model:t('demoModel'),
-      kind:'bus', seats:50, energy_code:'DIESEL', unit:'L',
-      consumption_per_km:'0.2', consumption_per_hour:'0', usable_capacity:'100', reserve:'5',
-      maintenance_eur_per_km:'0', labor_eur_per_h:'0', purchase_eur:'0', residual_eur:'0',
-      life_years:10, insurance_eur_year:'0', connectors:[],
-      source:t('demoSource'), quality:'unverified',
-    };
-  }
   // The supplied ranges are reference information, not complete vehicle specs or
   // verified national energy data. They never create records without explicit action.
   let referenceEntries = [];

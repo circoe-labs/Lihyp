@@ -272,12 +272,15 @@ async def main():
             assert 'Comparaison indicative' in await page.locator('.reference-comparison').inner_text()
             await page.locator('[data-prefill-reference="biognv-12"]').click()
             assert await page.locator('#vehicle-form select[name=energy_code]').input_value() == 'BIOGNV'
-            assert await page.locator('#vehicle-form input[name=seats]').input_value() == ''
-            assert await page.locator('#vehicle-form input[name=consumption_per_km]').input_value() == ''
-            assert await page.locator('#vehicle-form input[name=usable_capacity]').input_value() == ''
+            assert await page.locator('#vehicle-form input[name=seats]').input_value() == '55'
+            assert await page.locator('#vehicle-form input[name=consumption_per_km]').input_value() == '0.3'
+            assert await page.locator('#vehicle-form input[name=usable_capacity]').input_value() == '200'
             assert 'Énergies par pays' in await page.locator('#reference-form-note').inner_text()
             await page.locator('[data-prefill-reference="h2-retrofit-12"]').click()
             assert await page.locator('#vehicle-form input[name=purchase_eur]').input_value() == ''
+            await page.locator('[data-add-reference="diesel-13"]').click()
+            await page.wait_for_function("document.querySelector('[data-add-reference=\\\"diesel-13\\\"]')?.disabled")
+            assert 'Autocar Diesel Grande Capacité' in await page.locator('#vehicle-table').inner_text()
             assert not errors, 'Browser JS errors: '+repr(errors)
             print('Browser smoke OK: FR/EN login/navigation, automatic route, inline results, H2/fuel stations.')
             await browser.close()

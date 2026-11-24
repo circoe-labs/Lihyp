@@ -1,12 +1,12 @@
 {
   "schema_version": 1,
-  "origin": "Tableau communiqué par l’utilisateur (2026-11-24), données indicatives non vérifiées, prix HT",
+  "origin": "Fourchettes de coûts et caractéristiques techniques fournies par l’utilisateur le 24/11/2026 ; non vérifiées auprès des constructeurs.",
   "entries": [
     {
       "id": "diesel-12",
       "label": "Autocar Diesel Standard (12m)",
       "manufacturer": "Iveco Bus",
-      "model": "Iveco Bus Crossway Line 12m",
+      "model": "Crossway Line 12m",
       "energy_code": "DIESEL",
       "unit": "L",
       "purchase_eur_ht": [
@@ -25,13 +25,21 @@
         0.25,
         0.28
       ],
-      "purchase_scope": "vehicle"
+      "purchase_scope": "vehicle",
+      "seats": 55,
+      "consumption_per_km": 0.26,
+      "consumption_per_hour": 0,
+      "usable_capacity": 310,
+      "reserve": 25,
+      "capacity_details": "310 L utiles",
+      "technical_source": "Fiche constructeur / Retour exploitation",
+      "technical_quality": "user_supplied_unverified"
     },
     {
       "id": "diesel-13",
       "label": "Autocar Diesel Grande Capacité (13m)",
       "manufacturer": "Mercedes-Benz",
-      "model": "Mercedes-Benz Intouro M 13m",
+      "model": "Intouro M 13m",
       "energy_code": "DIESEL",
       "unit": "L",
       "purchase_eur_ht": [
@@ -50,13 +58,21 @@
         0.27,
         0.3
       ],
-      "purchase_scope": "vehicle"
+      "purchase_scope": "vehicle",
+      "seats": 63,
+      "consumption_per_km": 0.28,
+      "consumption_per_hour": 0,
+      "usable_capacity": 350,
+      "reserve": 30,
+      "capacity_details": "350 L utiles",
+      "technical_source": "Fiche constructeur / Retour exploitation",
+      "technical_quality": "user_supplied_unverified"
     },
     {
       "id": "biognv-12",
       "label": "Autocar BioGNV Standard (12m)",
       "manufacturer": "Iveco Bus",
-      "model": "Iveco Bus Crossway NP 12m",
+      "model": "Crossway NP 12m",
       "energy_code": "BIOGNV",
       "unit": "kg",
       "purchase_eur_ht": [
@@ -75,13 +91,21 @@
         0.3,
         0.33
       ],
-      "purchase_scope": "vehicle"
+      "purchase_scope": "vehicle",
+      "seats": 55,
+      "consumption_per_km": 0.3,
+      "consumption_per_hour": 0,
+      "usable_capacity": 200,
+      "reserve": 15,
+      "capacity_details": "200 kg utiles (1 260 L à 200 bar déclarés)",
+      "technical_source": "Fiche constructeur (autonomie ~600 km)",
+      "technical_quality": "user_supplied_unverified"
     },
     {
       "id": "biognv-13",
       "label": "Autocar BioGNV Grande Capacité (13m)",
       "manufacturer": "Irizar / Scania",
-      "model": "Irizar / Scania i4 GNV 13m",
+      "model": "i4 GNV 13m",
       "energy_code": "BIOGNV",
       "unit": "kg",
       "purchase_eur_ht": [
@@ -100,13 +124,21 @@
         0.32,
         0.35
       ],
-      "purchase_scope": "vehicle"
+      "purchase_scope": "vehicle",
+      "seats": 63,
+      "consumption_per_km": 0.32,
+      "consumption_per_hour": 0,
+      "usable_capacity": 250,
+      "reserve": 20,
+      "capacity_details": "250 kg utiles (5 × 315 L à 200 bar déclarés)",
+      "technical_source": "Fiche constructeur / Gaz-Mobilité",
+      "technical_quality": "user_supplied_unverified"
     },
     {
       "id": "electric-12-yutong",
       "label": "Autocar Électrique Interurbain (12m)",
       "manufacturer": "Yutong",
-      "model": "Yutong ICe 12 (350 kWh)",
+      "model": "ICe 12 (350 kWh)",
       "energy_code": "ELECTRIC",
       "unit": "kWh",
       "purchase_eur_ht": [
@@ -125,13 +157,21 @@
         0.19,
         0.22
       ],
-      "purchase_scope": "vehicle"
+      "purchase_scope": "vehicle",
+      "seats": 59,
+      "consumption_per_km": 0.95,
+      "consumption_per_hour": 0,
+      "usable_capacity": 315,
+      "reserve": 25,
+      "capacity_details": "315 kWh utiles (350 kWh bruts déclarés)",
+      "technical_source": "Fiche constructeur / Retour réseau (autonomie ~320 km)",
+      "technical_quality": "user_supplied_unverified"
     },
     {
       "id": "electric-12-iveco",
       "label": "Autocar Électrique Interurbain (12m)",
       "manufacturer": "Iveco Bus",
-      "model": "Iveco Bus Crossway ELEC 12m",
+      "model": "Crossway ELEC 12m",
       "energy_code": "ELECTRIC",
       "unit": "kWh",
       "purchase_eur_ht": [
@@ -150,13 +190,21 @@
         0.2,
         0.22
       ],
-      "purchase_scope": "vehicle"
+      "purchase_scope": "vehicle",
+      "seats": 55,
+      "consumption_per_km": 1.0,
+      "consumption_per_hour": 0,
+      "usable_capacity": 375,
+      "reserve": 30,
+      "capacity_details": "375 kWh utiles (6 × 69 kWh = 414 kWh bruts déclarés)",
+      "technical_source": "Fiche constructeur Iveco Bus",
+      "technical_quality": "user_supplied_unverified"
     },
     {
       "id": "electric-13",
       "label": "Autocar Électrique Longue Autonomie (13m)",
       "manufacturer": "Mercedes-Benz",
-      "model": "Mercedes-Benz eIntouro M 13m",
+      "model": "eIntouro M 13m",
       "energy_code": "ELECTRIC",
       "unit": "kWh",
       "purchase_eur_ht": [
@@ -175,13 +223,21 @@
         0.21,
         0.24
       ],
-      "purchase_scope": "vehicle"
+      "purchase_scope": "vehicle",
+      "seats": 63,
+      "consumption_per_km": 1.05,
+      "consumption_per_hour": 0,
+      "usable_capacity": 380,
+      "reserve": 30,
+      "capacity_details": "380 kWh utiles (2 × 207 kWh = 414 kWh bruts déclarés)",
+      "technical_source": "Fiche constructeur Daimler Buses (autonomie 400–500 km)",
+      "technical_quality": "user_supplied_unverified"
     },
     {
       "id": "h2-retrofit-12",
       "label": "Autocar Hydrogène Rétrofit (12m)",
-      "manufacturer": "GCK Mobility",
-      "model": "GCK Mobility / Crossway H2",
+      "manufacturer": "GCK Mobility / Iveco",
+      "model": "Crossway H2 Rétrofit",
       "energy_code": "H2",
       "unit": "kg",
       "purchase_eur_ht": [
@@ -200,13 +256,21 @@
         0.32,
         0.38
       ],
-      "purchase_scope": "retrofit_kit_installation"
+      "purchase_scope": "retrofit_kit_installation",
+      "seats": 55,
+      "consumption_per_km": 0.07,
+      "consumption_per_hour": 0,
+      "usable_capacity": 38.2,
+      "reserve": 3.0,
+      "capacity_details": "38,2 kg utiles (700 bar déclarés)",
+      "technical_source": "Fiche produit GCK Mobility (autonomie ~500 km)",
+      "technical_quality": "user_supplied_unverified"
     },
     {
       "id": "h2-13",
       "label": "Autocar Hydrogène Longue Distance (13-15m)",
       "manufacturer": "Irizar",
-      "model": "Irizar i6S Efficient Hydrogen",
+      "model": "i6S Efficient Hydrogen",
       "energy_code": "H2",
       "unit": "kg",
       "purchase_eur_ht": [
@@ -225,7 +289,15 @@
         0.35,
         0.42
       ],
-      "purchase_scope": "vehicle"
+      "purchase_scope": "vehicle",
+      "seats": 59,
+      "consumption_per_km": 0.085,
+      "consumption_per_hour": 0,
+      "usable_capacity": 51.2,
+      "reserve": 4.0,
+      "capacity_details": "51,2 kg utiles",
+      "technical_source": "Fiche constructeur Irizar (autonomie 450–600 km)",
+      "technical_quality": "user_supplied_unverified"
     }
   ]
 }

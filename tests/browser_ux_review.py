@@ -126,7 +126,7 @@ async def main():
             assert await page.locator('#vehicle-table').is_visible()
             assert await page.locator('#vehicle-table .reference-card').count()==4
             await page.locator('#vehicle-table [data-view-vehicle]').first.click()
-            assert 'Données utilisateur' in await page.locator('#ux-vehicle-preview').inner_text()
+            assert 'Fixture utilisateur' in await page.locator('#ux-vehicle-preview').inner_text()
             await page.evaluate('window.scrollTo(0,0)')
             await page.screenshot(path=str(OUT/'vehicles-registered.png'),full_page=True)
             # 3. Real admin login is still protected and available (not a cosmetic overlay).

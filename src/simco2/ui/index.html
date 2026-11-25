@@ -100,7 +100,7 @@
                       <div class="actions"><button type="button" class="button outline" id="day-plan-select-station" data-i18n="browseRefuelStations">Choisir une station sur la carte</button><button type="button" class="button outline" id="day-plan-remove-station" data-i18n="clearRefuelStation">Effacer la sélection</button></div>
                     </div>
                     <div class="form-grid">
-                      <label><span data-i18n="dieselRate">Débit gazole (L/min, hypothèse)</span><input name="diesel_flow_l_per_min" value="30" inputmode="decimal" /></label>
+                      <label><span data-i18n="dieselRate">Débit gazole (L/min)</span><input name="diesel_flow_l_per_min" value="30" inputmode="decimal" /></label>
                       <label><span data-i18n="hydrogenRate">Débit hydrogène (kg/min, à renseigner)</span><input name="hydrogen_flow_kg_per_min" value="0" inputmode="decimal" /></label>
                       <label><span data-i18n="handlingTime">Manipulation (minutes)</span><input name="handling_minutes" value="0" inputmode="decimal" /></label>
                     </div>
@@ -202,7 +202,7 @@
             <label><span data-i18n="ports">Nombre de points</span><input name="ports" type="number" min="1" value="1" required /></label>
             <label class="wide"><span data-i18n="source">Source / méthode</span><input name="source" required data-i18n-placeholder="sourceHint" placeholder="Document ou relevé" /></label>
             <label><span data-i18n="sourceDate">Date observée</span><input name="observed_at" type="date" required /></label>
-            <div class="wide actions"><button class="button primary" type="submit" data-i18n="saveStation">Enregistrer la station non vérifiée</button></div>
+            <div class="wide actions"><button class="button primary" type="submit" data-i18n="saveStation">Enregistrer la station</button></div>
           </form></details>
         </section>
 
@@ -233,7 +233,7 @@
               <button type="button" class="button outline" id="ux-reset-filters" data-i18n="uxResetFilters">Réinitialiser les filtres</button>
             </aside>
             <section class="panel ux-vehicle-browser">
-              <div class="ux-card-head"><div><h3 id="ux-catalog-title" data-i18n="referenceLibraryTitle">Bibliothèque indicative — 9 références</h3><p class="small muted" id="ux-catalog-hint" data-i18n="referenceLibraryHelp">Explorez les modèles et leurs caractéristiques.</p></div><span class="subtle-tag" id="ux-visible-count">9</span></div>
+              <div class="ux-card-head"><div><h3 id="ux-catalog-title" data-i18n="referenceLibraryTitle">Bibliothèque — 9 références</h3><p class="small muted" id="ux-catalog-hint" data-i18n="referenceLibraryHelp">Explorez les modèles et leurs caractéristiques.</p></div><span class="subtle-tag" id="ux-visible-count">9</span></div>
               <div id="reference-library" class="reference-grid" aria-live="polite"></div>
               <div id="vehicle-table" class="solution-list hidden" aria-live="polite"></div>
               <div id="vehicle-history" class="history"></div>
@@ -254,7 +254,7 @@
             <details class="wide advanced-settings"><summary data-i18n="advancedVehicle">Coûts avancés (facultatif)</summary><div class="form-grid">
               <label><span data-i18n="maintenance">Maintenance EUR/km</span><input name="maintenance_eur_per_km" value="0" inputmode="decimal" required /></label><label><span data-i18n="labor">Personnel EUR/h</span><input name="labor_eur_per_h" value="0" inputmode="decimal" required /></label><label><span data-i18n="purchase">Acquisition EUR</span><input name="purchase_eur" value="0" inputmode="decimal" required /></label><label><span data-i18n="residual">Valeur résiduelle EUR</span><input name="residual_eur" value="0" inputmode="decimal" required /></label><label><span data-i18n="life">Durée de vie (ans)</span><input name="life_years" type="number" value="10" min="1" required /></label><label><span data-i18n="insurance">Assurance EUR/an</span><input name="insurance_eur_year" value="0" inputmode="decimal" required /></label>
             </div></details>
-            <label class="wide"><span data-i18n="source">Source / méthode</span><input name="source" required value="Hypothèse utilisateur non vérifiée" /></label>
+            <label class="wide"><span data-i18n="source">Source / méthode</span><input name="source" required value="Données renseignées par l’utilisateur" /></label>
             <div class="wide actions"><button class="button primary" type="submit" id="vehicle-submit" data-i18n="saveVehicle">Enregistrer le véhicule</button><button class="button outline hidden" type="button" id="vehicle-cancel" data-i18n="cancel">Annuler</button></div>
           </form>
               </div>

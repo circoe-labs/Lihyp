@@ -42,3 +42,7 @@ jobs:
         env:
           PYTHONPATH: src:tests
         run: python tests/browser_ux_review.py
+      - name: Validate top row, route geometry, and hover station tooltip
+        env:
+          PYTHONPATH: src:tests
+        run: python tests/browser_layout_station.py

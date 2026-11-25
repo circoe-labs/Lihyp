@@ -78,10 +78,15 @@ async def main():
             assert await page.locator('#ux-route-distance').inner_text()=='—'
             assert await page.locator('.ux-vehicle-input .compare-option').count()==4
             assert not await page.locator('#comparison-results').is_hidden()
-            # 1. Simulation left inputs, right map & results, no overlaid tiles.
-            left=await page.locator('.simulator-composer').bounding_box()
-            right=await page.locator('.ux-map-overview').bounding_box()
-            assert left['x']+left['width'] <= right['x']+3, (left,right)
+            # 1. Three input steps share the top row; map and results are full width below.
+            cards=[await page.locator(f'.ux-{kind}-input').bounding_box()
+                   for kind in ('route','vehicle','plan')]
+            map_panel=await page.locator('.ux-map-overview').bounding_box()
+            comparison_panel=await page.locator('.ux-comparison-results').bounding_box()
+            assert all(abs(cards[0]['y']-card['y'])<5 for card in cards),cards
+            assert cards[0]['x']<cards[1]['x']<cards[2]['x'],cards
+            assert map_panel['y']>=max(c['y']+c['height'] for c in cards)-2
+            assert comparison_panel['width'] >= map_panel['width']-3
             await page.locator('#calculate-route').click()
             await page.locator('#route-summary').wait_for(state='visible')
             assert '132' in await page.locator('#ux-route-distance').inner_text()
@@ -121,7 +126,7 @@ async def main():
             assert await page.locator('#vehicle-table').is_visible()
             assert await page.locator('#vehicle-table .reference-card').count()==4
             await page.locator('#vehicle-table [data-view-vehicle]').first.click()
-            assert 'Données utilisateur' in await page.locator('#ux-vehicle-preview').inner_text()
+            assert 'Fixture utilisateur' in await page.locator('#ux-vehicle-preview').inner_text()
             await page.evaluate('window.scrollTo(0,0)')
             await page.screenshot(path=str(OUT/'vehicles-registered.png'),full_page=True)
             # 3. Real admin login is still protected and available (not a cosmetic overlay).

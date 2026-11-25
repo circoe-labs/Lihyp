@@ -40,7 +40,7 @@
       <nav aria-label="Navigation" id="main-nav">
         <button class="nav-item active" data-view="scenarios"><span>▤</span> <span data-i18n="navSimulations">Simulations</span></button>
         <button class="nav-item" data-view="stations"><span>⌖</span> <span data-i18n="navStations">Stations en Normandie</span></button>
-        <div class="sidebar-label compact" data-i18n="settings">PARAMÈTRES</div>
+        
         <button class="nav-item" data-view="vehicles"><span>▣</span> <span data-i18n="navVehicles">Véhicules</span></button>
         <button class="nav-item" data-view="energy"><span>◉</span> <span data-i18n="navEnergy">Énergies par pays</span></button>
         <button class="nav-item" data-view="routing"><span>⌁</span> <span data-i18n="navRouting">API de routage</span></button>
@@ -57,7 +57,7 @@
       </header>
       <div class="workspace">
         <div id="feedback" class="feedback hidden" role="status" aria-live="polite"></div>
-        <div class="notice-banner"><strong data-i18n="uncertified">Données de calcul non certifiées.</strong> <span data-i18n="globalNotice">Les prix et facteurs CO₂ sont des hypothèses à renseigner. Les stations répertoriées sont indicatives.</span></div>
+        
 
         <section id="view-scenarios" class="view">
           <div class="section-heading"><div><div class="eyebrow" data-i18n="scenarioKicker">NOUVELLE ÉTUDE</div><h2 data-i18n="scenarioTitle">Comparer plusieurs véhicules</h2><p data-i18n="scenarioIntro">Un même trajet et une même demande pour comparer coûts, émissions et faisabilité de plusieurs solutions.</p></div></div>
@@ -84,7 +84,7 @@
                 <section class="panel ux-sim-card ux-plan-input"><div class="form-grid">
                   <div class="wide form-section-title"><span class="step-number">3</span><h3 data-i18n="uxPlanningTitle">Hypothèses d'exploitation</h3></div>
 <div class="wide day-planner-settings">
-                  <label class="day-plan-toggle"><input type="checkbox" name="day_plan" id="day-plan-enabled" checked /> <span data-i18n="dayPlanToggle">Planifier les rotations et les pleins de la journée (prototype)</span></label>
+                  <label class="day-plan-toggle"><input type="checkbox" name="day_plan" id="day-plan-enabled" checked /> <span data-i18n="dayPlanToggle">Planifier les rotations et les pleins</span></label>
                   <p class="small muted" data-i18n="dayPlanNotice">Calcule les trajets retour à vide et les arrêts éventuels. Fin de plage = fin du dernier trajet. Aucune attente à la station.</p>
                   <div id="day-plan-details" class="day-plan-details">
                     <label class="wide"><span data-i18n="stationPolicy">Politique de ravitaillement</span>
@@ -94,7 +94,7 @@
                         <option value="none" data-i18n="stationNone">Sans ravitaillement</option>
                       </select>
                     </label>
-                    <p class="small muted" data-i18n="stationAutoExplanation">Recherche automatique selon l'énergie du véhicule et le temps de détour. Les stations et leur accès aux autocars restent à vérifier.</p>
+                    <p class="small muted" data-i18n="stationAutoExplanation">Recherche selon l’énergie et le temps de détour.</p>
                     <div id="day-station-manual" class="hidden">
                       <p class="small"><span data-i18n="selectedRefuelStation">Station choisie :</span> <strong id="day-station-name" data-i18n="noRefuelStation">Aucune station sélectionnée.</strong></p>
                       <div class="actions"><button type="button" class="button outline" id="day-plan-select-station" data-i18n="browseRefuelStations">Choisir une station sur la carte</button><button type="button" class="button outline" id="day-plan-remove-station" data-i18n="clearRefuelStation">Effacer la sélection</button></div>
@@ -104,7 +104,7 @@
                       <label><span data-i18n="hydrogenRate">Débit hydrogène (kg/min, à renseigner)</span><input name="hydrogen_flow_kg_per_min" value="0" inputmode="decimal" /></label>
                       <label><span data-i18n="handlingTime">Manipulation (minutes)</span><input name="handling_minutes" value="0" inputmode="decimal" /></label>
                     </div>
-                    <p class="small muted" data-i18n="refuelNoQueue">Attente en station : 0 min. Gazole 30 L/min est une hypothèse illustrative non vérifiée. Débit 0 = plein impossible.</p>
+                    <p class="small muted" data-i18n="refuelNoQueue">Attente en station : 0 min · Débit 0 : plein impossible.</p>
                   </div>
                 </div>
                 <details class="wide advanced-settings"><summary data-i18n="advancedSettings">Options avancées (facultatif)</summary><div class="form-grid">
@@ -161,7 +161,7 @@
         </section>
 
         <section id="view-stations" class="view hidden">
-          <div class="section-heading"><div><div class="eyebrow" data-i18n="stationKicker">RÉFÉRENTIELS GÉOGRAPHIQUES</div><h2 data-i18n="stationTitle">Stations en Normandie</h2><p data-i18n="stationIntro">Stations hydrogène répertoriées et stations essence/gazole issues de la DGCCRF. Informations indicatives, sans garantie d'accès pour les autocars.</p></div><button class="button outline" id="reload-stations" data-i18n="refresh">Actualiser</button></div>
+          <div class="section-heading"><div><div class="eyebrow" data-i18n="stationKicker">RÉFÉRENTIELS GÉOGRAPHIQUES</div><h2 data-i18n="stationTitle">Stations en Normandie</h2><p data-i18n="stationIntro">Explorez les stations hydrogène, essence et gazole en Normandie.</p></div><button class="button outline" id="reload-stations" data-i18n="refresh">Actualiser</button></div>
           <article class="panel station-explorer">
             <div class="station-toolbar" role="group" aria-label="Filtres des stations">
               <label class="station-area-field"><span data-i18n="stationArea">Secteur</span>
@@ -190,7 +190,7 @@
             </div>
             <div id="station-data-status" class="small muted"></div>
             <button class="button outline hidden" id="more-stations" data-i18n="moreStations">Charger davantage de stations essence</button>
-            <p class="small warning-text" data-i18n="stationCaution">Liste indicative : une station H₂ destinée aux véhicules légers n'est pas automatiquement compatible avec un autocar. Disponibilité et accès à confirmer auprès de l'exploitant.</p>
+            
           </article>
           <details class="panel admin-only hidden" id="add-station-details"><summary data-i18n="addStation">Ajouter une station manuellement (avancé)</summary><form id="station-form" class="form-grid">
             <label class="wide"><span data-i18n="stationName">Nom de la station</span><input name="name" required /></label>
@@ -207,7 +207,7 @@
         </section>
 
         <section id="view-vehicles" class="view hidden">
-          <div class="section-heading"><div><div class="eyebrow" data-i18n="settings">PARAMÈTRES</div><h2 data-i18n="navVehicles">Véhicules</h2><p data-i18n="vehicleIntro">Créer un modèle de véhicule utilisé par les simulations. Les valeurs doivent être justifiées par une source.</p></div><button class="button outline" id="reload-vehicles" data-i18n="refresh">Actualiser</button></div>
+          <div class="section-heading"><div><h2 data-i18n="navVehicles">Véhicules</h2><p data-i18n="vehicleIntro">Créer un modèle de véhicule utilisé par les simulations. Les valeurs doivent être justifiées par une source.</p></div><button class="button outline" id="reload-vehicles" data-i18n="refresh">Actualiser</button></div>
           <div class="ux-vehicle-stats" aria-label="Statistiques du catalogue">
             <div class="ux-stat"><span class="ux-stat-symbol">▣</span><strong id="ux-stat-variants">9</strong><small data-i18n="uxVariantCount">Références de la bibliothèque</small></div>
             <div class="ux-stat"><span class="ux-stat-symbol">⚡</span><strong id="ux-stat-energies">4</strong><small data-i18n="uxEnergyCount">Motorisations</small></div>
@@ -233,7 +233,7 @@
               <button type="button" class="button outline" id="ux-reset-filters" data-i18n="uxResetFilters">Réinitialiser les filtres</button>
             </aside>
             <section class="panel ux-vehicle-browser">
-              <div class="ux-card-head"><div><h3 id="ux-catalog-title" data-i18n="referenceLibraryTitle">Bibliothèque indicative — 9 références</h3><p class="small muted" id="ux-catalog-hint" data-i18n="referenceLibraryHelp">Données utilisateur indicatives non vérifiées.</p></div><span class="subtle-tag" id="ux-visible-count">9</span></div>
+              <div class="ux-card-head"><div><h3 id="ux-catalog-title" data-i18n="referenceLibraryTitle">Bibliothèque indicative — 9 références</h3><p class="small muted" id="ux-catalog-hint" data-i18n="referenceLibraryHelp">Explorez les modèles et leurs caractéristiques.</p></div><span class="subtle-tag" id="ux-visible-count">9</span></div>
               <div id="reference-library" class="reference-grid" aria-live="polite"></div>
               <div id="vehicle-table" class="solution-list hidden" aria-live="polite"></div>
               <div id="vehicle-history" class="history"></div>
@@ -242,7 +242,7 @@
               <div class="ux-card-head"><h3 data-i18n="uxVehicleDetail">Fiche véhicule</h3></div>
               <div id="ux-vehicle-preview" class="ux-vehicle-preview" aria-live="polite"><p class="small muted" data-i18n="uxPickVehicle">Sélectionnez une carte pour consulter ses caractéristiques et ses sources.</p></div>
               <div class="admin-only hidden" id="vehicle-editor-panel">
-                <h3 data-i18n="vehicleFormTitle">Fiche véhicule</h3><p class="small muted" id="vehicle-edit-label" data-i18n="vehicleUnverified">Données à vérifier.</p>
+                <h3 data-i18n="vehicleFormTitle">Fiche véhicule</h3><p class="small muted" id="vehicle-edit-label" data-i18n="vehicleUnverified">Caractéristiques du véhicule.</p>
                 <p class="small warning-text hidden" id="reference-form-note" role="status"></p>
 <form id="vehicle-form" class="form-grid">
             <label class="wide"><span data-i18n="modelName">Nom de variante</span><input name="label" required data-i18n-placeholder="modelExample" placeholder="Autocar diesel A" /></label>
@@ -268,7 +268,7 @@
         </section>
 
         <section id="view-routing" class="view hidden">
-          <div class="section-heading"><div><div class="eyebrow" data-i18n="settings">PARAMÈTRES</div><h2 data-i18n="routingSettingsTitle">API de routage</h2><p data-i18n="routingSettingsIntro">Choisissez le fournisseur de calcul des trajets. Les clés sont conservées côté serveur, jamais dans la simulation.</p></div><button class="button outline" type="button" id="reload-routing" data-i18n="refresh">Actualiser</button></div>
+          <div class="section-heading"><div><h2 data-i18n="routingSettingsTitle">API de routage</h2><p data-i18n="routingSettingsIntro">Choisissez le fournisseur de calcul des trajets. Les clés sont conservées côté serveur, jamais dans la simulation.</p></div><button class="button outline" type="button" id="reload-routing" data-i18n="refresh">Actualiser</button></div>
           <article class="panel routing-panel">
             <div class="panel-head"><div><h3 data-i18n="routingPanelTitle">Calcul d'itinéraire bus et camion</h3><p class="small muted" data-i18n="routingPanelHelp">Geoapify propose les profils bus, camion 22 t et poids lourd 40 t. Ces profils ne certifient pas toutes les restrictions locales.</p></div><span class="subtle-tag" id="routing-availability" role="status"></span></div>
             <div class="routing-data-grid">
@@ -301,7 +301,7 @@
         </section>
 
         <section id="view-energy" class="view hidden">
-          <div class="section-heading"><div><div class="eyebrow" data-i18n="settings">PARAMÈTRES</div><h2 data-i18n="navEnergy">Énergies par pays</h2><p data-i18n="energyIntro">Un prix national par énergie, des facteurs d'émissions sourcés et versionnés. Aucun tarif par station.</p></div><button class="button outline" id="reload-energy" data-i18n="refresh">Actualiser</button></div>
+          <div class="section-heading"><div><h2 data-i18n="navEnergy">Énergies par pays</h2><p data-i18n="energyIntro">Un prix national par énergie, des facteurs d'émissions sourcés et versionnés. Aucun tarif par station.</p></div><button class="button outline" id="reload-energy" data-i18n="refresh">Actualiser</button></div>
           <article class="panel energy-manager">
             <div class="energy-toolbar">
               <label class="energy-country"><span data-i18n="country">Pays</span><select id="energy-country-filter"><option value="FR" data-i18n="france">France (FR)</option></select></label>
@@ -314,7 +314,7 @@
           </article>
           <section id="energy-editor" class="panel energy-editor hidden" aria-labelledby="energy-editor-title">
             <div class="panel-head"><h3 id="energy-editor-title" data-i18n="energyFormTitle">Prix et facteurs d’émission</h3><button type="button" class="button outline" id="close-energy" data-i18n="cancel">Annuler</button></div>
-            <p class="small muted" data-i18n="energyUnverified">Les valeurs ne sont pas préremplies : les sources nationales et les périmètres doivent être validés.</p>
+            
             <form id="energy-form" class="form-grid">
               <label><span data-i18n="country">Pays</span><select name="country_iso"><option value="FR" data-i18n="france">France (FR)</option></select></label>
               <label><span data-i18n="energy">Énergie</span><select name="energy_code" id="energy-code"><option value="DIESEL" data-i18n="diesel">Gazole (L)</option><option value="ELECTRIC" data-i18n="electric">Électricité (kWh)</option><option value="H2" data-i18n="hydrogen">Hydrogène (kg)</option><option value="BIOGNV" data-i18n="biognv">BioGNV (kg)</option></select></label>

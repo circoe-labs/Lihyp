@@ -23,7 +23,7 @@
       uxVehicleDetail:'Fiche véhicule', uxPickVehicle:'Sélectionnez une carte pour voir ses caractéristiques et ses sources.',
       uxViewDetails:'Voir la fiche', uxNoVehicleMatches:'Aucun véhicule pour ces filtres.',
       uxNoSavedVehicles:'Aucun véhicule enregistré. Ouvrez la bibliothèque pour en ajouter.',
-      uxRange:'Autonomie estimée', uxIndicative:'Données utilisateur non vérifiées',
+      uxRange:'Autonomie estimée', uxIndicative:'Source disponible dans la fiche',
       uxNoChargeNotice:'Recharge électrique et ravitaillement BioGNV non planifiés automatiquement.',
       loginKicker:'ACCÈS ADMINISTRATEUR', loginIntro:"Connectez-vous pour gérer les clés de routage, les énergies, les véhicules et les stations.",
       username:'Identifiant',password:'Mot de passe',signIn:'Se connecter',loginHelp:"Compte créé par l'administrateur du service. En local : python -m simco2.cli create-user.",
@@ -42,7 +42,7 @@
       infrastructureCost:'Infrastructure EUR/jour',runSimulation:'Comparer les véhicules',
       oneWayWarning:'Planning journalier activé par défaut. Étude indicative : restrictions autocars, pauses réglementaires et disponibilité des stations à vérifier.',
       mySimulations:'Mes simulations',myResults:'Résultats précédents',stationKicker:'RÉFÉRENTIELS GÉOGRAPHIQUES',
-      stationTitle:'Stations en Normandie',stationIntro:'Stations hydrogène répertoriées et stations essence/gazole issues de la DGCCRF. Informations indicatives, sans garantie d’accès pour les autocars.',
+      stationTitle:'Stations en Normandie',stationIntro:'Explorez les stations hydrogène, essence et gazole en Normandie.',
       refresh:'Actualiser',filterType:'Afficher',filterAll:'Toutes les stations',filterH2:'Hydrogène H₂',filterFuel:'Essence / gazole',
       filterManual:'Ajoutées manuellement',mapInfo:'Localisations déclarées dans les sources',moreStations:'Charger davantage de stations essence',
       stationCaution:"Liste indicative : une station H₂ destinée aux véhicules légers n'est pas automatiquement compatible avec un autocar. Disponibilité et accès à confirmer auprès de l'exploitant.",
@@ -50,17 +50,17 @@
       access:'Accès',publicDeclared:'Public (déclaré)',private:'Privé',restricted:'Restreint',pump:'Pompe / connecteur',ports:'Nombre de points',
       source:'Source / méthode',sourceHint:'Document ou relevé',sourceDate:'Date de source',saveStation:'Enregistrer la station non vérifiée',
       vehicleIntro:'Créer un modèle de véhicule utilisé par les simulations. Les valeurs doivent être justifiées par une source.',
-      referenceLibraryTitle:'Bibliothèque indicative — 9 références',referenceLibraryHelp:'Neuf autocars : coûts et données techniques fournis par l’utilisateur, non vérifiés. Ajoutez-les au catalogue puis configurez les énergies pour les comparer.',referenceLibraryBadge:'À vérifier',
-      referencePrice:'Acquisition / opération HT',referenceEnergyPrice:'Énergie HT',referenceEnergy100:'Coût énergie / 100 km HT',referenceMaintenance:'Maintenance préventive HT / km',referenceUse:'Vérifier / modifier',referenceAdd:'Ajouter au catalogue',referenceAdded:'Déjà enregistré',referenceAddedMessage:'Autocar ajouté au catalogue (données utilisateur non vérifiées).',referenceImportAll:'Ajouter les 9 au catalogue',referenceImportConfirm:'Ajouter les références non enregistrées ? Les données sont indicatives et les tarifs nationaux et facteurs CO₂e doivent être configurés séparément.',referenceImportDone:'Références ajoutées au catalogue',referenceSpecSeats:'Places utiles',referenceSpecConsumption:'Consommation',referenceSpecCapacity:'Capacité utile',referenceSpecReserve:'Réserve',referenceSpecSource:'Source déclarée',
-      referenceSource:'Source : tableau utilisateur non vérifié (24/11/2026)',referenceComplete:'Places, consommation, capacité et réserve préremplies selon tes données, non vérifiées. Les médianes des coûts restent modifiables ; aucun tarif national ni facteur CO₂e ajouté.',referenceRetrofit:'Kit et pose seulement, pas prix du véhicule complet.',referenceCompareTitle:'Comparaison indicative des coûts sur 100 km',referencePartialCost:'Énergie + maintenance / 100 km HT',referencePartialWarning:'Comparatif partiel hors salaires, amortissement, assurance, autres coûts et CO₂e. Ce ne sont pas des résultats de simulation.',referenceMissingEnergy:'Avant de comparer, configurez cette énergie et son facteur CO₂e dans Énergies par pays.',
-      vehicleFormTitle:'Fiche véhicule',vehicleUnverified:'Données constructeur non préchargées : valeurs à vérifier.',
+      referenceLibraryTitle:'Bibliothèque — 9 références',referenceLibraryHelp:'Neuf modèles à consulter et à ajouter au catalogue.',referenceLibraryBadge:'Référence',
+      referencePrice:'Acquisition / opération HT',referenceEnergyPrice:'Énergie HT',referenceEnergy100:'Coût énergie / 100 km HT',referenceMaintenance:'Maintenance préventive HT / km',referenceUse:'Vérifier / modifier',referenceAdd:'Ajouter au catalogue',referenceAdded:'Déjà enregistré',referenceAddedMessage:'Autocar ajouté au catalogue.',referenceImportAll:'Ajouter les 9 au catalogue',referenceImportConfirm:'Ajouter les références non enregistrées ? Les données sont indicatives et les tarifs nationaux et facteurs CO₂e doivent être configurés séparément.',referenceImportDone:'Références ajoutées au catalogue',referenceSpecSeats:'Places utiles',referenceSpecConsumption:'Consommation',referenceSpecCapacity:'Capacité utile',referenceSpecReserve:'Réserve',referenceSpecSource:'Source déclarée',
+      referenceSource:'Tableau de référence utilisateur (24/11/2026)',referenceComplete:'Places, consommation, capacité et réserve préremplies. Les coûts restent modifiables ; les tarifs nationaux sont gérés dans Énergies par pays.',referenceRetrofit:'Kit et pose seulement, pas prix du véhicule complet.',referenceCompareTitle:'Comparaison indicative des coûts sur 100 km',referencePartialCost:'Énergie + maintenance / 100 km HT',referencePartialWarning:'Comparatif partiel hors salaires, amortissement, assurance, autres coûts et CO₂e. Ce ne sont pas des résultats de simulation.',referenceMissingEnergy:'Avant de comparer, configurez cette énergie et son facteur CO₂e dans Énergies par pays.',
+      vehicleFormTitle:'Fiche véhicule',vehicleUnverified:'Caractéristiques du véhicule.',
       modelName:'Nom de variante',modelExample:'Autocar diesel A',manufacturer:'Constructeur',model:'Modèle',seats:'Places utiles',
       diesel:'Gazole (L)',electric:'Électricité (kWh)',hydrogen:'Hydrogène (kg)',biognv:'BioGNV (kg)',consumptionKm:'Consommation / km',
       consumptionHour:'Consommation / h',capacity:'Réservoir / batterie utile',reserve:'Réserve',advancedVehicle:'Coûts avancés (facultatif)',
       maintenance:'Maintenance EUR/km',labor:'Personnel EUR/h',purchase:'Acquisition EUR',residual:'Valeur résiduelle EUR',
       life:'Durée de vie (ans)',insurance:'Assurance EUR/an',saveVehicle:'Enregistrer le véhicule',cancel:'Annuler',
       vehicleCatalog:'Solutions de transport',energyIntro:"Un prix national par énergie, avec des facteurs d’émissions et leurs sources. Aucun tarif par station.",
-      energyFormTitle:'Prix et facteurs d’émission',energyUnverified:'Les valeurs ne sont pas préremplies : les sources nationales et les périmètres doivent être validés.',
+      energyFormTitle:'Prix et facteurs d’émission',energyUnverified:'Renseignez un prix et ses facteurs associés.',
       country:'Pays',france:'France (FR)',nationalPrice:'Prix national EUR/unité',directFactor:'Facteur direct kgCO₂e/unité',
       wtwFactor:'Facteur puits-roue kgCO₂e/unité',optional:'facultatif',license:'Licence / droit de réutilisation',
       saveEnergy:'Enregistrer',savedEnergies:'Énergies enregistrées',fuelSourceLink:'Source officielle des prix à la pompe (DGCCRF)',
@@ -111,7 +111,7 @@
       stationHeavyLane:'Piste poids lourds déclarée',station24h:'Automate 24 h déclaré',
       stationYes:'Oui',stationNo:'Non précisé',stationServices:'Services déclarés',
 
-      dayPlanToggle:'Planifier les rotations et les pleins de la journée (prototype)',
+      dayPlanToggle:'Planifier les rotations et les pleins',
       dayPlanNotice:'Trajets retour routés séparément. La fin de plage devient la fin du service. Aucune attente à la station.',
       selectedRefuelStation:'Station imposée :',noRefuelStation:'Aucune station imposée.',
       stationPolicy:'Politique de ravitaillement',stationAuto:'Automatique : station compatible si un plein est nécessaire',
@@ -121,13 +121,13 @@
       browseRefuelStations:'Choisir une station sur la carte',clearRefuelStation:'Effacer la sélection',
       useForRefuel:'Choisir pour le planning',stationChosen:'Station retenue pour le planning journalier.',
       dieselRate:'Débit gazole (L/min, hypothèse non vérifiée)',hydrogenRate:'Débit hydrogène (kg/min, à fournir)',
-      handlingTime:'Manipulation (minutes)',refuelNoQueue:'Attente à la station : 0 min. Le débit gazole 30 L/min est une hypothèse de démonstration, à vérifier ; 0 interdit un plein.',
+      handlingTime:'Manipulation (minutes)',refuelNoQueue:'Attente à la station : 0 min. Un débit à 0 interdit le plein.',
       dayTileTitle:'Journée par solution de véhicule',dayService:'Course avec voyageurs',
       dayDeadhead:'Retour à vide',dayDetour:'Détour vers station',dayRefuel:'Ravitaillement',
       dayHandling:'Manipulation',dayWaiting:'Attente en station',dayTimeTotal:'Amplitude du service',
       dayVehicleTime:'Heures-véhicules cumulées',dayFuelStops:'Pleins',dayVehicleNumber:'Autocar',
       dayRotations:'Rotations réalisées',bestIndicative:'Coût le plus faible parmi les cas calculés (non optimal garanti)',
-      stationAutoExplanation:'Recherche automatique par énergie et temps de détour. Échantillon non exhaustif, accès autocars non vérifié.',
+      stationAutoExplanation:'Recherche automatique par énergie et temps de détour.',
       stationSearchLimits:'Limites de la recherche de stations',
       dayPlanUnverified:'Planning indicatif : pauses, restrictions autocars et disponibilité des stations non vérifiées.',
       dayBasicNotice:'Mode simple : une course par véhicule, sans rotation ni ravitaillement.',
@@ -189,7 +189,7 @@
       uxVehicleDetail:'Vehicle details', uxPickVehicle:'Select a card to inspect specifications and sources.',
       uxViewDetails:'View details', uxNoVehicleMatches:'No matching vehicles.',
       uxNoSavedVehicles:'No saved vehicles. Open the library to register some.',
-      uxRange:'Estimated range', uxIndicative:'Unverified user-provided data',
+      uxRange:'Estimated range', uxIndicative:'Source available in vehicle details',
       uxNoChargeNotice:'Electric charging and BioCNG refueling are not automatically scheduled.',
       loginKicker:'PASSENGER TRANSPORT SIMULATOR · PROTOTYPE',loginIntro:'Estimate costs and emissions for a passenger route using computed road distances.',
       username:'Username',password:'Password',signIn:'Sign in',loginHelp:'An account is created by the service administrator. Locally: python -m simco2.cli create-user.',
@@ -216,17 +216,17 @@
       access:'Access',publicDeclared:'Public (declared)',private:'Private',restricted:'Restricted',pump:'Pump / connector',ports:'Number of outlets',
       source:'Source / methodology',sourceHint:'Document or observation',sourceDate:'Source date',saveStation:'Save as unverified station',
       vehicleIntro:'Create a vehicle model for use in simulations. Values should be backed by a source.',
-      referenceLibraryTitle:'Indicative library — 9 references',referenceLibraryHelp:'Nine coaches with user-provided costs and technical specifications (not verified). Add them to the catalogue and configure energies to compare.',referenceLibraryBadge:'Unverified',
-      referencePrice:'Purchase / operation (excl. VAT)',referenceEnergyPrice:'Energy price (excl. VAT)',referenceEnergy100:'Energy cost / 100 km (excl. VAT)',referenceMaintenance:'Preventive maintenance / km (excl. VAT)',referenceUse:'Review / edit',referenceAdd:'Add to catalogue',referenceAdded:'Already saved',referenceAddedMessage:'Coach added to catalogue (unverified user-supplied data).',referenceImportAll:'Add all 9 to catalogue',referenceImportConfirm:'Add unsaved references? Figures are indicative; national energy prices and CO₂e factors must be configured separately.',referenceImportDone:'References added to catalogue',referenceSpecSeats:'Usable seats',referenceSpecConsumption:'Consumption',referenceSpecCapacity:'Usable capacity',referenceSpecReserve:'Reserve',referenceSpecSource:'Declared source',
-      referenceSource:'Source: unverified user table (24 Nov 2026)',referenceComplete:'Seats, consumption, capacity and reserve filled from user-supplied unverified figures. Cost midpoints are editable; no national energy price or CO₂e factor is added.',referenceRetrofit:'Conversion kit and installation only, not a complete vehicle price.',referenceCompareTitle:'Indicative comparison of costs over 100 km',referencePartialCost:'Energy + maintenance / 100 km, excl. VAT',referencePartialWarning:'Partial comparison excluding staff, depreciation, insurance, other costs and CO₂e. Not simulated results.',referenceMissingEnergy:'Configure this energy type and its CO₂e factor in Energy by country before comparing.',
-      vehicleFormTitle:'Vehicle details',vehicleUnverified:'No manufacturer data preloaded: values require validation.',
+      referenceLibraryTitle:'Library — 9 references',referenceLibraryHelp:'Explore nine coaches and add them to your catalogue.',referenceLibraryBadge:'Reference',
+      referencePrice:'Purchase / operation (excl. VAT)',referenceEnergyPrice:'Energy price (excl. VAT)',referenceEnergy100:'Energy cost / 100 km (excl. VAT)',referenceMaintenance:'Preventive maintenance / km (excl. VAT)',referenceUse:'Review / edit',referenceAdd:'Add to catalogue',referenceAdded:'Already saved',referenceAddedMessage:'Coach added to catalogue.',referenceImportAll:'Add all 9 to catalogue',referenceImportConfirm:'Add unsaved references? Figures are indicative; national energy prices and CO₂e factors must be configured separately.',referenceImportDone:'References added to catalogue',referenceSpecSeats:'Usable seats',referenceSpecConsumption:'Consumption',referenceSpecCapacity:'Usable capacity',referenceSpecReserve:'Reserve',referenceSpecSource:'Declared source',
+      referenceSource:'Source: unverified user table (24 Nov 2026)',referenceComplete:'Seats, consumption, capacity and reserve prefilled. Costs remain editable; national prices are managed under Energy by country.',referenceRetrofit:'Conversion kit and installation only, not a complete vehicle price.',referenceCompareTitle:'Indicative comparison of costs over 100 km',referencePartialCost:'Energy + maintenance / 100 km, excl. VAT',referencePartialWarning:'Partial comparison excluding staff, depreciation, insurance, other costs and CO₂e. Not simulated results.',referenceMissingEnergy:'Configure this energy type and its CO₂e factor in Energy by country before comparing.',
+      vehicleFormTitle:'Vehicle details',vehicleUnverified:'Vehicle specifications.',
       modelName:'Variant name',modelExample:'Diesel coach A',manufacturer:'Manufacturer',model:'Model',seats:'Usable seats',
       diesel:'Diesel (L)',electric:'Electricity (kWh)',hydrogen:'Hydrogen (kg)',biognv:'Bio-CNG (kg)',consumptionKm:'Consumption / km',
       consumptionHour:'Consumption / hour',capacity:'Usable tank / battery capacity',reserve:'Reserve',advancedVehicle:'Advanced costs (optional)',
       maintenance:'Maintenance EUR/km',labor:'Staff EUR/hour',purchase:'Purchase price EUR',residual:'Residual value EUR',
       life:'Lifetime (years)',insurance:'Insurance EUR/year',saveVehicle:'Save vehicle',cancel:'Cancel',
       vehicleCatalog:'Transport options',energyIntro:'One national price per energy type, with sourced emission factors. No station pricing.',
-      energyFormTitle:'Price and emission factors',energyUnverified:'Values are not preloaded: national sources and emission boundaries must be validated.',
+      energyFormTitle:'Price and emission factors',energyUnverified:'Enter an energy price and associated emission factors.',
       country:'Country',france:'France (FR)',nationalPrice:'National price EUR/unit',directFactor:'Direct factor kgCO₂e/unit',
       wtwFactor:'Well-to-wheel factor kgCO₂e/unit',optional:'optional',license:'Licence / reuse rights',
       saveEnergy:'Save',savedEnergies:'Saved energies',fuelSourceLink:'Official fuel pump-price source (DGCCRF)',
@@ -558,7 +558,7 @@
       const icon=({DIESEL:'⛽',ELECTRIC:'⚡',H2:'H₂',BIOGNV:'♻'})[code]||'◉';
       const srcUrl=safeUrl(p.source);
       const source=srcUrl?`<a href="${esc(srcUrl)}" rel="noopener" target="_blank">${esc(p.source)}</a>`:esc(p.source);
-      return `<tr><td><span class="energy-name"><span class="energy-icon" aria-hidden="true">${icon}</span><span><strong>${esc(energyName(code))}</strong><small>${esc(t('unverified'))} · ${unit}</small></span></span></td>
+      return `<tr><td><span class="energy-name"><span class="energy-icon" aria-hidden="true">${icon}</span><span><strong>${esc(energyName(code))}</strong><small>${unit}</small></span></span></td>
         <td><strong>${esc(number(Number(p.price_per_unit),2))}</strong> EUR/${unit}</td>
         <td>${esc(p.factors.direct??'—')}</td><td>${esc(p.factors.well_to_wheel??'—')}</td>
         <td>${source}<small>${esc(p.source_date)}</small></td>
@@ -712,7 +712,7 @@
         <div><dt>${esc(t('reserve'))}</dt><dd>${esc(p.reserve)} ${esc(p.unit)}</dd></div>
         <div><dt>${esc(t('uxRange'))}</dt><dd>${Number.isFinite(range) && range>0?esc(number(range,0))+' km':'—'}</dd></div>
         <div><dt>${esc(t('referencePrice'))}</dt><dd>${esc(purchase)}</dd></div>
-      </dl><p class="small warning-text">${esc(t('uxIndicative'))}</p><p class="small muted">${esc(t('source'))}: ${esc(source)}</p>`;
+      </dl><p class="small muted">${esc(t('source'))}: ${esc(source)}</p>`;
   }
   function renderReferenceLibrary() {
     const node=$('reference-library');if(!node)return;
@@ -1027,38 +1027,47 @@
     host.appendChild(svg);
   }
   function showRouteMap(route) {
-    if (!route.geometry || route.geometry.type!=='LineString') {
-      drawRouteSketch(route);
-      return;
-    }
-    // A previous schematic may have hidden the Leaflet container. Reveal it before measuring.
+    const coords=route.geometry?.type==='LineString' ? route.geometry.coordinates : null;
+    const points=Array.isArray(coords) ? coords.filter(p=>Array.isArray(p) && p.length>=2 &&
+      Number.isFinite(Number(p[0])) && Number.isFinite(Number(p[1])) &&
+      Math.abs(Number(p[0]))<=180 && Math.abs(Number(p[1]))<=90).map(p=>[Number(p[1]),Number(p[0])]) : [];
+    if(points.length<2){drawRouteSketch(route);return;}
+    // Never let a map-library failure turn a computed itinerary into an empty panel.
     $('route-map').classList.remove('hidden');
-    if (!routeMap) routeMap = ensureMap('route-map');
-    if (!routeMap) { drawRouteSketch(route); return; }
+    if(!routeMap) routeMap=ensureMap('route-map');
+    if(!routeMap){drawRouteSketch(route);return;}
     try {
+      routeDrawings.forEach(layer=>routeMap.removeLayer(layer));routeDrawings=[];
+      const outline=window.L.polyline(points,{color:'#fff',weight:10,opacity:.95,lineCap:'round',lineJoin:'round'}).addTo(routeMap);
+      const line=window.L.polyline(points,{color:'#067f8d',weight:6,opacity:1,lineCap:'round',lineJoin:'round'}).addTo(routeMap);
+      routeDrawings.push(outline,line);
+      for(const [i,[point,label]] of [[route.origin_coordinates,route.origin],[route.destination_coordinates,route.destination]].entries()) {
+        if(!point || point.length<2) continue;
+        routeDrawings.push(window.L.circleMarker([point[1],point[0]],{
+          radius:9,color:'#fff',weight:3,fillColor:i===0?'#087e8b':'#ca8137',fillOpacity:1,
+        }).bindPopup(esc(label)).addTo(routeMap));
+      }
       $('route-map-sketch').classList.add('hidden');
       $('route-map-fallback').classList.add('hidden');
       $('route-map').classList.remove('hidden');
-      routeDrawings.forEach(layer => routeMap.removeLayer(layer));routeDrawings=[];
-      const geometry=route.geometry;
-      const feature=window.L.geoJSON(geometry,{style:{color:'#0b7f8b',weight:5}}).addTo(routeMap);
-      routeDrawings.push(feature);
-      for (const [i,[point,label]] of [[route.origin_coordinates,route.origin],[route.destination_coordinates,route.destination]].entries()) {
-        if (!point || point.length<2) continue;
-        routeDrawings.push(window.L.circleMarker([point[1],point[0]], {
-          radius:8,color:'#fff',weight:3,
-          fillColor:i===0?'#087e8b':'#ca8137',fillOpacity:1,
-        }).bindPopup(esc(label)).addTo(routeMap));
-      }
       requestAnimationFrame(()=>{
         if(!routeMap || $('view-scenarios').classList.contains('hidden'))return;
-        routeMap.invalidateSize({pan:false});
-        const bounds=feature.getBounds();
-        if(bounds.isValid())routeMap.fitBounds(bounds.pad(0.14));
+        try {
+          routeMap.invalidateSize({pan:false});
+          const bounds=line.getBounds();
+          if(!bounds.isValid())throw new Error('invalid route bounds');
+          routeMap.fitBounds(bounds.pad(.18));
+          // On some browsers a rendered but empty SVG layer has no visible trace.
+          // Show the actual GeoJSON geometry in the fallback, never a fabricated straight line.
+          requestAnimationFrame(()=>{
+            const visible=Array.from($('route-map').querySelectorAll('.leaflet-overlay-pane path'))
+              .some(el=>el.getAttribute('d') && el.getAttribute('d')!=='M0 0');
+            if(!visible) drawRouteSketch(route);
+          });
+        }catch(error){drawRouteSketch(route);}
       });
-    } catch (error) {
-      // A mapping rendering issue must never turn a computed route into a blank panel.
-      console.warn('Route drawing failed, displaying a geometry-only fallback');
+    } catch(error) {
+      console.warn('Unable to draw route on basemap; displaying its geographic shape');
       drawRouteSketch(route);
     }
   }
@@ -1461,6 +1470,12 @@
       ${url?`<a href="${esc(url)}" target="_blank" rel="noopener">${esc(t('sourceLink'))} ↗</a>`:esc(s.source||'')}
       </div>`;
   }
+  function stationHoverHtml(s) {
+    const label=stationType(s);
+    const place=s.address||s.city||t('stationUnknown');
+    return `<span class="station-hover-name">${esc(s.name)}</span>
+      <span class="station-hover-meta">${esc(label)} · ${esc(place)}</span>`;
+  }
   function baseMarkerRadius(marker) {
     return marker.options.stationBaseRadius || 6;
   }
@@ -1470,14 +1485,15 @@
     marker.setRadius(baseMarkerRadius(marker)*1.7);
     marker.setStyle({weight:4,fillOpacity:1});
     marker.bringToFront();
-    if(openPopup) marker.openPopup();
+    if(openPopup && marker.getTooltip()) marker.openTooltip();
   }
   function restoreMarker(id) {
     const marker=stationMarkers.get(id);
-    if (!marker || id===stationSelection) return;
+    if (!marker) return;
+    marker.closeTooltip();
+    if (id===stationSelection) return;
     marker.setRadius(baseMarkerRadius(marker));
     marker.setStyle({weight:2,fillOpacity:.8});
-    marker.closePopup();
   }
   function selectStation(id, openMap=true) {
     const previous=stationSelection;
@@ -1501,7 +1517,7 @@
     const marker=stationMarkers.get(id);
     if(marker) {
       if (openMap&&stationsMap) stationsMap.panTo(marker.getLatLng());
-      emphasizeMarker(id,true);
+      emphasizeMarker(id,false);marker.openPopup();
     }
   }
   function renderStations() {
@@ -1521,7 +1537,7 @@
     $('station-list').innerHTML=filtered.map(s=>`<button type="button" class="station-card${s.id===stationSelection?' active':''}" data-station-id="${esc(s.id)}" aria-label="${esc(t('stationChoose'))}: ${esc(s.name)}">
         <span class="station-type ${esc(s.category)}">${esc(stationType(s))}</span>
         <strong>${esc(s.name)}</strong><small>${esc(s.address||s.city||t('stationUnknown'))}</small>
-        <small>${esc(s.category==='hydrogen'?t('h2Disclaimer'):s.category==='fuel'?t('fuelDisclaimer'):t('unverified'))}</small>
+
       </button>`).join('') || `<div class="empty-state">${esc(t('stationNoData'))}</div>`;
     for(const b of $('station-list').querySelectorAll('[data-station-id]')) {
       b.addEventListener('click',()=>selectStation(b.dataset.stationId));
@@ -1547,6 +1563,7 @@
       const marker=window.L.circleMarker(point,{radius,stationBaseRadius:radius,
         color:s.category==='hydrogen'?'#087e8b':s.category==='fuel'?'#248455':'#586577',weight:2,fillOpacity:.8})
         .bindPopup(stationPopupHtml(s))
+        .bindTooltip(stationHoverHtml(s),{direction:'top',offset:[0,-12],sticky:true,opacity:1,className:'station-hover-tooltip'})
         .on('mouseover',()=>emphasizeMarker(s.id,true))
         .on('mouseout',()=>restoreMarker(s.id))
         .on('click',()=>selectStation(s.id,false))

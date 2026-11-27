@@ -100,10 +100,29 @@ def test_refresh_does_not_extend_guest_and_old_database_is_cleaned(tmp_path):
 def test_local_docker_admin_remains_explicit_opt_in(tmp_path, monkeypatch):
     app = create_app(tmp_path / "docker-admin.sqlite")
     app.state.db.create_user("admin", "a-very-long-administrator-password")
-    c = TestClient(app, base_url="http://127.0.0.1:8000")
-    # Mock bridge IP with custom ASGI scope: a normal test client is local.
-    # The opt-in must be disabled unless explicitly set in server environment.
-    assert "SIMCO2_DOCKER_LOCAL_HTTP_ADMIN" not in app.openapi()["info"]["title"]
+    c = TestClient(app, base_url="http://127.0.0.1:8000",
+                   client=("172.18.0.1", 50000))
+    credentials = {"username": "admin", "password": "a-very-long-administrator-password"}
+    monkeypatch.delenv("SIMCO2_DOCKER_LOCAL_HTTP_ADMIN", raising=False)
+    assert c.post("/auth/login", json=credentials).status_code == 403
     monkeypatch.setenv("SIMCO2_DOCKER_LOCAL_HTTP_ADMIN", "1")
-    assert c.post("/auth/login", json={"username": "admin",
-           "password": "a-very-long-administrator-password"}).status_code == 200
+    assert c.post("/auth/login", json=credentials).status_code == 200
+    # The opt-in does not permit a non-loopback HTTP Host.
+    remote = TestClient(app, base_url="http://lihyp.example", client=("172.18.0.1", 50001))
+    assert remote.post("/auth/login", json=credentials).status_code == 403
+
+
+def test_trusted_proxy_quota_uses_validated_client_ip(tmp_path, monkeypatch):
+    app = create_app(tmp_path / "proxy.sqlite")
+    monkeypatch.setenv("SIMCO2_TRUSTED_PROXY_IPS", "192.0.2.10")
+    monkeypatch.setenv("SIMCO2_PUBLIC_SESSIONS_PER_IP_HOUR", "1")
+    one = TestClient(app, client=("192.0.2.10", 40001),
+                     headers={"x-forwarded-for": "203.0.113.11"})
+    two = TestClient(app, client=("192.0.2.10", 40002),
+                     headers={"x-forwarded-for": "203.0.113.12"})
+    assert one.post("/public/session").status_code == 200
+    assert two.post("/public/session").status_code == 200
+    repeat = TestClient(app, client=("192.0.2.10", 40003),
+                        headers={"x-forwarded-for": "203.0.113.11"})
+    assert repeat.post("/public/session").status_code == 429
+

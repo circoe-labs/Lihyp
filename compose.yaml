@@ -1,0 +1,30 @@
+services:
+  app:
+    build: .
+    image: lihyp:local
+    restart: unless-stopped
+    init: true
+    ports:
+      # No public exposure by default. Put a TLS reverse proxy in front.
+      - "127.0.0.1:8000:8000"
+    environment:
+      SIMCO2_DB_PATH: /data/simco2.sqlite
+      SIMCO2_ROUTING_SETTINGS_PATH: /data/routing-settings.json
+      SIMCO2_OPERATOR_USERNAME: admin
+      # Opt-in only for isolated Docker Desktop testing on localhost.
+      SIMCO2_DOCKER_LOCAL_HTTP_ADMIN: ${SIMCO2_DOCKER_LOCAL_HTTP_ADMIN:-0}
+      # Match the exact trusted reverse proxy IP(s) when deployed behind HTTPS.
+      SIMCO2_TRUSTED_PROXY_IPS: ${SIMCO2_TRUSTED_PROXY_IPS:-}
+      FORWARDED_ALLOW_IPS: ${FORWARDED_ALLOW_IPS:-127.0.0.1}
+      SIMCO2_PUBLIC_SESSIONS_PER_IP_HOUR: ${SIMCO2_PUBLIC_SESSIONS_PER_IP_HOUR:-100}
+    volumes:
+      - lihyp_data:/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3).read()"]
+      interval: 30s
+      timeout: 5s
+      start_period: 30s
+      retries: 3
+
+volumes:
+  lihyp_data:

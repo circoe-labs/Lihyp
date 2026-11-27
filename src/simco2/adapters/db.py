@@ -14,6 +14,10 @@ from argon2 import PasswordHasher, exceptions as argon_errors
 from simco2.domain.errors import DomainError, MissingReference
 
 
+# Public workspaces expire from creation, never from their last request.
+PUBLIC_SESSION_TTL = timedelta(minutes=20)
+
+
 def utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
@@ -51,6 +55,9 @@ class Database:
         schema = Path(__file__).with_name("schema.sql").read_text(encoding="utf-8")
         with self.session() as con:
             con.executescript(schema)
+            con.execute("PRAGMA journal_mode=WAL")
+        # Also purge guests left by prior installations (including old 8h tokens).
+        self.cleanup_expired_guests()
 
     @staticmethod
     def _dict(row):
@@ -65,7 +72,7 @@ class Database:
                      jdump(after) if after else None, utc_now()))
 
     def create_user(self, username: str, password: str) -> str:
-        if not username or len(username) > 120 or len(password) < 12:
+        if not username or len(username) > 120 or len(password) < 12 or username.startswith('guest_'):
             raise DomainError("weak_credentials", "Identifiant requis et mot de passe >= 12 caractères")
         uid = rid()
         with self.session() as con:
@@ -107,7 +114,7 @@ class Database:
         """Create an isolated, expiring public workspace without a password prompt."""
         uid, username = rid(), "guest_" + rid().replace("-", "")
         token = secrets.token_urlsafe(32)
-        expiry = (datetime.now(timezone.utc) + timedelta(hours=8)).isoformat()
+        expiry = (datetime.now(timezone.utc) + PUBLIC_SESSION_TTL).isoformat()
         with self.session() as con:
             con.execute("INSERT INTO users VALUES (?, ?, ?, 1, ?)",
                         (uid, username, self.hasher.hash(secrets.token_urlsafe(40)), utc_now()))
@@ -145,13 +152,49 @@ class Database:
             return None
         h = hashlib.sha256(token.encode()).hexdigest()
         with self.session() as con:
-            row = con.execute("""SELECT u.id, u.username, u.active, t.expires_at
+            row = con.execute("""SELECT u.id, u.username, u.active, u.created_at, t.expires_at
                FROM session_tokens t JOIN users u ON t.user_id=u.id WHERE t.token_hash=?""", (h,)).fetchone()
             if not row or not row["active"]:
                 return None
-            if datetime.fromisoformat(row["expires_at"]) <= datetime.now(timezone.utc):
+            now = datetime.now(timezone.utc)
+            if datetime.fromisoformat(row["expires_at"]) <= now:
                 return None
-            return {"id": row["id"], "username": row["username"]}
+            if (row["username"].startswith("guest_") and
+                    datetime.fromisoformat(row["created_at"]) + PUBLIC_SESSION_TTL <= now):
+                return None
+            return {"id": row["id"], "username": row["username"],
+                    "created_at": row["created_at"]}
+
+    def cleanup_expired_guests(self) -> int:
+        """Permanently remove every record owned by expired public visitors.
+
+        Executed in one transaction. Permanent admin records, the shared energy/
+        vehicle/station catalogues and their immutable versions are never touched.
+        """
+        cutoff = (datetime.now(timezone.utc) - PUBLIC_SESSION_TTL).isoformat()
+        with self.session() as con:
+            con.execute("BEGIN IMMEDIATE")
+            guests = [row["id"] for row in con.execute(
+                "SELECT id FROM users WHERE substr(username, 1, 6)='guest_' AND created_at<=?",
+                (cutoff,)).fetchall()]
+            for uid in guests:
+                # Delete dependent rows before their owners. Guest-only deletes
+                # are permitted by narrow immutable-result trigger exceptions.
+                con.execute("""DELETE FROM comparison_members WHERE comparison_id IN
+                    (SELECT id FROM comparison_groups WHERE owner_id=?)""", (uid,))
+                con.execute("DELETE FROM comparison_groups WHERE owner_id=?", (uid,))
+                con.execute("DELETE FROM simulation_runs WHERE owner_id=?", (uid,))
+                con.execute("""DELETE FROM scenario_revisions WHERE scenario_id IN
+                    (SELECT id FROM scenarios WHERE owner_id=?)""", (uid,))
+                con.execute("DELETE FROM scenarios WHERE owner_id=?", (uid,))
+                con.execute("DELETE FROM route_quotes WHERE owner_id=?", (uid,))
+                con.execute("DELETE FROM audit_events WHERE actor_id=?", (uid,))
+                con.execute("DELETE FROM session_tokens WHERE user_id=?", (uid,))
+                con.execute("DELETE FROM users WHERE id=?", (uid,))
+            # Independent expiry for anonymous rate-limit traces.
+            con.execute("DELETE FROM public_quotas WHERE created_at<?",
+                        ((datetime.now(timezone.utc) - timedelta(hours=1)).isoformat(),))
+        return len(guests)
 
     def revoke_token(self, token: str):
         with self.session() as con:

@@ -2,7 +2,14 @@
 
 import hashlib
 import os
+import logging
+from ipaddress import ip_address
+from datetime import datetime, timezone
+from math import ceil
 from pathlib import Path
+from threading import Event, Thread
+
+from simco2.adapters.db import PUBLIC_SESSION_TTL
 from typing import Annotated
 
 from fastapi import FastAPI, Depends, HTTPException, Header, Request
@@ -33,6 +40,33 @@ def create_app(db_path: str | Path | None = None, *, geocoder=None, routing_prov
     db = Database(db_path or os.getenv("SIMCO2_DB_PATH", "./simco2.sqlite"))
     db.setup()
     app.state.db = db
+
+    # A server-side sweep runs even when a visitor closes the tab. One Docker
+    # process is the supported SQLite deployment model; sweeps are idempotent.
+    cleanup_stop = Event()
+
+    def cleanup_loop():
+        while not cleanup_stop.wait(30):
+            try:
+                db.cleanup_expired_guests()
+            except Exception:
+                logging.getLogger(__name__).exception("Public session cleanup failed")
+
+    @app.on_event("startup")
+    def start_guest_cleanup():
+        db.cleanup_expired_guests()
+        cleanup_stop.clear()
+        worker = Thread(target=cleanup_loop, name="simco2-guest-cleanup", daemon=True)
+        app.state.guest_cleanup_thread = worker
+        worker.start()
+
+    @app.on_event("shutdown")
+    def stop_guest_cleanup():
+        cleanup_stop.set()
+        worker = getattr(app.state, "guest_cleanup_thread", None)
+        if worker is not None:
+            worker.join(timeout=3)
+
     engine = BaselineEngine()
     app.state.geocoder = geocoder if geocoder is not None else GeoplatformGeocoder()
     app.state.fuel_directory = fuel_directory if fuel_directory is not None else FuelStationDirectory()
@@ -56,15 +90,40 @@ def create_app(db_path: str | Path | None = None, *, geocoder=None, routing_prov
     def active_router():
         return app.state.routing_provider or app.state.routing_settings.provider()
 
+    def is_secure_admin_transport(request: Request) -> bool:
+        # TLS is compulsory for Internet logins. Opt-in Docker HTTP exception
+        # applies ONLY to localhost-bound installations, never by default.
+        if request.url.scheme == "https":
+            return True
+        peer = request.client.host if request.client else ""
+        local_host = request.url.hostname in ("127.0.0.1", "localhost", "::1", "testserver")
+        if local_host and peer in ("127.0.0.1", "::1", "testclient"):
+            return True
+        if local_host and os.getenv("SIMCO2_DOCKER_LOCAL_HTTP_ADMIN") == "1":
+            try:
+                return ip_address(peer).is_private
+            except ValueError:
+                return False
+        return False
+
     def is_local_operator(actor: dict, request: Request) -> bool:
-        # Admin requests must carry an explicit bearer token. HTTPS is required
-        # over a network; loopback remains available for local development.
-        secure_transport = (request.url.scheme == "https" or
-                            request.client is not None and
-                            request.client.host in ("127.0.0.1", "::1", "testclient") and
-                            request.url.hostname in ("127.0.0.1", "localhost", "::1", "testserver"))
         return (actor.get("username") == os.getenv("SIMCO2_OPERATOR_USERNAME", "admin")
-                and secure_transport)
+                and is_secure_admin_transport(request))
+
+    def public_client_key(request: Request) -> str:
+        # Trust X-Forwarded-For only from an explicitly trusted proxy address.
+        # The proxy MUST replace any incoming client-supplied XFF value.
+        peer = request.client.host if request.client else "unknown"
+        trusted = {x.strip() for x in os.getenv("SIMCO2_TRUSTED_PROXY_IPS", "").split(",")
+                   if x.strip()}
+        if peer in trusted:
+            forwarded = request.headers.get("x-forwarded-for", "").split(",")[0].strip()
+            if forwarded:
+                try:
+                    return str(ip_address(forwarded))
+                except ValueError:
+                    pass
+        return peer
 
     def assert_local_operator(actor: dict, request: Request):
         if not is_local_operator(actor, request):
@@ -117,25 +176,29 @@ def create_app(db_path: str | Path | None = None, *, geocoder=None, routing_prov
 
     @app.post("/public/session")
     def public_session(request: Request, response: Response, db: Db):
-        # Refreshing the page must not send visitors back to a login portal.
+        # A guest's first visit starts a fixed 20-minute interval: refresh
+        # never renews it. Expired workspaces are removed before a new one.
+        db.cleanup_expired_guests()
         existing = db.actor_for_token(request.cookies.get("simco2_guest", ""))
         if existing and existing["username"].startswith("guest_"):
-            return {"mode": "public"}
-        client_key = request.client.host if request.client else "unknown"
-        db.consume_public_quota(client_key, "new_session", 25)
+            expires = datetime.fromisoformat(existing["created_at"]) + PUBLIC_SESSION_TTL
+            remaining = max(1, ceil((expires - datetime.now(timezone.utc)).total_seconds()))
+            return {"mode": "public", "expires_in_seconds": remaining}
+        client_key = public_client_key(request)
+        db.consume_public_quota(
+            client_key, "new_session",
+            min(1000, max(1, int(os.getenv("SIMCO2_PUBLIC_SESSIONS_PER_IP_HOUR", "100")))))
         _, token = db.create_guest()
         response.set_cookie("simco2_guest", token, httponly=True, samesite="lax",
-                            secure=request.url.scheme == "https", max_age=8 * 3600,
-                            path="/")
-        return {"mode": "public"}
+                            secure=request.url.scheme == "https",
+                            max_age=int(PUBLIC_SESSION_TTL.total_seconds()), path="/")
+        return {"mode": "public", "expires_in_seconds": int(PUBLIC_SESSION_TTL.total_seconds())}
 
     @app.post("/auth/login")
     def login(data: LoginInput, db: Db, request: Request):
         if data.username != os.getenv("SIMCO2_OPERATOR_USERNAME", "admin"):
             raise HTTPException(status_code=401, detail="Compte administrateur requis")
-        if request.url.scheme != "https" and not (request.client and
-                request.client.host in ("127.0.0.1", "::1", "testclient") and
-                request.url.hostname in ("127.0.0.1", "localhost", "::1", "testserver")):
+        if not is_secure_admin_transport(request):
             raise HTTPException(status_code=403, detail="HTTPS requis pour la connexion administrateur")
         client_key = request.client.host if request.client else "unknown"
         user_id, token = db.authenticate(data.username, data.password, client_key)
@@ -300,8 +363,7 @@ def create_app(db_path: str | Path | None = None, *, geocoder=None, routing_prov
     def compare_vehicles(data: ComparisonInput, actor: Actor, db: Db, request: Request):
         """Comparer des cas séparés sur un itinéraire, une demande et un périmètre identiques."""
         if actor["username"].startswith("guest_"):
-            db.consume_public_quota(request.client.host if request.client else "unknown",
-                                    "comparison", 20)
+            db.consume_public_quota(actor["id"], "comparison", 20)
         from simco2.api.schemas import ScenarioInput
         quote = db.get_route_quote(data.route_quote_id, actor["id"])
         energies = {e["energy_code"]: e for e in db.list_energies(data.country_iso)}
@@ -547,8 +609,7 @@ def create_app(db_path: str | Path | None = None, *, geocoder=None, routing_prov
     @app.post("/routing/resolve")
     def resolve_route(data: RouteResolveInput, actor: Actor, db: Db, request: Request):
         if actor["username"].startswith("guest_"):
-            db.consume_public_quota(request.client.host if request.client else "unknown",
-                                    "route", 40)
+            db.consume_public_quota(actor["id"], "route", 40)
         provider = active_router()
         if provider is None:
             raise RoutingFailure("provider_unconfigured", "Routage non configuré sur le serveur")

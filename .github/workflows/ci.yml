@@ -20,6 +20,29 @@ jobs:
         run: python -m pytest -q
       - name: OpenAPI contract
         run: python -c 'from simco2.api.app import app; assert len(app.openapi()["paths"]) >= 20'
+  docker:
+    name: Docker - build and smoke test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate Compose and build image
+        run: |
+          docker compose config -q
+          docker build --tag lihyp-ci .
+      - name: Run isolated container and public smoke
+        run: |
+          docker volume create lihyp-ci-data
+          docker run -d --name lihyp-ci-app -v lihyp-ci-data:/data -p 127.0.0.1:18080:8000 lihyp-ci
+          for i in $(seq 1 40); do
+            if curl -fsS http://127.0.0.1:18080/health >/dev/null; then break; fi
+            sleep 2
+          done
+          curl -fsS http://127.0.0.1:18080/health
+          curl -fsS -X POST -c /tmp/lihyp_cookies.txt http://127.0.0.1:18080/public/session
+          curl -fsS -b /tmp/lihyp_cookies.txt http://127.0.0.1:18080/vehicles
+          docker rm -f lihyp-ci-app
+          docker volume rm lihyp-ci-data
   browser:
     name: Interface Chromium - livraison et mise a jour
     runs-on: ubuntu-latest

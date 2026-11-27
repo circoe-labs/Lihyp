@@ -165,11 +165,17 @@ CREATE TRIGGER IF NOT EXISTS station_no_delete BEFORE DELETE ON station_versions
 BEGIN SELECT RAISE(ABORT, 'station revisions are immutable'); END;
 CREATE TRIGGER IF NOT EXISTS scenario_revision_no_update BEFORE UPDATE ON scenario_revisions
 BEGIN SELECT RAISE(ABORT, 'scenario revisions are immutable'); END;
-CREATE TRIGGER IF NOT EXISTS scenario_revision_no_delete BEFORE DELETE ON scenario_revisions
+-- Recreated on every setup to migrate the old always-immutable triggers.
+DROP TRIGGER IF EXISTS scenario_revision_no_delete;
+CREATE TRIGGER scenario_revision_no_delete BEFORE DELETE ON scenario_revisions
+WHEN substr(coalesce((SELECT username FROM users WHERE id=OLD.created_by), ''), 1, 6) != 'guest_'
 BEGIN SELECT RAISE(ABORT, 'scenario revisions are immutable'); END;
 CREATE TRIGGER IF NOT EXISTS run_no_update BEFORE UPDATE ON simulation_runs
 BEGIN SELECT RAISE(ABORT, 'run results are immutable'); END;
-CREATE TRIGGER IF NOT EXISTS run_no_delete BEFORE DELETE ON simulation_runs
+-- Recreated on every setup to migrate the old always-immutable triggers.
+DROP TRIGGER IF EXISTS run_no_delete;
+CREATE TRIGGER run_no_delete BEFORE DELETE ON simulation_runs
+WHEN substr(coalesce((SELECT username FROM users WHERE id=OLD.owner_id), ''), 1, 6) != 'guest_'
 BEGIN SELECT RAISE(ABORT, 'run results are immutable'); END;
 
 CREATE TRIGGER IF NOT EXISTS factor_no_update BEFORE UPDATE ON emission_factors
@@ -215,9 +221,15 @@ CREATE TABLE IF NOT EXISTS comparison_members (
 CREATE INDEX IF NOT EXISTS ix_comparison_owner ON comparison_groups(owner_id, created_at);
 CREATE TRIGGER IF NOT EXISTS comparison_no_update BEFORE UPDATE ON comparison_groups
 BEGIN SELECT RAISE(ABORT, 'comparisons are immutable'); END;
-CREATE TRIGGER IF NOT EXISTS comparison_no_delete BEFORE DELETE ON comparison_groups
+-- Recreated on every setup to migrate the old always-immutable triggers.
+DROP TRIGGER IF EXISTS comparison_no_delete;
+CREATE TRIGGER comparison_no_delete BEFORE DELETE ON comparison_groups
+WHEN substr(coalesce((SELECT username FROM users WHERE id=OLD.owner_id), ''), 1, 6) != 'guest_'
 BEGIN SELECT RAISE(ABORT, 'comparisons are immutable'); END;
 CREATE TRIGGER IF NOT EXISTS member_no_update BEFORE UPDATE ON comparison_members
 BEGIN SELECT RAISE(ABORT, 'comparison members are immutable'); END;
-CREATE TRIGGER IF NOT EXISTS member_no_delete BEFORE DELETE ON comparison_members
+-- Recreated on every setup to migrate the old always-immutable triggers.
+DROP TRIGGER IF EXISTS member_no_delete;
+CREATE TRIGGER member_no_delete BEFORE DELETE ON comparison_members
+WHEN substr(coalesce((SELECT username FROM users WHERE id=(SELECT owner_id FROM comparison_groups WHERE id=OLD.comparison_id)), ''), 1, 6) != 'guest_'
 BEGIN SELECT RAISE(ABORT, 'comparison members are immutable'); END;

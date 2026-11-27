@@ -343,6 +343,7 @@
   try { if (localStorage.getItem('simco2_language') === 'en') language = 'en'; } catch (_) {}
   const t = (key) => dictionary[language][key] ?? dictionary.fr[key] ?? key;
   let token = '', actor = null, operator = false, currentQuote = null, currentRoute = null, currentRun = null;
+  let publicExpiryTimer = null;
   let comparisons = [], currentComparison = null, selectedVehicleIds = new Set(), routingConfig = null;
   let comparisonSelectionInitialized = false;
   let plannedStation = null;
@@ -496,15 +497,34 @@
     try { await api('/auth/logout', {method:'POST'}); } catch (_) {}
     token = ''; actor = null; operator = false;
     $('login-form').elements.namedItem('password').value = '';
-    updateOperatorUI(); show('routing');
+    updateOperatorUI(); await loadPublicWorkspace(); show('routing');
   });
+  function schedulePublicExpiry(seconds) {
+    if (publicExpiryTimer !== null) clearTimeout(publicExpiryTimer);
+    const duration = Math.max(1, Number(seconds) || 1);
+    publicExpiryTimer = setTimeout(() => {
+      // Admin sessions persist; only the public workspace is time-limited.
+      if (token || operator) return;
+      try { sessionStorage.setItem('simco2_guest_expired', '1'); } catch (_) {}
+      window.location.reload(); // Clears rendered results and creates a fresh guest.
+    }, (duration + 1) * 1000);
+  }
   async function loadPublicWorkspace() {
     try {
-      await api('/public/session', {method:'POST'});
+      const session = await api('/public/session', {method:'POST'});
+      schedulePublicExpiry(session.expires_in_seconds);
       const [e,v,s,r,custom] = await Promise.all([
         api('/energies'),api('/vehicles'),api('/scenarios'),api('/runs'),api('/stations')]);
       [energies,vehicles,scenarios,runs,customStations] = [e,v,s,r,custom];
       updateVehicleFilters(); fillScenarioSelects(); show('scenarios'); applyLanguage();
+      try {
+        if (sessionStorage.getItem('simco2_guest_expired') === '1') {
+          sessionStorage.removeItem('simco2_guest_expired');
+          message(language === 'fr'
+            ? 'La session publique de 20 minutes est terminée. Les simulations temporaires ont été supprimées. Recalculez votre itinéraire pour continuer.'
+            : 'The 20-minute public session has ended. Temporary simulations were deleted. Calculate a new route to continue.');
+        }
+      } catch (_) {}
     } catch (error) {
       message((language === 'fr' ? 'Chargement public impossible : ' : 'Unable to load public view: ')+error.message,true);
     }

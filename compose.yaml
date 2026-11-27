@@ -11,6 +11,12 @@ services:
       SIMCO2_DB_PATH: /data/simco2.sqlite
       SIMCO2_ROUTING_SETTINGS_PATH: /data/routing-settings.json
       SIMCO2_OPERATOR_USERNAME: admin
+      # Opt-in only for isolated Docker Desktop testing on localhost.
+      SIMCO2_DOCKER_LOCAL_HTTP_ADMIN: ${SIMCO2_DOCKER_LOCAL_HTTP_ADMIN:-0}
+      # Match the exact trusted reverse proxy IP(s) when deployed behind HTTPS.
+      SIMCO2_TRUSTED_PROXY_IPS: ${SIMCO2_TRUSTED_PROXY_IPS:-}
+      FORWARDED_ALLOW_IPS: ${FORWARDED_ALLOW_IPS:-127.0.0.1}
+      SIMCO2_PUBLIC_SESSIONS_PER_IP_HOUR: ${SIMCO2_PUBLIC_SESSIONS_PER_IP_HOUR:-100}
     volumes:
       - lihyp_data:/data
     healthcheck:

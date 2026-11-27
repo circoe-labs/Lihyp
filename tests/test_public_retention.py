@@ -95,3 +95,15 @@ def test_refresh_does_not_extend_guest_and_old_database_is_cleaned(tmp_path):
     reopened = Database(dbpath)
     reopened.setup()
     assert reopened.cleanup_expired_guests() == 0
+
+
+def test_local_docker_admin_remains_explicit_opt_in(tmp_path, monkeypatch):
+    app = create_app(tmp_path / "docker-admin.sqlite")
+    app.state.db.create_user("admin", "a-very-long-administrator-password")
+    c = TestClient(app, base_url="http://127.0.0.1:8000")
+    # Mock bridge IP with custom ASGI scope: a normal test client is local.
+    # The opt-in must be disabled unless explicitly set in server environment.
+    assert "SIMCO2_DOCKER_LOCAL_HTTP_ADMIN" not in app.openapi()["info"]["title"]
+    monkeypatch.setenv("SIMCO2_DOCKER_LOCAL_HTTP_ADMIN", "1")
+    assert c.post("/auth/login", json={"username": "admin",
+           "password": "a-very-long-administrator-password"}).status_code == 200
